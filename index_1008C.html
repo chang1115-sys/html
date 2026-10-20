@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>薩爾瓦多·達利：夢境與驚奇的大師！</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;padding:20px;
+  font-family:"Microsoft JhengHei","Noto Sans TC",Arial,sans-serif;
+  background:linear-gradient(135deg,#f7f4ef,#eef5f7);
+  color:#333;line-height:1.7;
+}
+.container{max-width:850px;margin:auto;background:#fff;padding:28px;border-radius:18px;box-shadow:0 8px 30px rgba(0,0,0,.08)}
+h1{text-align:center;color:#c94b47;margin:0 0 8px;font-size:clamp(1.6rem,4vw,2.2rem)}
+.subtitle{text-align:center;color:#666;margin-bottom:28px}
+.section-title{
+  margin:28px 0 16px;
+  padding:12px 16px;
+  border-radius:10px;
+  background:#f8e8e7;
+  color:#b63f3a;
+  font-size:1.25rem;
+  font-weight:bold;
+}
+.choice-title{
+  background:#e8f1fb;
+  color:#3972a8;
+  margin-top:32px;
+}
+.quiz-item{background:#fafafa;padding:20px;margin-bottom:20px;border-radius:12px;border-left:6px solid #d9534f}
+.question-text{font-weight:bold;font-size:1.08rem;margin-bottom:15px}
+.options{display:flex;flex-direction:column;gap:10px}
+.option{
+  display:flex;align-items:center;gap:10px;padding:12px 14px;
+  background:white;border:1px solid #ddd;border-radius:9px;cursor:pointer;
+  transition:.2s;
+}
+.option:hover{background:#fff6f5;border-color:#d9534f}
+.option input{transform:scale(1.2);margin:0}
+.submit{
+  width:100%;border:0;border-radius:10px;padding:15px;
+  background:#d9534f;color:#fff;font-size:1.15rem;font-weight:bold;cursor:pointer;
+}
+.submit:hover{background:#b83c38}
+.result{
+  display:none;margin-top:25px;padding:25px;border-radius:12px;
+  background:#eef8ff;border:2px solid #b9e3f2;text-align:center;
+}
+.score{font-size:2rem;font-weight:bold;color:#d9534f;margin:8px}
+.feedback{font-weight:bold;font-size:1.05rem}
+.explanation{
+  display:none;margin-top:12px;padding:12px 15px;
+  background:#fffdf2;border:1px dashed #e6a23c;border-radius:8px;color:#666;
+}
+.correct{color:#4c9a57;font-weight:bold}
+.missing{border-color:#e6a23c;background:#fff8e8}
+.reset{margin-top:12px;background:#666}
+.reset:hover{background:#444}
+.note{text-align:center;color:#777;font-size:.9rem;margin-top:18px}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>🎨 薩爾瓦多·達利：夢境與驚奇的大師！</h1>
+<div class="subtitle">看完影片後，一起來挑戰看看你對達利了解多少吧！</div>
+
+<form id="quizForm">
+
+<div class="quiz-item" data-q="1">
+<div class="question-text">1. 【是非題】薩爾瓦多·達利有一撇非常著名、長長尖尖的鬍子，他會把它梳成各種瘋狂的形狀，甚至曾開玩笑說這鬍子可以當作天線來接收無線電波。</div>
+<div class="options">
+<label class="option"><input type="radio" name="q1" value="O">⭕ 正確</label>
+<label class="option"><input type="radio" name="q1" value="X">❌ 錯誤</label>
+</div>
+<div class="explanation"><div class="correct">正確答案：⭕ 正確</div>💡 <b>解析：</b>答對了！達利這對向上翹的鬍子非常招牌，他本人甚至把這對鬍子當作一件獨立的藝術品來精心保養呢！</div>
+</div>
+
+<div class="quiz-item" data-q="2">
+<div class="question-text">2. 【是非題】知名糖果品牌「加倍佳（Chupa Chups）」棒棒糖上沿用至今的黃紅相間「雛菊形商標」，是由達利親手設計的。</div>
+<div class="options">
+<label class="option"><input type="radio" name="q2" value="O">⭕ 正確</label>
+<label class="option"><input type="radio" name="q2" value="X">❌ 錯誤</label>
+</div>
+<div class="explanation"><div class="correct">正確答案：⭕ 正確</div>💡 <b>解析：</b>沒錯！達利在 1969 年一間咖啡廳裡，僅花不到一小時就在報紙上塗鴉設計出這個經典標標，他還體貼地建議要把商標放在棒棒糖正上方，這樣圖案才不會變形。</div>
+</div>
+
+<div class="quiz-item" data-q="3">
+<div class="question-text">3. 【是非題】達利曾創作過一個稀奇古怪的電話雕塑，他用一隻真實大小的「塑膠龍蝦」取代了傳統電話的聽筒。</div>
+<div class="options">
+<label class="option"><input type="radio" name="q3" value="O">⭕ 正確</label>
+<label class="option"><input type="radio" name="q3" value="X">❌ 錯誤</label>
+</div>
+<div class="explanation"><div class="correct">正確答案：⭕ 正確</div>💡 <b>解析：</b>沒錯，這件作品叫《龍蝦電話》。達利非常喜歡把原本毫不相干的日常用品組合在一起，給看畫的人帶來驚喜與思考！</div>
+</div>
+
+<div class="quiz-item" data-q="4">
+<div class="question-text">4. 【是非題】達利畫作中那些「融化的時鐘」，代表在我們的夢境與大腦記憶中，時間其實是柔軟且主觀彈性的，而不是像時鐘機械一樣死板。</div>
+<div class="options">
+<label class="option"><input type="radio" name="q4" value="O">⭕ 正確</label>
+<label class="option"><input type="radio" name="q4" value="X">❌ 錯誤</label>
+</div>
+<div class="explanation"><div class="correct">正確答案：⭕ 正確</div>💡 <b>解析：</b>這正是超現實主義有趣的地方。就像我們高興時覺得時間過得快，無聊時覺得時間過得慢一樣，達利把這種大腦對時間的「柔軟感覺」具體畫了出來。</div>
+</div>
+
+<div class="quiz-item" data-q="5">
+<div class="question-text">5. 【是非題】薩爾瓦多·達利私底下的個性其實非常害羞且安靜，平時最喜歡穿樸素的灰色西裝，並盡一切可能躲在人群角落不讓任何人注意到他。</div>
+<div class="options">
+<label class="option"><input type="radio" name="q5" value="O">⭕ 正確</label>
+<label class="option"><input type="radio" name="q5" value="X">❌ 錯誤</label>
+</div>
+<div class="explanation"><div class="correct">正確答案：❌ 錯誤</div>💡 <b>解析：</b>完全相反！達利超級熱愛成為全場焦點。他喜歡穿著極其華麗誇張的服裝、在公眾場合做出誇張的戲劇表演，他的一生就是一場精心設計的超現實藝術秀。</div>
+</div>
+
+<div class="section-title choice-title">🔵 第二部分：選擇題</div>
+
+<div class="quiz-item" data-q="6">
+<div class="question-text">6. 【選擇題】薩爾瓦多·達利於 1904 年出生在歐洲的哪一個國家？</div>
+<div class="options">
+<label class="option"><input type="radio" name="q6" value="A">A. 法國</label>
+<label class="option"><input type="radio" name="q6" value="B">B. 西班牙</label>
+<label class="option"><input type="radio" name="q6" value="C">C. 義大利</label>
+<label class="option"><input type="radio" name="q6" value="D">D. 英國</label>
+</div>
+<div class="explanation"><div class="correct">正確答案：B. 西班牙</div>💡 <b>解析：</b>達利出生於西班牙加泰隆尼亞的菲格拉斯，他與畢卡索、米羅並稱為西班牙二十世紀三大藝術家。</div>
+</div>
+
+<div class="quiz-item" data-q="7">
+<div class="question-text">7. 【選擇題】在達利最著名的代表作畫作《永恆的記憶》中，哪一種日常物品呈現垂落且正在「融化」的奇特狀態？</div>
+<div class="options">
+<label class="option"><input type="radio" name="q7" value="A">A. 蠟燭</label>
+<label class="option"><input type="radio" name="q7" value="B">B. 時鐘／口袋錶</label>
+<label class="option"><input type="radio" name="q7" value="C">C. 冰淇淋甜筒</label>
+<label class="option"><input type="radio" name="q7" value="D">D. 帽子</label>
+</div>
+<div class="explanation"><div class="correct">正確答案：B. 時鐘／口袋錶</div>💡 <b>解析：</b>柔軟、像起司一樣融化並掛在樹枝上的「軟時鐘」，是這幅經典名作中最讓人印象深刻的標誌。</div>
+</div>
+
+<div class="quiz-item" data-q="8">
+<div class="question-text">8. 【選擇題】達利所屬於的「超現實主義」藝術流派，主要是關於什麼樣的繪畫風格？</div>
+<div class="options">
+<label class="option"><input type="radio" name="q8" value="A">A. 描繪夢境與神奇、不可能出現在現實的場景</label>
+<label class="option"><input type="radio" name="q8" value="B">B. 幫總統或國王畫非常寫實逼真的肖像</label>
+<label class="option"><input type="radio" name="q8" value="C">C. 盡可能精準地複製古希臘雕像</label>
+<label class="option"><input type="radio" name="q8" value="D">D. 只用嚴格的數學幾何圖形和線條畫畫</label>
+</div>
+<div class="explanation"><div class="correct">正確答案：A. 描繪夢境與神奇、不可能出現在現實的場景</div>💡 <b>解析：</b>超現實主義試圖解開人類的潛意識，將我們晚上做的奇妙、怪異、不可能的夢境世界，用細緻的技巧真實地畫在畫布上。</div>
+</div>
+
+<div class="quiz-item" data-q="9">
+<div class="question-text">9. 【選擇題】達利生前非常著名的特立獨行舉動之一，是他曾養過哪一種不尋常的野生動物作為寵物，甚至用牽繩牽著牠去餐廳和上豪華遊輪？</div>
+<div class="options">
+<label class="option"><input type="radio" name="q9" value="A">A. 國王企鵝</label>
+<label class="option"><input type="radio" name="q9" value="B">B. 飛鼠</label>
+<label class="option"><input type="radio" name="q9" value="C">C. 雙眼斑「長尾虎貓」（Ocelot）</label>
+<label class="option"><input type="radio" name="q9" value="D">D. 鱷魚寶寶</label>
+</div>
+<div class="explanation"><div class="correct">正確答案：C. 雙眼斑「長尾虎貓」（Ocelot）</div>💡 <b>解析：</b>達利養了一隻名叫 Babou 的長尾虎貓，牠是一種身上有像豹一樣美麗斑點的野生貓科動物，達利走到哪都帶著牠。</div>
+</div>
+
+<div class="quiz-item" data-q="10">
+<div class="question-text">10. 【選擇題】達利曾說過，他是透過什麼方式捕捉到大腦中那些稀奇古怪、充滿魔幻的畫面，然後再將牠們畫出來的？</div>
+<div class="options">
+<label class="option"><input type="radio" name="q10" value="A">A. 靠一整晚不停閱讀厚重的科學教科書</label>
+<label class="option"><input type="radio" name="q10" value="B">B. 在剛要睡著或剛醒來、大腦半夢半醒的催眠狀態下捕捉幻覺</label>
+<label class="option"><input type="radio" name="q10" value="C">C. 寫信請教他小學的藝術老師</label>
+<label class="option"><input type="radio" name="q10" value="D">D. 聽早上的氣象播報新聞</label>
+</div>
+<div class="explanation"><div class="correct">正確答案：B. 在剛要睡著或剛醒來、大腦半夢半醒的催眠狀態下捕捉幻覺</div>💡 <b>解析：</b>達利發明了「偏執狂批判法」。他甚至會手拿一把重鑰匙坐在椅子上睡覺，當他快睡著時手一鬆，鑰匙掉到地上的巨響會把他吵醒，他就能立刻動筆畫下大腦剛剛浮現的夢境。</div>
+</div>
+
+<button type="button" class="submit" onclick="calculateScore()">送出測驗，計算成績！</button>
+</form>
+
+<div class="result" id="resultBox">
+<h2>🎉 測驗完成！</h2>
+<div class="score" id="scoreDisplay">0 / 100 分</div>
+<div id="feedbackText" class="feedback"></div>
+<button type="button" class="submit reset" onclick="resetQuiz()">重新作答</button>
+</div>
+<div class="note">完成送出後，系統會顯示每一題的正確答案與詳細解析。</div>
+</div>
+
+<script>
+const answers={q1:"O",q2:"O",q3:"O",q4:"O",q5:"X",q6:"B",q7:"B",q8:"A",q9:"C",q10:"B"};
+
+function calculateScore(){
+  let score=0, unanswered=0;
+  document.querySelectorAll(".quiz-item").forEach(item=>item.classList.remove("missing"));
+
+  for(let i=1;i<=10;i++){
+    const name="q"+i;
+    const selected=document.querySelector('input[name="'+name+'"]:checked');
+    if(!selected){
+      unanswered++;
+      document.querySelector('.quiz-item[data-q="'+i+'"]').classList.add("missing");
+    }else if(selected.value===answers[name]){
+      score+=10;
+    }
+  }
+
+  document.querySelectorAll(".explanation").forEach(e=>e.style.display="block");
+  const result=document.getElementById("resultBox");
+  document.getElementById("scoreDisplay").textContent=score+" / 100 分";
+
+  let feedback;
+  if(score===100) feedback="太厲害了！你簡直就是達利大師的瘋狂小夥伴，拿到滿分！💯";
+  else if(score>=70) feedback="很棒喔！你對超現實主義與達利的奇幻世界已經非常熟悉了！✨";
+  else feedback="再接再厲！別灰心，超現實的世界本來就充滿驚奇，看上方解析能讓你學到更多趣事喔！🚀";
+
+  if(unanswered>0) feedback+="（有 "+unanswered+" 題尚未作答，未作答題目不計分。）";
+  document.getElementById("feedbackText").textContent=feedback;
+  result.style.display="block";
+  result.scrollIntoView({behavior:"smooth",block:"center"});
+}
+
+function resetQuiz(){
+  document.getElementById("quizForm").reset();
+  document.querySelectorAll(".explanation").forEach(e=>e.style.display="none");
+  document.querySelectorAll(".quiz-item").forEach(item=>item.classList.remove("missing"));
+  document.getElementById("resultBox").style.display="none";
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+</script>
+</body>
+</html>
