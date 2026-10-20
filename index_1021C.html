@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>唐詩閱讀素養測驗</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
+            background-color: #f7fafc;
+        }
+    </style>
+</head>
+<body class="bg-amber-50 min-h-screen py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- 標題區塊 -->
+        <header class="text-center mb-8 bg-white p-6 rounded-2xl shadow-md border-t-4 border-amber-700">
+            <span class="inline-block bg-amber-100 text-amber-800 text-sm font-semibold px-3 py-1 rounded-full mb-2">
+                國小六年級｜四選一｜共 10 題
+            </span>
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">唐詩閱讀素養測驗</h1>
+            <p class="text-gray-600">測驗時間無限制，每題 10 分，滿分 100 分</p>
+        </header>
+
+        <div id="quizArea">
+        <!-- 閱讀短文區塊 -->
+        <section class="bg-white p-6 sm:p-8 rounded-2xl shadow-md mb-8 border border-amber-200">
+            <h2 class="text-xl font-bold text-amber-900 border-b-2 border-amber-300 pb-2 mb-4 flex items-center">
+                <svg class="w-6 h-6 mr-2 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                </svg>
+                閱讀短文：唐詩中的生活與情感
+            </h2>
+            <div class="prose max-w-none text-gray-700 space-y-4 leading-relaxed text-base sm:text-lg">
+                <p>唐朝是中國詩歌發展的重要時期，許多詩人透過文字描寫自然景色、生活經驗與內心感受。唐詩不僅講究音韻與節奏，也常運用生動的景物描寫，傳達深刻的情感。</p>
+                <p>李白在〈靜夜思〉中寫道：「<span class="font-serif font-semibold text-amber-800">舉頭望明月，低頭思故鄉。</span>」詩人望著明亮的月亮，想起遠方的家鄉，短短兩句便表達了濃濃的思鄉之情。</p>
+                <p>杜甫的〈春望〉寫道：「<span class="font-serif font-semibold text-amber-800">國破山河在，城春草木深。</span>」詩人面對戰亂後的景象，雖然山河依舊，城中卻雜草叢生，透露出對國家命運的憂慮。</p>
+                <p>王維的〈鹿柴〉寫道：「<span class="font-serif font-semibold text-amber-800">空山不見人，但聞人語響。</span>」山中看不見人的身影，卻能聽見遠處傳來的人聲。詩人透過安靜的山林與隱約的聲音，呈現出幽靜的氣氛。</p>
+                <p>從這些作品可以發現，唐詩常常不直接說出所有情感，而是藉由景物、聲音和生活情境，讓讀者從詩句中體會詩人的心情。</p>
+            </div>
+        </section>
+
+        <!-- 測驗題目表單 -->
+        <form id="quizForm" class="space-y-6">
+            <!-- 題目 1 -->
+            <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100" id="q1-card">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-start">
+                    <span class="bg-amber-600 text-white text-sm font-bold px-2.5 py-1 rounded-lg mr-3 mt-0.5">1</span>
+                    <span>根據短文，唐詩除了講究音韻與節奏，還常具有什麼特色？</span>
+                </h3>
+                <div class="space-y-2 ml-2 sm:ml-9">
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q1" value="1" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（1） 使用艱深的數學公式</span>
+                    </label>
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q1" value="2" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（2） 透過景物描寫傳達情感</span>
+                    </label>
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q1" value="3" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（3） 完整記錄每一天的生活</span>
+                    </label>
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q1" value="4" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（4） 只描寫熱鬧的節慶活動</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 題目 2 -->
+            <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100" id="q2-card">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-start">
+                    <span class="bg-amber-600 text-white text-sm font-bold px-2.5 py-1 rounded-lg mr-3 mt-0.5">2</span>
+                    <span>李白在〈靜夜思〉中，為什麼會產生思鄉之情？</span>
+                </h3>
+                <div class="space-y-2 ml-2 sm:ml-9">
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q2" value="1" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（1） 因為他看見家鄉的房屋</span>
+                    </label>
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q2" value="2" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（2） 因為他聽見朋友的歌聲</span>
+                    </label>
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q2" value="3" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（3） 因為他望著明月，想起遠方的家鄉</span>
+                    </label>
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q2" value="4" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（4） 因為他正在欣賞春天的花朵</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 題目 3 -->
+            <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100" id="q3-card">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-start">
+                    <span class="bg-amber-600 text-white text-sm font-bold px-2.5 py-1 rounded-lg mr-3 mt-0.5">3</span>
+                    <span>〈春望〉中的「國破山河在」，最適合用來表達下列哪一種情境？</span>
+                </h3>
+                <div class="space-y-2 ml-2 sm:ml-9">
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q3" value="1" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（1） 國家遭逢戰亂，但自然景色依然存在</span>
+                    </label>
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q3" value="2" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（2） 國家富裕，人民生活十分幸福</span>
+                    </label>
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q3" value="3" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（3） 詩人準備離開家鄉去旅行</span>
+                    </label>
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q3" value="4" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（4） 春天到來，大家忙著舉辦宴會</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 題目 4 -->
+            <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100" id="q4-card">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-start">
+                    <span class="bg-amber-600 text-white text-sm font-bold px-2.5 py-1 rounded-lg mr-3 mt-0.5">4</span>
+                    <span>「城春草木深」中的「草木深」，最可能暗示什麼？</span>
+                </h3>
+                <div class="space-y-2 ml-2 sm:ml-9">
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q4" value="1" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（1） 城市裡正在舉辦園藝比賽</span>
+                    </label>
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q4" value="2" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（2） 人們細心整理每一座花園</span>
+                    </label>
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q4" value="3" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（3） 春天的植物全部枯萎了</span>
+                    </label>
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q4" value="4" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（4） 戰亂使城市荒涼，缺乏人們照料</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 題目 5 -->
+            <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100" id="q5-card">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-start">
+                    <span class="bg-amber-600 text-white text-sm font-bold px-2.5 py-1 rounded-lg mr-3 mt-0.5">5</span>
+                    <span>王維在〈鹿柴〉中寫「空山不見人，但聞人語響」，主要運用了哪一種表現手法？</span>
+                </h3>
+                <div class="space-y-2 ml-2 sm:ml-9">
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q5" value="1" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（1） 以人物對話推動故事情節</span>
+                    </label>
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q5" value="2" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（2） 以聲音襯托山林的幽靜</span>
+                    </label>
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q5" value="3" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（3） 以誇張手法描寫山的高度</span>
+                    </label>
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q5" value="4" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（4） 以熱鬧景象表現歡樂氣氛</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 題目 6 -->
+            <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100" id="q6-card">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-start">
+                    <span class="bg-amber-600 text-white text-sm font-bold px-2.5 py-1 rounded-lg mr-3 mt-0.5">6</span>
+                    <span>閱讀李白與杜甫的這兩首詩，兩人表達的情感有何不同？</span>
+                </h3>
+                <div class="space-y-2 ml-2 sm:ml-9">
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q6" value="1" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（1） 兩人都只想描寫春天的景色</span>
+                    </label>
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q6" value="2" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（2） 李白表達喜悅，杜甫表達驚喜</span>
+                    </label>
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q6" value="3" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（3） 李白表達思鄉，杜甫流露對國家命運的憂慮</span>
+                    </label>
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q6" value="4" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（4） 李白表達憤怒，杜甫表達對旅行的期待</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 題目 7 -->
+            <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100" id="q7-card">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-start">
+                    <span class="bg-amber-600 text-white text-sm font-bold px-2.5 py-1 rounded-lg mr-3 mt-0.5">7</span>
+                    <span>如果一位詩人寫道：「窗前燈影孤，千里念親人。」這首詩最可能與哪一種主題有關？</span>
+                </h3>
+                <div class="space-y-2 ml-2 sm:ml-9">
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q7" value="1" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（1） 思念親人</span>
+                    </label>
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q7" value="2" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（2） 歌頌戰爭勝利</span>
+                    </label>
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q7" value="3" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（3） 描寫農夫豐收</span>
+                    </label>
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q7" value="4" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（4） 讚美熱鬧市集</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 題目 8 -->
+            <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100" id="q8-card">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-start">
+                    <span class="bg-amber-600 text-white text-sm font-bold px-2.5 py-1 rounded-lg mr-3 mt-0.5">8</span>
+                    <span>閱讀唐詩時，如果詩句沒有直接寫出「悲傷」，讀者仍可能感受到悲傷，主要是因為什麼？</span>
+                </h3>
+                <div class="space-y-2 ml-2 sm:ml-9">
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q8" value="1" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（1） 所有唐詩都使用相同的句型</span>
+                    </label>
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q8" value="2" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（2） 唐詩一定會在最後一句寫出答案</span>
+                    </label>
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q8" value="3" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（3） 讀者只要知道作者姓名就能理解</span>
+                    </label>
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q8" value="4" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（4） 詩人會運用景物與情境暗示情感</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 題目 9 -->
+            <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100" id="q9-card">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-start">
+                    <span class="bg-amber-600 text-white text-sm font-bold px-2.5 py-1 rounded-lg mr-3 mt-0.5">9</span>
+                    <span>下列哪一個情境，最適合用「舉頭望明月，低頭思故鄉」來表達？</span>
+                </h3>
+                <div class="space-y-2 ml-2 sm:ml-9">
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q9" value="1" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（1） 小明在操場上和同學比賽跑步</span>
+                    </label>
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q9" value="2" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（2） 小美在外地過節，看著月亮想念家人</span>
+                    </label>
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q9" value="3" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（3） 小華在圖書館專心閱讀科普書</span>
+                    </label>
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q9" value="4" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（4） 小志在花園裡觀察蝴蝶飛舞</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 題目 10 -->
+            <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100" id="q10-card">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-start">
+                    <span class="bg-amber-600 text-white text-sm font-bold px-2.5 py-1 rounded-lg mr-3 mt-0.5">10</span>
+                    <span>綜合短文，下列哪一項最能說明唐詩值得閱讀的原因？</span>
+                </h3>
+                <div class="space-y-2 ml-2 sm:ml-9">
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q10" value="1" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（1） 每首唐詩都能提供精確的歷史日期</span>
+                    </label>
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q10" value="2" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（2） 唐詩只適合背誦，不需要理解</span>
+                    </label>
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q10" value="3" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（3） 唐詩能用精簡的文字描寫景物，並傳達豐富的情感</span>
+                    </label>
+                    <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:bg-amber-50 cursor-pointer transition">
+                        <input type="radio" name="q10" value="4" class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500">
+                        <span class="ml-3 text-gray-700">（4） 唐詩的內容都相同，只要記住詩人即可</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 交卷按鈕 -->
+            <div class="text-center pt-4">
+                <button type="button" onclick="submitQuiz()" class="bg-amber-700 hover:bg-amber-800 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition duration-200 transform hover:-translate-y-0.5 text-lg">
+                    繳卷
+                </button>
+            </div>
+        </form>
+        </div>
+
+        <!-- 結果顯示區塊 -->
+        <div id="resultBox" class="hidden mt-8 bg-white p-8 rounded-2xl shadow-xl text-center border-2 border-amber-500">
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">測驗結果</h2>
+            <div class="text-5xl font-extrabold text-amber-700 my-4" id="scoreDisplay">0 分</div>
+            <p class="text-gray-600 mb-6" id="scoreFeedback"></p>
+            <button type="button" onclick="resetQuiz()" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-6 rounded-lg transition">
+                重新測驗
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const answers = {
+            q1: "2",
+            q2: "3",
+            q3: "1",
+            q4: "4",
+            q5: "2",
+            q6: "3",
+            q7: "1",
+            q8: "4",
+            q9: "2",
+            q10: "3"
+        };
+
+        function submitQuiz() {
+            let score = 0;
+            let answeredCount = 0;
+
+            for (let i = 1; i <= 10; i++) {
+                const qName = "q" + i;
+                const selected = document.querySelector(`input[name="${qName}"]:checked`);
+                if (selected) {
+                    answeredCount++;
+                    if (selected.value === answers[qName]) {
+                        score += 10;
+                    }
+                }
+            }
+
+            // 顯示得分區塊
+            const resultBox = document.getElementById("resultBox");
+            const scoreDisplay = document.getElementById("scoreDisplay");
+            const scoreFeedback = document.getElementById("scoreFeedback");
+
+            scoreDisplay.textContent = `${score} 分`;
+
+            if (score === 100) {
+                scoreFeedback.textContent = "太棒了！你完美掌握了唐詩閱讀的精髓！";
+            } else if (score >= 80) {
+                scoreFeedback.textContent = "表現非常優秀！對文章與詩句的理解很到位。";
+            } else if (score >= 60) {
+                scoreFeedback.textContent = "及格了！再多練習，理解會更深入喔！";
+            } else {
+                scoreFeedback.textContent = "加油！建議重新閱讀文章後再試一次！";
+            }
+
+            // 繳卷後隱藏題目與短文，只顯示成績
+            document.getElementById("quizArea").classList.add("hidden");
+            resultBox.classList.remove("hidden");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetQuiz() {
+            document.getElementById("quizForm").reset();
+            document.getElementById("quizArea").classList.remove("hidden");
+            document.getElementById("resultBox").classList.add("hidden");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

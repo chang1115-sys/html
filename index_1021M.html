@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>六上數學：圓周長與圓面積填空測驗</title>
+    <style>
+        body {
+            font-family: 'Microsoft JhengHei', sans-serif;
+            background-color: #f0f3f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .quiz-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+        h2 { color: #2e4053; margin-bottom: 5px; }
+        .sub-title { color: #7f8c8d; font-size: 0.95rem; margin-bottom: 25px; }
+        .question-box {
+            font-size: 1.2rem;
+            color: #2c3e50;
+            background-color: #f4f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #3498db;
+            margin-bottom: 25px;
+            text-align: left;
+            line-height: 1.6;
+        }
+        .input-area {
+            margin-bottom: 20px;
+        }
+        input[type="number"] {
+            font-size: 1.3rem;
+            padding: 10px;
+            width: 70%;
+            border: 2px solid #bdc3c7;
+            border-radius: 8px;
+            text-align: center;
+            outline: none;
+            transition: 0.3s;
+        }
+        input[type="number"]:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 8px rgba(52,152,219,0.3);
+        }
+        .unit { font-size: 1.2rem; margin-left: 10px; color: #34495e; font-weight: bold; }
+        button {
+            font-size: 1.1rem;
+            padding: 10px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            transition: 0.2s;
+            font-weight: bold;
+        }
+        .btn-submit { background-color: #3498db; color: white; }
+        .btn-submit:hover { background-color: #2980b9; }
+        .btn-next { background-color: #2ecc71; color: white; }
+        .btn-next:hover { background-color: #27ae60; }
+        .result-box {
+            margin-top: 20px;
+            font-size: 1.15rem;
+            font-weight: bold;
+            min-height: 40px;
+            line-height: 1.5;
+        }
+        .correct { color: #27ae60; }
+        .wrong { color: #e74c3c; }
+        .score-box {
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px dashed #bdc3c7;
+            color: #7f8c8d;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <h2>✏️ 第四單元：看題填數字練習 ✏️</h2>
+    <div class="sub-title">( 圓周率一律以 3.14 計算，請輸入純數字答案 )</div>
+    
+    <div class="question-box" id="question-text">題目載入中...</div>
+    
+    <div class="input-area">
+        <input type="number" id="user-input" step="0.01" placeholder="請輸入算出的數字" autocomplete="off">
+        <span class="unit" id="unit-text">公分</span>
+    </div>
+    
+    <button class="btn-submit" onclick="checkAnswer()">檢查答案</button>
+    <button class="btn-next" onclick="nextQuestion()">下一題</button>
+    
+    <div class="result-box" id="result-message"></div>
+    
+    <div class="score-box">
+        進度：第 <span id="current-idx">1</span> / 10 題 ｜ 目前得分：<span id="score">0</span> 分
+    </div>
+</div>
+
+<script>
+    // 固定的 10 題核心填充題庫
+    const quizData = [
+        { q: "有一個圓形的直徑是 20 公分，請問它的圓周長是多少公分？", a: 62.8, u: "公分" },
+        { q: "有一個圓形的半徑是 5 公分，請問它的圓周長是多少公分？", a: 31.4, u: "公分" },
+        { q: "一個圓形盤子的半徑是 8 公分，請問它的圓面積是多少平方公分？", a: 200.96, u: "平方公分" },
+        { q: "一個圓形時鐘的直徑是 12 公分，請問它的表面積是多少平方公分？", a: 113.04, u: "平方公分" },
+        { q: "曉明量得一個圓形噴水池的圓周長是 157 公尺，請問這個噴水池的直徑是多少公尺？", a: 50, u: "公尺" },
+        { q: "小華用繩子圍成一個半徑 10 公分的圓，之後他把繩子拉直，這條繩子長度是多少公分？", a: 62.8, u: "公分" },
+        { q: "有一塊扇形草皮剛好是四分之一圓（\(\frac{1}{4}\) 圓），它的半徑是 20 公尺，請問這塊扇形草皮的面積是多少平方公尺？", a: 314, u: "平方公尺" },
+        { q: "有一個半圓形的木板，它的直徑是 10 公分，請問這個半圓形木板的周長是多少公分？(提示：弧長加直徑)", a: 25.7, u: "公分" },
+        { q: "有一台腳踏車輪子的直徑是 50 公分，當輪子向前滾動了 10 圈，腳踏車大約向前移動了多少公分？", a: 1570, u: "公分" },
+        { q: "正方形邊長 10 公分，裡面畫一個最大的圓。請問正方形扣掉這個圓之後，剩下的面積是多少平方公分？", a: 21.5, u: "平方公分" }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let hasAnswered = false;
+
+    function displayQuestion() {
+        hasAnswered = false;
+        document.getElementById("user-input").value = "";
+        document.getElementById("user-input").disabled = false;
+        document.getElementById("result-message").innerText = "";
+        
+        const currentQuiz = quizData[currentQuestionIndex];
+        document.getElementById("question-text").innerText = `${currentQuestionIndex + 1}. ${currentQuiz.q}`;
+        document.getElementById("unit-text").innerText = currentQuiz.u;
+        document.getElementById("current-idx").innerText = currentQuestionIndex + 1;
+    }
+
+    function checkAnswer() {
+        if (hasAnswered) return;
+
+        const userInput = parseFloat(document.getElementById("user-input").value);
+        const resultEl = document.getElementById("result-message");
+        const currentQuiz = quizData[currentQuestionIndex];
+
+        if (isNaN(userInput)) {
+            resultEl.innerHTML = "<span class='wrong'>⚠️ 請先輸入數字答案！</span>";
+            return;
+        }
+
+        hasAnswered = true;
+        document.getElementById("user-input").disabled = true;
+
+        // 使用極小差距比對，避免浮點數誤差
+        if (Math.abs(userInput - currentQuiz.a) < 0.01) {
+            resultEl.innerHTML = "<span class='correct'>⭕ 答對了！計算非常精準！</span>";
+            score += 10;
+            document.getElementById("score").innerText = score;
+        } else {
+            resultEl.innerHTML = `<span class='wrong'>❌ 答錯了！<br>正確答案應該是：${currentQuiz.a}</span>`;
+        }
+    }
+
+    function nextQuestion() {
+        if (currentQuestionIndex < quizData.length - 1) {
+            currentQuestionIndex++;
+            displayQuestion();
+        } else {
+            document.getElementById("question-text").innerHTML = `🎉 <b>測驗結束！</b><br>您總共獲得了 <b>${score}</b> 分！`;
+            document.getElementById("user-input").style.display = "none";
+            document.getElementById("unit-text").style.display = "none";
+            document.getElementById("result-message").innerText = score === 100 ? "太神了！完美的 100 分！💯" : "辛苦了！多練習幾次會更熟練喔！";
+        }
+    }
+
+    // 網頁載入時啟動第一題
+    window.onload = displayQuestion;
+</script>
+
+</body>
+</html>
