@@ -1,186 +1,265 @@
 <!DOCTYPE html>
-<html lang="zh-Hant-TW">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>六上數學：圓周長與圓面積填空測驗</title>
+    <title>國小數學：圓周長與圓面積線上測驗</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Microsoft JhengHei', sans-serif;
-            background-color: #f0f3f6;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f8fafc;
+        }
+        /* 隱藏原生 number 輸入框的上下微調按鈕 */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
             margin: 0;
-            padding: 20px;
         }
-        .quiz-container {
-            background-color: white;
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-            text-align: center;
-            max-width: 500px;
-            width: 100%;
+        input[type=number] {
+            -moz-appearance: textfield;
         }
-        h2 { color: #2e4053; margin-bottom: 5px; }
-        .sub-title { color: #7f8c8d; font-size: 0.95rem; margin-bottom: 25px; }
-        .question-box {
-            font-size: 1.2rem;
-            color: #2c3e50;
-            background-color: #f4f9f9;
-            padding: 20px;
-            border-radius: 10px;
-            border-left: 5px solid #3498db;
-            margin-bottom: 25px;
-            text-align: left;
-            line-height: 1.6;
+        .correct-style {
+            border-color: #22c55e !important;
+            background-color: #f0fdf4 !important;
+            color: #15803d !important;
         }
-        .input-area {
-            margin-bottom: 20px;
-        }
-        input[type="number"] {
-            font-size: 1.3rem;
-            padding: 10px;
-            width: 70%;
-            border: 2px solid #bdc3c7;
-            border-radius: 8px;
-            text-align: center;
-            outline: none;
-            transition: 0.3s;
-        }
-        input[type="number"]:focus {
-            border-color: #3498db;
-            box-shadow: 0 0 8px rgba(52,152,219,0.3);
-        }
-        .unit { font-size: 1.2rem; margin-left: 10px; color: #34495e; font-weight: bold; }
-        button {
-            font-size: 1.1rem;
-            padding: 10px 24px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            margin: 5px;
-            transition: 0.2s;
-            font-weight: bold;
-        }
-        .btn-submit { background-color: #3498db; color: white; }
-        .btn-submit:hover { background-color: #2980b9; }
-        .btn-next { background-color: #2ecc71; color: white; }
-        .btn-next:hover { background-color: #27ae60; }
-        .result-box {
-            margin-top: 20px;
-            font-size: 1.15rem;
-            font-weight: bold;
-            min-height: 40px;
-            line-height: 1.5;
-        }
-        .correct { color: #27ae60; }
-        .wrong { color: #e74c3c; }
-        .score-box {
-            margin-top: 25px;
-            padding-top: 15px;
-            border-top: 1px dashed #bdc3c7;
-            color: #7f8c8d;
-            font-size: 1rem;
+        .incorrect-style {
+            border-color: #ef4444 !important;
+            background-color: #fef2f2 !important;
+            color: #b91c1c !important;
         }
     </style>
 </head>
-<body>
+<body class="min-h-screen text-slate-800 pb-16">
 
-<div class="quiz-container">
-    <h2>✏️ 第四單元：看題填數字練習 ✏️</h2>
-    <div class="sub-title">( 圓周率一律以 3.14 計算，請輸入純數字答案 )</div>
-    
-    <div class="question-box" id="question-text">題目載入中...</div>
-    
-    <div class="input-area">
-        <input type="number" id="user-input" step="0.01" placeholder="請輸入算出的數字" autocomplete="off">
-        <span class="unit" id="unit-text">公分</span>
-    </div>
-    
-    <button class="btn-submit" onclick="checkAnswer()">檢查答案</button>
-    <button class="btn-next" onclick="nextQuestion()">下一題</button>
-    
-    <div class="result-box" id="result-message"></div>
-    
-    <div class="score-box">
-        進度：第 <span id="current-idx">1</span> / 10 題 ｜ 目前得分：<span id="score">0</span> 分
-    </div>
-</div>
+    <!-- 頂部標題列 -->
+    <header class="bg-indigo-600 text-white shadow-md mb-8 sticky top-0 z-50">
+        <div class="max-w-3xl mx-auto px-4 py-5 flex justify-between items-center">
+            <div>
+                <h1 class="text-xl sm:text-2xl font-bold flex items-center gap-2">
+                    📐 國小數學：圓周長與圓面積練習測驗
+                </h1>
+                <p class="text-indigo-100 text-xs sm:text-sm mt-1">圓周率請以 3.14 計算，請在框內填入正確答案。</p>
+            </div>
+        </div>
+    </header>
 
-<script>
-    // 固定的 10 題核心填充題庫
-    const quizData = [
-        { q: "有一個圓形的直徑是 20 公分，請問它的圓周長是多少公分？", a: 62.8, u: "公分" },
-        { q: "有一個圓形的半徑是 5 公分，請問它的圓周長是多少公分？", a: 31.4, u: "公分" },
-        { q: "一個圓形盤子的半徑是 8 公分，請問它的圓面積是多少平方公分？", a: 200.96, u: "平方公分" },
-        { q: "一個圓形時鐘的直徑是 12 公分，請問它的表面積是多少平方公分？", a: 113.04, u: "平方公分" },
-        { q: "曉明量得一個圓形噴水池的圓周長是 157 公尺，請問這個噴水池的直徑是多少公尺？", a: 50, u: "公尺" },
-        { q: "小華用繩子圍成一個半徑 10 公分的圓，之後他把繩子拉直，這條繩子長度是多少公分？", a: 62.8, u: "公分" },
-        { q: "有一塊扇形草皮剛好是四分之一圓（\(\frac{1}{4}\) 圓），它的半徑是 20 公尺，請問這塊扇形草皮的面積是多少平方公尺？", a: 314, u: "平方公尺" },
-        { q: "有一個半圓形的木板，它的直徑是 10 公分，請問這個半圓形木板的周長是多少公分？(提示：弧長加直徑)", a: 25.7, u: "公分" },
-        { q: "有一台腳踏車輪子的直徑是 50 公分，當輪子向前滾動了 10 圈，腳踏車大約向前移動了多少公分？", a: 1570, u: "公分" },
-        { q: "正方形邊長 10 公分，裡面畫一個最大的圓。請問正方形扣掉這個圓之後，剩下的面積是多少平方公分？", a: 21.5, u: "平方公分" }
-    ];
+    <!-- 主要測驗區域 -->
+    <main class="max-w-3xl mx-auto px-4">
 
-    let currentQuestionIndex = 0;
-    let score = 0;
-    let hasAnswered = false;
+        <!-- 題目列表容器 -->
+        <div id="quiz-container" class="space-y-6">
+            <!-- 由 JavaScript 動態生成題目 -->
+        </div>
 
-    function displayQuestion() {
-        hasAnswered = false;
-        document.getElementById("user-input").value = "";
-        document.getElementById("user-input").disabled = false;
-        document.getElementById("result-message").innerText = "";
-        
-        const currentQuiz = quizData[currentQuestionIndex];
-        document.getElementById("question-text").innerText = `${currentQuestionIndex + 1}. ${currentQuiz.q}`;
-        document.getElementById("unit-text").innerText = currentQuiz.u;
-        document.getElementById("current-idx").innerText = currentQuestionIndex + 1;
-    }
+        <!-- 交卷與成績卡片區 -->
+        <div id="action-area" class="mt-8 bg-white rounded-2xl p-6 shadow-sm border border-slate-200 text-center">
+            <button id="submit-btn" onclick="submitQuiz()" class="w-full sm:w-auto px-10 py-3.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold text-lg rounded-xl shadow-md hover:shadow-lg transition transform active:scale-95">
+                📝 完成交卷
+            </button>
 
-    function checkAnswer() {
-        if (hasAnswered) return;
+            <!-- 測驗結果卡片（預設隱藏） -->
+            <div id="result-card" class="hidden mt-6 pt-6 border-t border-slate-200">
+                <h2 class="text-xl font-bold text-slate-700 mb-4">測驗結果</h2>
+                
+                <div class="flex justify-center items-center gap-4 sm:gap-8 my-4">
+                    <div class="p-6 rounded-2xl bg-indigo-50 border border-indigo-100 shadow-inner flex-1 max-w-[200px]">
+                        <div class="text-xs sm:text-sm font-semibold text-slate-500 mb-1">最終得分</div>
+                        <div class="text-4xl sm:text-5xl font-extrabold text-indigo-600">
+                            <span id="score-display">0</span> <span class="text-base font-bold text-slate-400">/ 100</span>
+                        </div>
+                    </div>
 
-        const userInput = parseFloat(document.getElementById("user-input").value);
-        const resultEl = document.getElementById("result-message");
-        const currentQuiz = quizData[currentQuestionIndex];
+                    <div class="p-6 rounded-2xl bg-slate-50 border border-slate-100 shadow-inner flex-1 max-w-[200px]">
+                        <div class="text-xs sm:text-sm font-semibold text-slate-500 mb-1">答對題數</div>
+                        <div class="text-4xl sm:text-5xl font-extrabold text-slate-700">
+                            <span id="correct-count-display">0</span> <span class="text-base font-bold text-slate-400">/ 10 題</span>
+                        </div>
+                    </div>
+                </div>
 
-        if (isNaN(userInput)) {
-            resultEl.innerHTML = "<span class='wrong'>⚠️ 請先輸入數字答案！</span>";
-            return;
+                <div class="mt-6 flex justify-center gap-4">
+                    <button onclick="resetQuiz()" class="px-8 py-3 bg-slate-700 hover:bg-slate-800 text-white font-bold rounded-xl transition shadow-md">
+                        🔄 重新測驗
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // 題目與標準答案資料庫
+        const quizData = [
+            {
+                id: 1,
+                title: "1. 美術館的牆壁上，有一個用瓷磚貼成的圓形壁飾，周長是 14.13 公尺，直徑大約是多少公尺？",
+                inputs: [
+                    { id: "q1_a1", label: "直徑", unit: "公尺", answer: 4.5 }
+                ]
+            },
+            {
+                id: 2,
+                title: "2. 有一個圓形徽章，圓周長是 21.98 公分，徽章的半徑大約是幾公分？",
+                inputs: [
+                    { id: "q2_a1", label: "半徑", unit: "公分", answer: 3.5 }
+                ]
+            },
+            {
+                id: 3,
+                title: "3. 用繩子綁一隻牛，牛拉直繩子繞一圈共走了 34.54 公尺，這條拉直的繩子約長幾公尺？",
+                inputs: [
+                    { id: "q3_a1", label: "繩長", unit: "公尺", answer: 5.5 }
+                ]
+            },
+            {
+                id: 4,
+                title: "4. 一個半徑 2 公尺的圓形戲水池，面積大約是多少平方公尺？",
+                inputs: [
+                    { id: "q4_a1", label: "面積", unit: "平方公尺", answer: 12.56 }
+                ]
+            },
+            {
+                id: 5,
+                title: "5. 半徑 4.2 公尺的圓面積是半徑 2.1 公尺圓面積的幾倍？",
+                inputs: [
+                    { id: "q5_a1", label: "倍數", unit: "倍", answer: 4 }
+                ]
+            },
+            {
+                id: 6,
+                title: "6. 小月用繩子圍出一個邊長 4 公分的正方形，再以正方形的周長為半徑畫一個圓，這個圓的面積大約是幾平方公分？",
+                inputs: [
+                    { id: "q6_a1", label: "圓面積", unit: "平方公分", answer: 803.84 }
+                ]
+            },
+            {
+                id: 7,
+                title: "7. 半徑 3 公分的圓，面積大約是多少平方公分？",
+                inputs: [
+                    { id: "q7_a1", label: "面積", unit: "平方公分", answer: 28.26 }
+                ]
+            },
+            {
+                id: 8,
+                title: "8. 阿尼想畫一個圓周長約 62.8 公分的圓，他應該將圓規張開大約多少公分來畫？這個圓的面積大約是多少平方公分？",
+                inputs: [
+                    { id: "q8_a1", label: "圓規張開（半徑）", unit: "公分", answer: 10 },
+                    { id: "q8_a2", label: "圓面積", unit: "平方公分", answer: 314 }
+                ]
+            },
+            {
+                id: 9,
+                title: "9. 假如正方形和圓形的周長都是 314 公分，正方形的面積和圓面積大約相差幾平方公分？",
+                inputs: [
+                    { id: "q9_a1", label: "面積相差", unit: "平方公分", answer: 1687.75 }
+                ]
+            },
+            {
+                id: 10,
+                title: "10. 公園裡有一個圓形溜冰場，周長是 75.36 公尺，溜冰場的半徑大約是幾公尺？",
+                inputs: [
+                    { id: "q10_a1", label: "半徑", unit: "公尺", answer: 12 }
+                ]
+            }
+        ];
+
+        // 渲染題目列表
+        function renderQuiz() {
+            const container = document.getElementById('quiz-container');
+            container.innerHTML = quizData.map((item) => `
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                    <p class="text-slate-800 text-base sm:text-lg font-medium leading-relaxed mb-4">
+                        ${item.title}
+                    </p>
+
+                    <div class="bg-slate-50 p-4 rounded-xl space-y-3">
+                        ${item.inputs.map(input => `
+                            <div class="flex flex-wrap items-center gap-2">
+                                <label for="${input.id}" class="text-sm font-semibold text-slate-700 min-w-[130px]">
+                                    填答（${input.label}）：
+                                </label>
+                                <div class="relative flex items-center">
+                                    <input type="number" step="any" id="${input.id}" 
+                                        placeholder="請輸入數值"
+                                        class="w-36 px-3 py-2 border-2 border-slate-300 rounded-lg focus:outline-none focus:border-indigo-500 font-semibold text-slate-800 transition"
+                                    />
+                                    <span class="ml-2 text-sm font-medium text-slate-600">${input.unit}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
         }
 
-        hasAnswered = true;
-        document.getElementById("user-input").disabled = true;
-
-        // 使用極小差距比對，避免浮點數誤差
-        if (Math.abs(userInput - currentQuiz.a) < 0.01) {
-            resultEl.innerHTML = "<span class='correct'>⭕ 答對了！計算非常精準！</span>";
-            score += 10;
-            document.getElementById("score").innerText = score;
-        } else {
-            resultEl.innerHTML = `<span class='wrong'>❌ 答錯了！<br>正確答案應該是：${currentQuiz.a}</span>`;
+        // 檢查數值是否正確（容許極微小浮點數誤差）
+        function checkValue(userVal, targetVal) {
+            if (userVal === "" || userVal === null) return false;
+            const parsedVal = parseFloat(userVal);
+            return Math.abs(parsedVal - targetVal) < 0.01;
         }
-    }
 
-    function nextQuestion() {
-        if (currentQuestionIndex < quizData.length - 1) {
-            currentQuestionIndex++;
-            displayQuestion();
-        } else {
-            document.getElementById("question-text").innerHTML = `🎉 <b>測驗結束！</b><br>您總共獲得了 <b>${score}</b> 分！`;
-            document.getElementById("user-input").style.display = "none";
-            document.getElementById("unit-text").style.display = "none";
-            document.getElementById("result-message").innerText = score === 100 ? "太神了！完美的 100 分！💯" : "辛苦了！多練習幾次會更熟練喔！";
+        // 送出測驗與計分
+        function submitQuiz() {
+            let correctCount = 0;
+
+            quizData.forEach(item => {
+                let isItemCorrect = true;
+
+                item.inputs.forEach(input => {
+                    const inputElem = document.getElementById(input.id);
+                    const userValue = inputElem.value.trim();
+
+                    if (checkValue(userValue, input.answer)) {
+                        inputElem.classList.add('correct-style');
+                        inputElem.classList.remove('incorrect-style');
+                    } else {
+                        inputElem.classList.add('incorrect-style');
+                        inputElem.classList.remove('correct-style');
+                        isItemCorrect = false;
+                    }
+                });
+
+                if (isItemCorrect) {
+                    correctCount++;
+                }
+            });
+
+            // 計算分數（每題 10 分）
+            const score = correctCount * 10;
+            document.getElementById('score-display').innerText = score;
+            document.getElementById('correct-count-display').innerText = correctCount;
+
+            // 顯示成績結果
+            document.getElementById('result-card').classList.remove('hidden');
+
+            // 平滑滾動至成績區域
+            document.getElementById('action-area').scrollIntoView({ behavior: 'smooth' });
         }
-    }
 
-    // 網頁載入時啟動第一題
-    window.onload = displayQuestion;
-</script>
+        // 重新測驗
+        function resetQuiz() {
+            quizData.forEach(item => {
+                item.inputs.forEach(input => {
+                    const inputElem = document.getElementById(input.id);
+                    inputElem.value = "";
+                    inputElem.classList.remove('correct-style', 'incorrect-style');
+                });
+            });
 
+            document.getElementById('result-card').classList.add('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 頁面載入後自動渲染題目
+        window.onload = function() {
+            renderQuiz();
+        };
+    </script>
 </body>
 </html>
