@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>數學小測驗 - 最大公因數與最小公倍數</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: "Microsoft JhengHei", Arial, sans-serif;
+    }
+
+    body {
+      background-color: #f4f6f9;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+
+    .quiz-card {
+      max-width: 800px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 25px;
+    }
+
+    .question-container {
+      background-color: #f8f9fa;
+      border: 2px solid #e9ecef;
+      border-left: 5px solid #3498db;
+      padding: 18px 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    /* 答題結果的題目外框與背景狀態 */
+    .question-container.correct-bg {
+      border-color: #2ecc71;
+      border-left: 5px solid #2ecc71;
+      background-color: #f0fff4;
+    }
+
+    .question-container.wrong-bg {
+      border-color: #e74c3c;
+      border-left: 5px solid #e74c3c;
+      background-color: #fff5f5;
+    }
+
+    .question-container p {
+      font-weight: bold;
+      font-size: 1.05rem;
+      margin-top: 0;
+      margin-bottom: 12px;
+      color: #2c3e50;
+      line-height: 1.5;
+    }
+
+    .input-group {
+      margin-bottom: 8px;
+    }
+
+    input[type="number"] {
+      padding: 8px 12px;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      font-size: 1rem;
+      width: 130px;
+      margin: 2px 5px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input[type="number"]:focus {
+      border-color: #3498db;
+      box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+    }
+
+    /* 輸入框驗證樣式（僅用紅/綠框標示） */
+    input.input-correct {
+      border: 2px solid #2ecc71 !important;
+      background-color: #e8f8f5;
+    }
+
+    input.input-wrong {
+      border: 2px solid #e74c3c !important;
+      background-color: #fadbd8;
+    }
+
+    .submit-btn {
+      display: block;
+      width: 100%;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      padding: 14px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+      margin-top: 25px;
+    }
+
+    .submit-btn:hover {
+      background-color: #2980b9;
+    }
+
+    .submit-btn:active {
+      transform: scale(0.99);
+    }
+
+    /* 成績顯示區塊 */
+    #result-box {
+      display: none;
+      background: #e8f8f5;
+      border: 2px solid #2ecc71;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    #result-box h2 {
+      margin: 0 0 10px 0;
+      color: #27ae60;
+    }
+
+    .score-text {
+      font-size: 2.2rem;
+      font-weight: bold;
+      color: #e74c3c;
+    }
+
+    @media (max-width: 600px) {
+      .quiz-card {
+        padding: 15px;
+      }
+      input[type="number"] {
+        width: 100%;
+        margin: 5px 0;
+      }
+      .input-group {
+        margin-bottom: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="quiz-card">
+  <h1>應用題測驗</h1>
+
+  <!-- 成績結果顯示面板 -->
+  <div id="result-box">
+    <h2>測驗結束！</h2>
+    <p>您的得分：<span id="score-display" class="score-text">0</span> / 100 分</p>
+    <p id="evaluation-text"></p>
+  </div>
+
+  <form id="quiz-form">
+    <div class="question-container">
+      <p>1. 王老師買了 30 枝鉛筆和 45 個橡皮擦，要分給小朋友，每個小朋友分到的鉛筆要一樣多，橡皮擦也一樣多，最多可以分給幾個小朋友？</p>
+      <div class="input-group">
+        <input type="number" name="q1" placeholder="請輸入答案"> 個
+      </div>
+    </div>
+
+    <div class="question-container">
+      <p>2. 用一個數去除 54 和 78 都可以整除，這個數最大是多少？</p>
+      <div class="input-group">
+        <input type="number" name="q2" placeholder="請輸入答案">
+      </div>
+    </div>
+
+    <div class="question-container">
+      <p>3. 阿偉把一張長 40 公分、寬 30 公分的長方形色紙，剪成數個全等的正方形且沒有剩下，正方形的邊長最大是多少？最少可以剪成幾個全等的正方形？</p>
+      <div class="input-group">正方形邊長：<input type="number" name="q3_1" placeholder="邊長"> 公分</div>
+      <div class="input-group">最少剪成：<input type="number" name="q3_2" placeholder="個數"> 個</div>
+    </div>
+
+    <div class="question-container">
+      <p>4. 有 32 本書和 48 枝筆，最多可以平分給幾個人，讓每個人拿到的書一樣多，筆也一樣多，且剛好分完？每人可以拿到幾本書和幾枝筆？</p>
+      <div class="input-group">最多平分給：<input type="number" name="q4_1" placeholder="人數"> 人</div>
+      <div class="input-group">每人拿書：<input type="number" name="q4_2" placeholder="本數"> 本</div>
+      <div class="input-group">每人拿筆：<input type="number" name="q4_3" placeholder="枝數"> 枝</div>
+    </div>
+
+    <div class="question-container">
+      <p>5. 把 45 個蘋果和 63 個水梨平均分裝成水果禮盒，每個禮盒裡的蘋果一樣多，水梨也一樣多，且全部裝完，最多能裝成幾個水果禮盒？每個禮盒裡的蘋果和水梨各有幾個？</p>
+      <div class="input-group">最多裝成：<input type="number" name="q5_1" placeholder="盒數"> 盒</div>
+      <div class="input-group">蘋果各有：<input type="number" name="q5_2" placeholder="個數"> 個</div>
+      <div class="input-group">水梨各有：<input type="number" name="q5_3" placeholder="個數"> 個</div>
+    </div>
+
+    <div class="question-container">
+      <p>6. 爸爸的辦公室長 24 公尺、寬 18 公尺，要鋪滿大小相同的正方形地毯，地毯的邊長最大是幾公尺？共需要幾個地毯？</p>
+      <div class="input-group">地毯邊長：<input type="number" name="q6_1" placeholder="長度"> 公尺</div>
+      <div class="input-group">共需要：<input type="number" name="q6_2" placeholder="數量"> 個</div>
+    </div>
+
+    <div class="question-container">
+      <p>7. 有一個長 56 公尺、寬 42 公尺的長方形水池，水池的四周圍要插上旗桿，四個角落都要插，每根旗桿的距離都相同，兩根旗桿之間的最大距離是幾公尺？</p>
+      <div class="input-group">最大距離：<input type="number" name="q7" placeholder="長度"> 公尺</div>
+    </div>
+
+    <div class="question-container">
+      <p>8. 廖老師把 64 枝鉛筆和 48 個橡皮擦，平分給小朋友，每個小朋友拿到鉛筆一樣多，橡皮擦也一樣多，最多可以分給幾個小朋友？每個小朋友分到的鉛筆和橡皮擦各是多少？</p>
+      <div class="input-group">最多平分給：<input type="number" name="q8_1" placeholder="人數"> 人</div>
+      <div class="input-group">分到鉛筆：<input type="number" name="q8_2" placeholder="枝數"> 枝</div>
+      <div class="input-group">分到橡皮擦：<input type="number" name="q8_3" placeholder="個數"> 個</div>
+    </div>
+
+    <div class="question-container">
+      <p>9. 撲滿裡有一些 5 元錢幣，12 個一數、15 個一數剛好都會少 1 個，撲滿裡最少有幾元？</p>
+      <div class="input-group">最少有：<input type="number" name="q9" placeholder="金額"> 元</div>
+    </div>
+
+    <div class="question-container">
+      <p>10. 媽媽幫涵涵安排才藝課，小提琴課每 7 天上一次，芭蕾舞課每 14 天上一次，今天涵涵上了兩種才藝課，下次兩種才藝課同一天上課最少是在幾天後？</p>
+      <div class="input-group">最少在：<input type="number" name="q10" placeholder="天數"> 天後</div>
+    </div>
+
+    <button type="submit" class="submit-btn">提交答案並計算成績</button>
+  </form>
+</div>
+
+<script>
+  // 正確答案定義 (10 大題，每題 10 分，共 100 分)
+  const correctAnswers = {
+    q1: { q1: 15 },
+    q2: { q2: 6 },
+    q3: { q3_1: 10, q3_2: 12 },
+    q4: { q4_1: 16, q4_2: 2, q4_3: 3 },
+    q5: { q5_1: 9, q5_2: 5, q5_3: 7 },
+    q6: { q6_1: 6, q6_2: 12 },
+    q7: { q7: 14 },
+    q8: { q8_1: 16, q8_2: 4, q8_3: 3 },
+    q9: { q9: 295 },
+    q10: { q10: 14 }
+  };
+
+  document.getElementById("quiz-form").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    let totalScore = 0;
+    const formData = new FormData(this);
+    const questionContainers = document.querySelectorAll(".question-container");
+
+    // 重置之前的標記與樣式
+    document.querySelectorAll("input[type='number']").forEach(input => {
+      input.classList.remove("input-correct", "input-wrong");
+    });
+    questionContainers.forEach(container => {
+      container.classList.remove("correct-bg", "wrong-bg");
+    });
+
+    // 逐題檢驗
+    for (let i = 1; i <= 10; i++) {
+      const qKey = "q" + i;
+      const expectedAnswers = correctAnswers[qKey];
+      const container = questionContainers[i - 1]; // 對應的題目區塊
+      let isQuestionAllCorrect = true;
+
+      // 檢查該題內的所有輸入欄位
+      for (const [inputName, expectedValue] of Object.entries(expectedAnswers)) {
+        const inputElem = this.querySelector(`input[name="${inputName}"]`);
+        const userValue = parseInt(formData.get(inputName), 10);
+
+        if (!isNaN(userValue) && userValue === expectedValue) {
+          // 該小項答對：標示綠色外框
+          inputElem.classList.add("input-correct");
+        } else {
+          // 該小項答錯或未填：標示紅色外框
+          isQuestionAllCorrect = false;
+          inputElem.classList.add("input-wrong");
+        }
+      }
+
+      // 判斷整題得分與背景配色
+      if (isQuestionAllCorrect) {
+        totalScore += 10;
+        container.classList.add("correct-bg");
+      } else {
+        container.classList.add("wrong-bg");
+      }
+    }
+
+    // 顯示總成績面板
+    const resultBox = document.getElementById("result-box");
+    const scoreDisplay = document.getElementById("score-display");
+    const evalText = document.getElementById("evaluation-text");
+
+    scoreDisplay.textContent = totalScore;
+    resultBox.style.display = "block";
+
+    if (totalScore === 100) {
+      evalText.textContent = "太厲害了！完全正確！🎉";
+    } else if (totalScore >= 80) {
+      evalText.textContent = "表現優秀！再接再厲！👍";
+    } else if (totalScore >= 60) {
+      evalText.textContent = "及格了，建議把做錯的題目重新算一遍喔！💪";
+    } else {
+      evalText.textContent = "需要再多加練習觀念喔，加油！📚";
+    }
+
+    // 自動滾動至頂部查看成績
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+</script>
+
+</body>
+</html>

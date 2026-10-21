@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>國小六年級閱讀素養練習：亞運背後的隱藏關卡與文化密碼</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Noto Sans TC', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#075985',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f8fafc;
+        }
+        /* 選項標籤 hover 與 checked 樣式 */
+        .option-label {
+            transition: all 0.2s ease;
+        }
+        .option-label:hover {
+            transform: translateY(-1px);
+        }
+        input[type="radio"]:checked + .option-content {
+            border-color: #0284c7;
+            background-color: #f0f9ff;
+            box-shadow: 0 2px 4px rgba(2, 132, 199, 0.15);
+        }
+        /* 捲軸優化 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col justify-between">
+
+    <!-- Header 頂部導覽列 -->
+    <header class="bg-gradient-to-r from-blue-600 via-indigo-600 to-amber-500 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <span class="bg-white text-blue-600 p-2 rounded-xl text-xl font-black shadow">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </span>
+                <div>
+                    <h1 class="text-lg md:text-xl font-bold tracking-wide">國小六年級 閱讀素養線上測驗</h1>
+                    <p class="text-xs text-blue-100">主題：亞運背後的「隱藏關卡」與「文化密碼」</p>
+                </div>
+            </div>
+            <div class="flex items-center bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full text-xs font-semibold">
+                <i class="fa-solid fa-list-check mr-2"></i>
+                <span id="answered-count">0</span> / 10 題已回答
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content 主要內容區域 (雙欄版面，大螢幕左文本右題目) -->
+    <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full">
+
+        <!-- 成績顯示區塊 (交卷後才顯示) -->
+        <section id="result-banner" class="hidden bg-white rounded-3xl shadow-2xl border-4 border-blue-500 p-8 md:p-12 text-center max-w-2xl mx-auto my-8 animate-fade-in">
+            <div class="inline-flex items-center justify-center w-24 h-24 bg-amber-100 text-amber-500 rounded-full text-5xl mb-6 shadow-inner">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+            <h2 class="text-2xl md:text-3xl font-black text-slate-800 mb-2">測驗完成！</h2>
+            <p class="text-slate-500 text-sm mb-6">感謝你的認真作答，以下是你的閱讀素養測驗成績：</p>
+            
+            <div class="bg-slate-50 rounded-2xl p-6 border border-slate-200 mb-6">
+                <span class="text-sm font-bold text-slate-400 block mb-1">最終獲得總分</span>
+                <div class="flex items-baseline justify-center space-x-2">
+                    <span class="text-6xl md:text-7xl font-black text-blue-600" id="final-score">0</span>
+                    <span class="text-2xl font-bold text-slate-400">/ 100 分</span>
+                </div>
+            </div>
+
+            <p id="score-comment" class="text-base md:text-lg font-bold text-slate-700 py-3 px-6 rounded-xl bg-blue-50 border border-blue-100 mb-8">
+                <!-- 評語由 JS 動態注入 -->
+            </p>
+
+            <button onclick="window.location.reload()" class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition transform active:scale-95">
+                <i class="fa-solid fa-rotate-right mr-2"></i> 重新進行測驗
+            </button>
+        </section>
+
+        <!-- 文本與題目區域 (交卷後隱藏) -->
+        <div id="quiz-container" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+            <!-- 左側：閱讀文本 -->
+            <article class="lg:col-span-5 bg-white rounded-3xl shadow-md border border-slate-200/80 overflow-hidden lg:sticky lg:top-24">
+                <div class="bg-gradient-to-r from-sky-500 to-blue-600 text-white px-6 py-4 flex items-center justify-between">
+                    <h2 class="text-lg md:text-xl font-black flex items-center">
+                        <i class="fa-solid fa-book-open mr-2"></i> 閱讀文本
+                    </h2>
+                    <span class="bg-white/20 text-xs px-2.5 py-1 rounded-full text-white font-medium">文章長度約 800 字</span>
+                </div>
+                <div class="p-6 md:p-8 space-y-6 text-slate-700 leading-relaxed text-base max-h-[calc(100vh-160px)] overflow-y-auto">
+                    <h3 class="text-xl md:text-2xl font-extrabold text-blue-900 border-b-2 border-blue-100 pb-3">
+                        亞運背後的「隱藏關卡」與「文化密碼」
+                    </h3>
+                    
+                    <p class="font-medium text-slate-600 bg-slate-50 p-4 rounded-2xl border-l-4 border-blue-500 text-sm md:text-base">
+                        當你看到各國頂尖運動員在運動場上揮灑汗水，爭奪象徵最高榮譽的金牌時，你是否曾想過：「亞洲運動會」（簡稱亞運）除了是運動員的競技場外，還隱藏了哪些不為人知的歷史與文化意義？
+                    </p>
+
+                    <div class="space-y-2">
+                        <h4 class="text-base md:text-lg font-bold text-sky-700 flex items-center">
+                            <span class="bg-sky-100 text-sky-800 rounded-lg px-2 py-0.5 text-xs font-black mr-2">關卡 1</span>
+                            亞運羽球賽，竟然可能比奧運還難打？
+                        </h4>
+                        <p class="text-sm md:text-base">
+                            許多人認為奧運是運動員的最高殿堂，比賽強度自然是世界第一。不過，台灣兩面羽球奧運金牌得主李洋曾感嘆：「亞運的羽球比奧運還難打！」
+                        </p>
+                        <p class="text-sm md:text-base">
+                            這並不是玩笑話。在奧運羽球項目中，為了讓各大洲的選手都有機會參賽，每個國家在單一項目最多隻能派出2名/對選手。然而，當今世界羽球的強權（如台灣、中國、韓國、印尼、日本等）幾乎全集中在亞洲。這意味著在亞運賽場上，強敵的密度極高，選手可能在極早的預賽階段，就會撞上世界排名前十的頂尖高手。
+                        </p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <h4 class="text-base md:text-lg font-bold text-amber-700 flex items-center">
+                            <span class="bg-amber-100 text-amber-800 rounded-lg px-2 py-0.5 text-xs font-black mr-2">關卡 2</span>
+                            除了跑步游泳，還有「卡巴迪」和「電競」？
+                        </h4>
+                        <p class="text-sm md:text-base">
+                            亞運與奧運最大的不同，在於其具有強烈的「亞洲文化特色」。亞運包含許多奧運沒有的非奧運項目。例如：
+                        </p>
+                        <ul class="list-disc pl-6 space-y-1 text-sm md:text-base text-slate-700">
+                            <li>
+                                <strong class="text-amber-900">卡巴迪（Kabaddi）：</strong> 這是一項擁有4000年歷史的亞洲傳統運動，類似高級版的「老鷹捉小雞」，進攻者必須在不換氣的情況下不斷喊著「卡巴迪」，並觸碰防守隊員得分。
+                            </li>
+                            <li>
+                                <strong class="text-purple-900">電子競技（Esports）：</strong> 隨著時代演進，亞運在2022杭州亞運將「電競」列為正式奪牌項目，觀眾能透過360度的實況轉播，觀看選手如何利用招式、戰術和過人的反應速度擊敗對手。
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="space-y-2">
+                        <h4 class="text-base md:text-lg font-bold text-emerald-700 flex items-center">
+                            <span class="bg-emerald-100 text-emerald-800 rounded-lg px-2 py-0.5 text-xs font-black mr-2">關卡 3</span>
+                            從「遠東」走來的和平足跡
+                        </h4>
+                        <p class="text-sm md:text-base">
+                            亞運的前身可以追溯到1913年舉辦的「遠東運動會」。第二次世界大戰結束後，為了促進亞洲各國的和平與團結，第一屆正式的亞洲運動會於1951年在印度新德里誕生，當時只有11個國家、不到500名運動員參賽。如今的亞運，已經發展成為擁有45個國家與地區、超過萬名選手共襄盛舉的亞洲最高水平體育盛事。
+                        </p>
+                    </div>
+                </div>
+            </article>
+
+            <!-- 右側：測驗試題區塊 -->
+            <section class="lg:col-span-7 space-y-6">
+                <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex items-center justify-between">
+                    <h3 class="text-lg font-bold text-slate-800 flex items-center">
+                        <i class="fa-solid fa-pen-to-square text-blue-600 mr-2"></i> 閱讀理解題（共 10 題，每題 10 分）
+                    </h3>
+                    <span class="text-xs bg-slate-100 text-slate-600 font-bold px-2.5 py-1 rounded-lg">單選題</span>
+                </div>
+
+                <!-- 題目容器 -->
+                <form id="quiz-form" class="space-y-6">
+                    <div id="questions-container" class="space-y-6"></div>
+
+                    <!-- 送交按鈕 -->
+                    <div class="pt-4 pb-12 text-center">
+                        <button type="button" onclick="submitQuiz()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-lg py-4 px-8 rounded-2xl shadow-lg hover:shadow-xl transition transform active:scale-95 flex items-center justify-center">
+                            <i class="fa-solid fa-paper-plane mr-2"></i> 送交答案並計算成績
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+        </div>
+
+    </main>
+
+    <!-- Footer 頁尾 -->
+    <footer class="bg-slate-800 text-slate-400 text-center py-6 text-sm border-t border-slate-700">
+        <div class="max-w-6xl mx-auto px-4 space-y-1">
+            <p>國小六年級國語文閱讀素養數位學習練習</p>
+            <p class="text-xs text-slate-500">本系統不提供解題提示與答案對照，送交後僅計算總成績。</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // 10 題選擇題資料 (答案於後端/內部邏輯靜態對照，畫面上不呈現)
+        const quizData = [
+            {
+                id: 1,
+                question: "為什麼奧運羽球項目的每個國家參賽名額會受到限制？",
+                options: [
+                    "為了縮短比賽的總時間",
+                    "為了節省舉辦比賽的經費",
+                    "為了讓各大洲的選手都有機會參賽",
+                    "為了減少運動員受傷的風險"
+                ],
+                answer: 2 // C
+            },
+            {
+                id: 2,
+                question: "李洋提到「亞運羽球比奧運難打」，主要的理由是什麼？",
+                options: [
+                    "亞運的比賽場地設備比奧運差",
+                    "世界羽球強隊幾乎都集中在亞洲，競爭密度極高",
+                    "亞運的比賽規則比奧運更加繁瑣嚴格",
+                    "亞運的裁判標準比奧運更偏袒地主隊"
+                ],
+                answer: 1 // B
+            },
+            {
+                id: 3,
+                question: "文章中提到傳統運動「卡巴迪」類似於我們常見的哪一種遊戲？",
+                options: [
+                    "鬼抓人",
+                    "躲避球",
+                    "紅綠燈",
+                    "老鷹捉小雞"
+                ],
+                answer: 3 // D
+            },
+            {
+                id: 4,
+                question: "在進行卡巴迪運動時，進攻者必須具備下列哪一項特殊的動作或條件？",
+                options: [
+                    "必須全程閉上眼睛",
+                    "必須在不換氣的情況下喊著「卡巴迪」",
+                    "必須單腳跳躍前進",
+                    "必須手持棒子觸碰防守隊員"
+                ],
+                answer: 1 // B
+            },
+            {
+                id: 5,
+                question: "根據文章，哪一屆亞運開始將「電子競技（Esports）」列為正式奪牌項目？",
+                options: [
+                    "1913年 遠東運動會",
+                    "1951年 新德里亞運",
+                    "2022年 杭州亞運",
+                    "2008年 北京奧運"
+                ],
+                answer: 2 // C
+            },
+            {
+                id: 6,
+                question: "亞運與奧運在項目設定上最大的不同點是什麼？",
+                options: [
+                    "亞運完全不舉辦田徑和游泳項目",
+                    "亞運具備強烈的「亞洲文化特色」，包含非奧運項目",
+                    "亞運只允許球類運動進行比賽",
+                    "亞運的所有項目都是四千年以上的古老運動"
+                ],
+                answer: 1 // B
+            },
+            {
+                id: 7,
+                question: "亞洲運動會的最早前身可以追溯到1913年舉辦的什麼賽事？",
+                options: [
+                    "東亞運",
+                    "遠東運動會",
+                    "印度和平盃",
+                    "亞洲青年運動會"
+                ],
+                answer: 1 // B
+            },
+            {
+                id: 8,
+                question: "第二次世界大戰結束後，舉辦第一屆正式亞洲運動會的主要宗旨是什麼？",
+                options: [
+                    "促進亞洲各國的和平與團結",
+                    "選拔前往奧運會的代表選手",
+                    "推廣電子競技的全球商業化",
+                    "證明亞洲的體育實力超越歐洲"
+                ],
+                answer: 0 // A
+            },
+            {
+                id: 9,
+                question: "第一屆正式的亞洲運動會是在哪一個國家的哪一個城市舉辦？",
+                options: [
+                    "日本 東京",
+                    "韓國 首爾",
+                    "中國 杭州",
+                    "印度 新德里"
+                ],
+                answer: 3 // D
+            },
+            {
+                id: 10,
+                question: "從1951年第一屆至今，亞運的發展規模產生了什麼樣的變化？",
+                options: [
+                    "參賽國家從45個減少到11個",
+                    "參賽人數從超過萬人減少到不到500人",
+                    "發展成為擁有45個國家與地區、超過萬名選手參賽的盛事",
+                    "比賽規模一直維持在11個國家，沒有太大改變"
+                ],
+                answer: 2 // C
+            }
+        ];
+
+        const optionLetters = ['A', 'B', 'C', 'D'];
+
+        // 渲染題目列表
+        function renderQuestions() {
+            const container = document.getElementById('questions-container');
+            container.innerHTML = '';
+
+            quizData.forEach((item, index) => {
+                const qCard = document.createElement('div');
+                qCard.className = "bg-white rounded-2xl p-6 shadow-sm border border-slate-200";
+
+                let optionsHTML = '';
+                item.options.forEach((opt, optIndex) => {
+                    optionsHTML += `
+                        <label class="option-label block cursor-pointer">
+                            <input type="radio" name="q${item.id}" value="${optIndex}" onchange="updateProgress()" class="sr-only">
+                            <div class="option-content flex items-center p-3.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 transition">
+                                <span class="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 font-bold flex items-center justify-center mr-3 text-sm shrink-0 font-mono">
+                                    ${optionLetters[optIndex]}
+                                </span>
+                                <span class="text-base">${opt}</span>
+                            </div>
+                        </label>
+                    `;
+                });
+
+                qCard.innerHTML = `
+                    <div class="mb-4">
+                        <h4 class="text-base md:text-lg font-bold text-slate-800 flex items-start">
+                            <span class="bg-blue-600 text-white text-xs px-2.5 py-1 rounded-md mr-3 font-mono shrink-0 mt-0.5">
+                                第 ${index + 1} 題
+                            </span>
+                            <span>${item.question}</span>
+                        </h4>
+                    </div>
+
+                    <div class="space-y-3 pl-0 md:pl-9">
+                        ${optionsHTML}
+                    </div>
+                `;
+
+                container.appendChild(qCard);
+            });
+        }
+
+        // 更新頂部已回答統計
+        function updateProgress() {
+            let answered = 0;
+            quizData.forEach(item => {
+                const selected = document.querySelector(`input[name="q${item.id}"]:checked`);
+                if (selected) answered++;
+            });
+            document.getElementById('answered-count').innerText = answered;
+        }
+
+        // 送交答案並計算分數（絕不顯示對錯提示或答案）
+        function submitQuiz() {
+            let unanswered = [];
+
+            // 檢查未答題目
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`input[name="q${item.id}"]:checked`);
+                if (!selected) {
+                    unanswered.push(index + 1);
+                }
+            });
+
+            if (unanswered.length > 0) {
+                alert(`尚有題目未完成（第 ${unanswered.join('、')} 題），請全部填寫完畢後再送交！`);
+                return;
+            }
+
+            // 計算分數
+            let totalScore = 0;
+            quizData.forEach(item => {
+                const selected = document.querySelector(`input[name="q${item.id}"]:checked`);
+                if (selected && parseInt(selected.value) === item.answer) {
+                    totalScore += 10;
+                }
+            });
+
+            // 隱藏整個測驗區域
+            document.getElementById('quiz-container').classList.add('hidden');
+
+            // 設置結果卡片
+            document.getElementById('final-score').innerText = totalScore;
+            
+            const commentEl = document.getElementById('score-comment');
+            if (totalScore === 100) {
+                commentEl.innerText = "🌟 太厲害了！完全答對，獲選為亞運閱讀小達人！";
+            } else if (totalScore >= 80) {
+                commentEl.innerText = "👍 表現非常優秀！對文章內容有相當深入的理解！";
+            } else if (totalScore >= 60) {
+                commentEl.innerText = "😊 順利通過測驗！基本內容都有掌握到喔！";
+            } else {
+                commentEl.innerText = "💪 繼續加油！建議可以再重新閱讀一次文章喔！";
+            }
+
+            // 顯示結果卡片並滾動至頂部
+            const resultBanner = document.getElementById('result-banner');
+            resultBanner.classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 初始化
+        window.onload = function() {
+            renderQuestions();
+        };
+    </script>
+</body>
+</html>
