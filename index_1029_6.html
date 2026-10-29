@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>水資源保衛戰：搶救乾淨小溪！</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Google Fonts Inter & Noto Sans TC -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #0ea5e9;
+            border-radius: 4px;
+        }
+        /* Animations */
+        @keyframes subtle-bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        .animate-subtle-bounce {
+            animation: subtle-bounce 2.5s infinite ease-in-out;
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 12px rgba(14, 165, 233, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(14, 165, 233, 0); }
+        }
+        .animate-pulse-ring {
+            animation: pulse-ring 2s infinite;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-800 min-h-screen flex flex-col justify-between items-center p-2 sm:p-4 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-sky-900 via-slate-900 to-black">
+
+    <div class="w-full max-w-4xl bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl overflow-hidden border-4 border-sky-400/40 flex flex-col my-auto min-h-[600px]">
+        
+        <!-- ================= 1. HERO HOME SCREEN ================= -->
+        <section id="hero-screen" class="p-6 sm:p-12 flex-1 flex flex-col items-center justify-center text-center bg-gradient-to-b from-sky-100 via-teal-50 to-emerald-100 relative overflow-hidden">
+            <!-- Decorative background elements -->
+            <div class="absolute -top-12 -left-12 w-40 h-40 bg-sky-300/30 rounded-full blur-2xl"></div>
+            <div class="absolute -bottom-12 -right-12 w-48 h-48 bg-emerald-300/30 rounded-full blur-2xl"></div>
+
+            <div class="relative z-10 flex flex-col items-center max-w-2xl">
+                <!-- Cute Mascot Icon -->
+                <div class="w-28 h-28 sm:w-36 sm:h-36 bg-gradient-to-tr from-sky-500 via-cyan-400 to-teal-300 rounded-full flex items-center justify-center text-white text-6xl sm:text-7xl shadow-xl border-4 border-white mb-6 animate-subtle-bounce relative">
+                    <i class="fa-solid fa-droplet text-cyan-100 drop-shadow-md"></i>
+                    <div class="absolute -bottom-1 -right-1 bg-amber-400 text-slate-900 text-xs font-black px-3 py-1 rounded-full border-2 border-white shadow-md">
+                        特訓中
+                    </div>
+                </div>
+
+                <h1 class="text-3xl sm:text-5xl font-black text-slate-800 tracking-wide mb-3 drop-shadow-sm">
+                    水資源保衛戰
+                </h1>
+                <p class="text-xl sm:text-2xl font-extrabold text-sky-600 mb-4">
+                    搶救乾淨小溪！
+                </p>
+                <p class="text-slate-600 font-medium text-sm sm:text-base leading-relaxed mb-8 max-w-lg bg-white/70 backdrop-blur-sm p-4 rounded-2xl border border-sky-100 shadow-sm">
+                    親愛的水質守護者！小溪正面臨嚴重的污染危機，請先進入「知識補給站」完成守護隊長特訓，學習關鍵的水資源保護技巧吧！
+                </p>
+
+                <button onclick="goToTutorial()" class="py-4 px-8 rounded-2xl bg-gradient-to-r from-sky-500 via-teal-500 to-emerald-500 hover:from-sky-600 hover:to-emerald-600 text-white font-black text-lg sm:text-xl shadow-xl hover:shadow-2xl transition transform active:scale-95 flex items-center gap-3 animate-pulse-ring">
+                    <i class="fa-solid fa-book-open"></i>
+                    <span>進入知識補給站</span>
+                    <i class="fa-solid fa-arrow-right text-sm"></i>
+                </button>
+            </div>
+        </section>
+
+
+        <!-- ================= 2. PRE-GAME TUTORIAL / KNOWLEDGE STATION ================= -->
+        <section id="tutorial-screen" class="p-4 sm:p-8 flex-1 flex flex-col justify-between bg-slate-50 hidden">
+            <div>
+                <!-- Header Title -->
+                <div class="text-center mb-6">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-800 font-extrabold text-xs sm:text-sm mb-2 border border-amber-300">
+                        <i class="fa-solid fa-graduation-cap text-amber-600"></i> 守護小隊長特訓
+                    </div>
+                    <h2 class="text-2xl sm:text-3xl font-black text-slate-800">不可不知的水污染知識</h2>
+                    <p class="text-slate-500 text-xs sm:text-sm mt-1">點擊下方每一個頁籤閱讀內容，解鎖遊戲挑戰！</p>
+                </div>
+
+                <!-- Navigation Tabs (Stepper / Tabs) -->
+                <div class="grid grid-cols-5 gap-1.5 sm:gap-3 mb-6" id="tutorial-tabs-header">
+                    <!-- Dynamic Tab Headers will be loaded by JS -->
+                </div>
+
+                <!-- Tab Content Card -->
+                <div class="bg-white rounded-3xl p-5 sm:p-8 shadow-lg border-2 border-sky-100 min-h-[220px] sm:min-h-[240px] flex flex-col justify-between relative overflow-hidden">
+                    <div class="absolute -right-8 -bottom-8 text-sky-50 opacity-40 text-9xl pointer-events-none" id="tab-bg-icon">
+                        <i class="fa-solid fa-water"></i>
+                    </div>
+
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-3 mb-3">
+                            <span id="tab-badge" class="w-9 h-9 rounded-2xl bg-sky-500 text-white font-black flex items-center justify-center text-base shadow-sm">
+                                1
+                            </span>
+                            <h3 id="tab-title" class="text-lg sm:text-xl font-bold text-slate-800">
+                                標題載入中...
+                            </h3>
+                        </div>
+                        <p id="tab-content" class="text-slate-600 font-medium text-sm sm:text-base leading-relaxed pl-1 sm:pl-12">
+                            內容載入中...
+                        </p>
+                    </div>
+
+                    <!-- Progress Indicator inside Card -->
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400 relative z-10">
+                        <span id="tab-step-info">第 1 / 5 項目</span>
+                        <span id="tab-read-status" class="font-bold text-emerald-600"><i class="fa-solid fa-check"></i> 已閱讀</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Unlock Action Gate -->
+            <div class="mt-6 pt-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-600">
+                    <i class="fa-solid fa-lock text-amber-500" id="lock-icon"></i>
+                    <span id="unlock-progress-text">特訓完成進度：已學習 1 / 5 個知識點</span>
+                </div>
+
+                <button id="start-game-btn" onclick="startGameFromTutorial()" disabled class="w-full sm:w-auto py-3.5 px-8 rounded-2xl bg-slate-300 text-slate-500 font-black text-base sm:text-lg cursor-not-allowed transition transform shadow-none flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-gamepad"></i>
+                    <span>準備好了，開始挑戰！</span>
+                </button>
+            </div>
+        </section>
+
+
+        <!-- ================= 3. GAMEPLAY SCREEN ================= -->
+        <div id="game-screen" class="hidden flex-col w-full">
+            <!-- Header / Status Bar -->
+            <header class="bg-gradient-to-r from-teal-600 via-sky-600 to-indigo-600 text-white p-4 sm:p-6 shadow-md relative">
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-white/20 p-3 rounded-2xl backdrop-blur-sm shadow-inner">
+                            <i class="fa-solid font-black fa-hand-holding-droplet text-3xl text-cyan-300"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-xl sm:text-2xl font-black tracking-wide text-amber-300 drop-shadow">水資源保衛戰</h1>
+                            <p class="text-xs sm:text-sm font-semibold text-sky-100">搶救乾淨小溪！</p>
+                        </div>
+                    </div>
+
+                    <!-- Status Counters -->
+                    <div class="grid grid-cols-3 gap-2 sm:gap-4 w-full sm:w-auto text-center">
+                        <div class="bg-black/25 px-3 py-2 rounded-xl backdrop-blur-sm border border-white/10">
+                            <div class="text-xs text-sky-200 font-semibold">關卡進度</div>
+                            <div id="level-display" class="text-base sm:text-lg font-extrabold text-yellow-300">任務 1/5</div>
+                        </div>
+                        <div class="bg-black/25 px-3 py-2 rounded-xl backdrop-blur-sm border border-white/10">
+                            <div class="text-xs text-sky-200 font-semibold">守護積分</div>
+                            <div id="score-display" class="text-base sm:text-lg font-extrabold text-emerald-300">0 分</div>
+                        </div>
+                        <div class="bg-black/25 px-3 py-2 rounded-xl backdrop-blur-sm border border-white/10">
+                            <div class="text-xs text-sky-200 font-semibold">小溪清澈度</div>
+                            <div id="clarity-text" class="text-base sm:text-lg font-extrabold text-cyan-300">20%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Clarity Progress Bar -->
+                <div class="mt-4 w-full bg-slate-900/40 rounded-full h-3.5 overflow-hidden p-0.5 border border-white/20">
+                    <div id="clarity-bar" class="bg-gradient-to-r from-amber-600 via-cyan-400 to-emerald-400 h-full rounded-full transition-all duration-1000 ease-out w-[20%] shadow-lg"></div>
+                </div>
+            </header>
+
+            <!-- Interactive Dynamic River View (Canvas) -->
+            <section class="relative w-full h-48 sm:h-60 bg-slate-800 overflow-hidden shadow-inner">
+                <canvas id="riverCanvas" class="w-full h-full block"></canvas>
+                
+                <!-- Floating Badge Indicator -->
+                <div id="river-status-badge" class="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-md text-amber-300 font-bold text-xs sm:text-sm px-3 py-1.5 rounded-full border border-amber-500/30 shadow-lg flex items-center gap-2">
+                    <i id="status-icon" class="fa-solid fa-triangle-exclamation text-amber-400"></i>
+                    <span id="status-text">警告：溪水高度混濁且含有大量垃圾！</span>
+                </div>
+            </section>
+
+            <!-- Quiz Content Area -->
+            <main id="game-panel" class="p-4 sm:p-8 flex-1 flex flex-col justify-between bg-slate-50">
+                <div class="mb-4">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-sky-100 text-sky-800 font-bold text-sm mb-2">
+                        <i class="fa-solid fa-bullseye text-sky-600"></i>
+                        <span id="task-title">任務 1：了解水汙染有哪些</span>
+                    </div>
+                    <h2 id="question-text" class="text-lg sm:text-xl font-bold text-slate-800 leading-relaxed">
+                        題目載入中...
+                    </h2>
+                </div>
+
+                <!-- Options Grid -->
+                <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 my-2">
+                    <!-- Buttons will be injected dynamically -->
+                </div>
+
+                <!-- Bottom Note -->
+                <div class="mt-4 pt-3 border-t border-slate-200 text-xs sm:text-sm text-slate-500 flex items-center justify-between">
+                    <span><i class="fa-solid fa-circle-info text-sky-500 mr-1"></i> 請點選最適當的答案來淨化溪水！</span>
+                    <span class="font-semibold text-sky-600">水質守護小隊</span>
+                </div>
+            </main>
+        </div>
+
+
+        <!-- ================= 4. KNOWLEDGE MODAL ================= -->
+        <div id="knowledge-modal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden transition-opacity duration-300">
+            <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border-4 transform transition-all scale-95 duration-300 relative overflow-hidden" id="modal-card">
+                <div id="modal-header-bg" class="absolute top-0 left-0 right-0 h-24 bg-emerald-500 flex items-center justify-center">
+                    <div id="modal-icon" class="w-16 h-16 rounded-full bg-white flex items-center justify-center text-3xl shadow-lg border-4 border-white mt-12">
+                        <i class="fa-solid fa-check text-emerald-500"></i>
+                    </div>
+                </div>
+
+                <div class="pt-16 text-center">
+                    <h3 id="modal-result-title" class="text-2xl font-black mb-1 text-emerald-600">答對了！太棒了！</h3>
+                    <p id="modal-result-sub" class="text-sm font-semibold text-slate-500 mb-4">守護積分 +20，小溪恢復部分清澈！</p>
+                    
+                    <div class="bg-amber-50 rounded-2xl p-4 sm:p-5 text-left border-2 border-amber-200/80 mb-6 relative">
+                        <div class="flex items-center gap-2 font-black text-amber-800 text-base mb-2">
+                            <i class="fa-solid fa-lightbulb text-amber-500 text-lg"></i> 守護小知識
+                        </div>
+                        <p id="modal-knowledge-text" class="text-slate-700 text-sm sm:text-base leading-relaxed font-medium">
+                            知識說明載入中...
+                        </p>
+                    </div>
+
+                    <button id="next-btn" onclick="nextLevel()" class="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white font-extrabold text-lg shadow-lg hover:shadow-xl transition transform active:scale-95 flex items-center justify-center gap-2">
+                        <span>前往下一個任務</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ================= 5. SETTLEMENT SCREEN ================= -->
+        <main id="settlement-screen" class="p-6 sm:p-10 text-center flex-1 flex flex-col items-center justify-center bg-gradient-to-b from-sky-50 to-emerald-50 hidden">
+            <div class="w-24 h-24 bg-gradient-to-tr from-amber-400 to-yellow-300 rounded-full flex items-center justify-center text-white text-5xl shadow-xl mb-4 border-4 border-white animate-subtle-bounce">
+                <i class="fa-solid fa-trophy text-amber-600"></i>
+            </div>
+            
+            <h2 class="text-3xl sm:text-4xl font-black text-slate-800 mb-2">大獲全勝！</h2>
+            <p class="text-sky-700 font-bold text-lg mb-6">小溪重獲新生，變得十分湛藍清澈！</p>
+
+            <div class="bg-white p-6 rounded-3xl shadow-xl border-2 border-sky-100 max-w-md w-full mb-6 text-center">
+                <div class="flex justify-center gap-2 mb-3 text-3xl text-amber-400" id="star-rating">
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                </div>
+                <div class="text-slate-500 text-sm font-semibold mb-1">最終獲得積分</div>
+                <div id="final-score" class="text-4xl font-black text-sky-600 mb-4">100 / 100</div>
+                <div class="inline-block px-4 py-1.5 rounded-full bg-emerald-100 text-emerald-800 font-extrabold text-sm mb-4">
+                    🏅 榮譽勳章：頂尖水質守護小隊長
+                </div>
+                <p id="final-comment" class="text-slate-700 font-medium text-sm sm:text-base leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    太棒了！你成功清空了小溪的垃圾，成為合格的水質守護小隊長！請將今天學到的省水、減污妙招分享給家人吧！
+                </p>
+            </div>
+
+            <button onclick="restartGame()" class="py-4 px-8 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black text-lg shadow-xl hover:shadow-2xl transition transform active:scale-95 flex items-center gap-3">
+                <i class="fa-solid fa-rotate-right text-xl"></i>
+                <span>重新挑戰遊戲</span>
+            </button>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-4 text-center text-xs text-sky-200/70 font-medium">
+        水資源保衛戰 &copy; 國小自然與生活科技教學互動網頁
+    </footer>
+
+    <script>
+        /* Web Audio API Sound Synthesizer */
+        class SoundEffects {
+            constructor() {
+                this.ctx = null;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioContext();
+                }
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            playClick() {
+                this.init();
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.exponentialRampToValueAtTime(800, now + 0.08);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.08);
+            }
+
+            playUnlock() {
+                this.init();
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.exponentialRampToValueAtTime(880, now + 0.25); // A5
+                gain.gain.setValueAtTime(0.25, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.25);
+            }
+
+            playCorrect() {
+                this.init();
+                const now = this.ctx.currentTime;
+                
+                const osc1 = this.ctx.createOscillator();
+                const gain1 = this.ctx.createGain();
+                osc1.type = 'sine';
+                osc1.frequency.setValueAtTime(523.25, now); // C5
+                gain1.gain.setValueAtTime(0.3, now);
+                gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                osc1.connect(gain1);
+                gain1.connect(this.ctx.destination);
+                osc1.start(now);
+                osc1.stop(now + 0.3);
+
+                const osc2 = this.ctx.createOscillator();
+                const gain2 = this.ctx.createGain();
+                osc2.type = 'sine';
+                osc2.frequency.setValueAtTime(659.25, now + 0.12); // E5
+                gain2.gain.setValueAtTime(0.3, now + 0.12);
+                gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
+                osc2.connect(gain2);
+                gain2.connect(this.ctx.destination);
+                osc2.start(now + 0.12);
+                osc2.stop(now + 0.45);
+            }
+
+            playWrong() {
+                this.init();
+                const now = this.ctx.currentTime;
+                
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(160, now);
+                osc.frequency.exponentialRampToValueAtTime(90, now + 0.35);
+                
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.35);
+            }
+
+            playVictory() {
+                this.init();
+                const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                notes.forEach((freq, index) => {
+                    const now = this.ctx.currentTime + index * 0.12;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now);
+                    
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.4);
+                });
+            }
+        }
+
+        const sound = new SoundEffects();
+
+        /* Tutorial Tabs Data */
+        const tutorialData = [
+            {
+                tabLabel: "什麼是水污染？",
+                title: "認識水污染的現象與危害",
+                icon: "fa-triangle-exclamation",
+                content: "水污染是指廢棄物或有害物質進入水體，導致水質惡化。常見的現象包括：溪流發出惡臭、海面浮油、漂浮死魚，甚至自來水變黃變濁。乾淨的水應該透明無味，保護水質是大家的責任！"
+            },
+            {
+                tabLabel: "水污染來源",
+                title: "生活污水是主要的污染來源",
+                icon: "fa-industry",
+                content: "很多人以為大自然的大兇手是工廠，但其實台灣有一半以上的河川污染，是來自我們每天洗碗、洗澡、沖馬桶排出的「家庭生活污水」喔！我們每一個人在日常生活中都能幫忙減少污染。"
+            },
+            {
+                tabLabel: "如何改善？",
+                title: "建設污水處理基礎設施",
+                icon: "fa-gears",
+                content: "最有效率的做法是依靠政府建設「公共污水下水道」與「污水處理廠」，把各家各戶的生活污水集中起來，經過過濾、沉澱與生物分解處理後，再放流回大自然，讓河川恢復生機。"
+            },
+            {
+                tabLabel: "減少生活用水",
+                title: "實踐「一水多用」綠色生活",
+                icon: "fa-faucet-detergent",
+                content: "我們可以實踐「一水多用」！例如用洗米水、洗菜水來澆花或沖馬桶；洗澡時多淋浴、少泡澡，就能一邊節水一邊減少污水排放，輕鬆成為省水達人！"
+            },
+            {
+                tabLabel: "減少生活污水",
+                title: "廢食用油的正確處理法",
+                icon: "fa-dumpster-fire",
+                content: "廚房的廢食用油千萬不能直接倒進水槽（會黏附水管造成堵塞並破壞河川生態）。最好的方法是用舊報紙或廚房紙巾將油污擦拭乾淨，再將紙巾當作一般垃圾丟棄喔！"
+            }
+        ];
+
+        let activeTab = 0;
+        let readTabs = new Set([0]); // Default tab 0 is read
+
+        /* Questions Data */
+        const quizData = [
+            {
+                task: "任務 1：了解水汙染有哪些",
+                question: "以下哪一種現象「不是」生活中常見的水污染表現？",
+                options: [
+                    "(A) 溪流發出惡臭並漂浮死魚",
+                    "(B) 海面出現大片油污",
+                    "(C) 飲用水看起來完全透明清澈且無味",
+                    "(D) 家中自來水流出黃褐色的鐵鏽水"
+                ],
+                answer: 2, // (C)
+                knowledge: "水污染有很多種，包含工業廢水、生活污水、海洋油污等。透明無味通常是乾淨水的特徵，但有些化學污染眼睛看不出來，仍需要經過檢測喔！"
+            },
+            {
+                task: "任務 2：了解造成水汙染的來源",
+                question: "在我們日常生活中，哪一個項目是造成河川水污染比例最高、最主要的來源？",
+                options: [
+                    "(A) 工廠排出的化學廢水",
+                    "(B) 家庭排出的生活污水（如洗碗、洗澡水）",
+                    "(C) 農田流出的肥料與農藥",
+                    "(D) 垃圾掩埋場的滲出水"
+                ],
+                answer: 1, // (B)
+                knowledge: "很多人以為工廠是最大兇手，但其實台灣許多河川的污染主要來自「家庭生活污水」（約佔一半以上），我們每個人都有責任喔！"
+            },
+            {
+                task: "任務 3：了解改善水汙染的方式",
+                question: "為了改善社區與都市的水污染，政府和都市規劃最常建設哪一種基礎設施來集中處理污水？",
+                options: [
+                    "(A) 蓋更多更大的水庫",
+                    "(B) 建設公共污水下水道與污水處理廠",
+                    "(C) 在河邊多種植漂亮的觀賞花卉",
+                    "(D) 把垃圾集中燒掉"
+                ],
+                answer: 1, // (B)
+                knowledge: "建設「污水下水道系統」並送往「污水處理廠」，經過過濾、沉澱、生物處理後再放流，是都市改善水污染最根本、最有效率的方法。"
+            },
+            {
+                task: "任務 4：了解可以如何減少生活用水與汙水",
+                question: "小明想要一邊「節約用水」又同時「減少污水排放」，以下哪一種做法最正確？",
+                options: [
+                    "(A) 洗澡時一律泡澡，洗完水直接倒掉",
+                    "(B) 改用洗碗機時，只洗兩三個碗就開最強模式",
+                    "(C) 用洗米水或洗菜水來澆花、沖馬桶",
+                    "(D) 為了省水，手洗衣服時加入兩倍的洗衣精"
+                ],
+                answer: 2, // (C)
+                knowledge: "一水多用（如洗米水澆花）不僅能大幅減少生活用水，還能減少污水的直接排放，是最棒的綠色生活實踐！"
+            },
+            {
+                task: "任務 5：了解如何減少生活汙水",
+                question: "媽媽在廚房煎完香腸後，鍋子裡剩下一層厚厚的廢食用油。為了減少生活污水對環境的破壞，最好的處理方式是什麼？",
+                options: [
+                    "(A) 趁熱直接倒入廚房水槽，用大量熱水沖走",
+                    "(B) 加入大量漂白水稀釋後倒進馬桶",
+                    "(C) 用舊報紙或廚房紙巾將油吸乾抹淨，再將紙巾當成一般垃圾丟棄（或集中做肥皂）",
+                    "(D) 偷偷倒到家門口的路邊水溝"
+                ],
+                answer: 2, // (C)
+                knowledge: "廢油如果直接倒進水槽，會黏附在水管造成堵塞，進入河川更會形成油膜阻絕空氣，害死水生生物。用紙巾擦拭後當垃圾處理，是保護水質的關鍵小動作！"
+            }
+        ];
+
+        /* Game State */
+        let currentLevel = 0;
+        let score = 0;
+
+        /* Interactive River Simulation Canvas */
+        const canvas = document.getElementById('riverCanvas');
+        const ctx = canvas.getContext('2d');
+        let animationFrameId;
+        let waveOffset = 0;
+
+        let trashItems = [];
+        let fishItems = [];
+        let bubbleItems = [];
+
+        function resizeCanvas() {
+            if (canvas && canvas.parentElement) {
+                canvas.width = canvas.parentElement.clientWidth;
+                canvas.height = canvas.parentElement.clientHeight;
+                initRiverElements();
+            }
+        }
+
+        function initRiverElements() {
+            trashItems = [];
+            const trashCount = Math.max(0, 10 - currentLevel * 2);
+            for (let i = 0; i < trashCount; i++) {
+                trashItems.push({
+                    x: Math.random() * (canvas.width || 800),
+                    y: (canvas.height || 200) * 0.3 + Math.random() * ((canvas.height || 200) * 0.5),
+                    type: ['bottle', 'bag', 'oil', 'wood'][Math.floor(Math.random() * 4)],
+                    size: 15 + Math.random() * 15,
+                    speed: 0.3 + Math.random() * 0.5
+                });
+            }
+
+            fishItems = [];
+            const fishCount = 1 + currentLevel * 2;
+            for (let i = 0; i < fishCount; i++) {
+                fishItems.push({
+                    x: Math.random() * (canvas.width || 800),
+                    y: (canvas.height || 200) * 0.4 + Math.random() * ((canvas.height || 200) * 0.4),
+                    speed: 0.8 + Math.random() * 1.2,
+                    size: 12 + Math.random() * 10,
+                    color: ['#f97316', '#eab308', '#ef4444', '#06b6d4'][i % 4]
+                });
+            }
+
+            bubbleItems = [];
+            const bubbleCount = currentLevel * 4;
+            for (let i = 0; i < bubbleCount; i++) {
+                bubbleItems.push({
+                    x: Math.random() * (canvas.width || 800),
+                    y: Math.random() * (canvas.height || 200),
+                    radius: 2 + Math.random() * 5,
+                    speedY: 0.3 + Math.random() * 0.6
+                });
+            }
+        }
+
+        function drawRiver() {
+            if (!canvas || !ctx) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const progress = currentLevel / 5;
+            
+            const r = Math.round(120 * (1 - progress) + 14 * progress);
+            const g = Math.round(100 * (1 - progress) + 165 * progress);
+            const b = Math.round(70 * (1 - progress) + 233 * progress);
+
+            const riverGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            riverGradient.addColorStop(0, `rgb(${Math.max(0, r-30)}, ${Math.max(0, g-30)}, ${Math.max(0, b-30)})`);
+            riverGradient.addColorStop(1, `rgb(${r}, ${g}, ${b})`);
+            ctx.fillStyle = riverGradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            waveOffset += 0.03;
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height * 0.2);
+            for (let x = 0; x <= canvas.width; x += 20) {
+                const y = Math.sin(x * 0.01 + waveOffset) * 6 + canvas.height * 0.2;
+                ctx.lineTo(x, y);
+            }
+            ctx.lineTo(canvas.width, canvas.height);
+            ctx.lineTo(0, canvas.height);
+            ctx.fill();
+
+            if (currentLevel >= 2) {
+                const plantCount = Math.floor(canvas.width / 40);
+                ctx.strokeStyle = `rgba(16, 185, 129, ${progress})`;
+                ctx.lineWidth = 4;
+                for (let i = 0; i < plantCount; i++) {
+                    const px = i * 40 + 10;
+                    ctx.beginPath();
+                    ctx.moveTo(px, canvas.height);
+                    ctx.quadraticCurveTo(
+                        px + Math.sin(waveOffset + i) * 15, 
+                        canvas.height - 30, 
+                        px + Math.sin(waveOffset + i) * 8, 
+                        canvas.height - 50
+                    );
+                    ctx.stroke();
+                }
+            }
+
+            trashItems.forEach(item => {
+                item.x += item.speed;
+                if (item.x > canvas.width + 20) item.x = -20;
+
+                ctx.save();
+                ctx.translate(item.x, item.y);
+                if (item.type === 'bottle') {
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.fillRect(-6, -10, 12, 20);
+                    ctx.fillStyle = '#ef4444';
+                    ctx.fillRect(-4, -14, 8, 4);
+                } else if (item.type === 'bag') {
+                    ctx.fillStyle = 'rgba(241, 245, 249, 0.7)';
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 10, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (item.type === 'oil') {
+                    ctx.fillStyle = 'rgba(51, 65, 85, 0.6)';
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, 18, 8, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    ctx.fillStyle = '#78350f';
+                    ctx.fillRect(-12, -4, 24, 8);
+                }
+                ctx.restore();
+            });
+
+            fishItems.forEach(fish => {
+                fish.x += fish.speed;
+                if (fish.x > canvas.width + 20) fish.x = -20;
+
+                const swimY = fish.y + Math.sin(waveOffset * 2 + fish.x * 0.05) * 5;
+
+                ctx.save();
+                ctx.translate(fish.x, swimY);
+                ctx.fillStyle = fish.color;
+                
+                ctx.beginPath();
+                ctx.ellipse(0, 0, fish.size, fish.size / 2, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.beginPath();
+                ctx.moveTo(-fish.size, 0);
+                ctx.lineTo(-fish.size - 8, -6);
+                ctx.lineTo(-fish.size - 8, 6);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(fish.size / 2, -2, 2.5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#000000';
+                ctx.beginPath();
+                ctx.arc(fish.size / 2 + 0.5, -2, 1, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.restore();
+            });
+
+            bubbleItems.forEach(b => {
+                b.y -= b.speedY;
+                if (b.y < 0) {
+                    b.y = canvas.height;
+                    b.x = Math.random() * canvas.width;
+                }
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+                ctx.stroke();
+            });
+
+            animationFrameId = requestAnimationFrame(drawRiver);
+        }
+
+        /* Navigation Functions */
+        function goToTutorial() {
+            sound.playClick();
+            document.getElementById('hero-screen').classList.add('hidden');
+            document.getElementById('tutorial-screen').classList.remove('hidden');
+            renderTutorialTabs();
+            updateTabContent();
+        }
+
+        /* Tutorial Tab Management */
+        function renderTutorialTabs() {
+            const container = document.getElementById('tutorial-tabs-header');
+            container.innerHTML = '';
+
+            tutorialData.forEach((item, idx) => {
+                const isRead = readTabs.has(idx);
+                const isActive = activeTab === idx;
+
+                const btn = document.createElement('button');
+                btn.onclick = () => switchTab(idx);
+
+                let baseClass = "p-2 sm:p-3 rounded-2xl flex flex-col items-center text-center transition transform active:scale-95 border-2 ";
+                if (isActive) {
+                    baseClass += "bg-sky-500 text-white border-sky-600 shadow-md scale-102";
+                } else if (isRead) {
+                    baseClass += "bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100";
+                } else {
+                    baseClass += "bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200";
+                }
+
+                btn.className = baseClass;
+                btn.innerHTML = `
+                    <div class="text-base sm:text-lg mb-1">
+                        <i class="fa-solid ${item.icon}"></i>
+                        ${isRead ? '<i class="fa-solid fa-circle-check text-xs ml-0.5 text-emerald-500"></i>' : ''}
+                    </div>
+                    <span class="text-xs font-bold leading-tight hidden sm:block">${item.tabLabel}</span>
+                    <span class="text-[10px] font-bold leading-tight sm:hidden">點${idx+1}</span>
+                `;
+                container.appendChild(btn);
+            });
+        }
+
+        function switchTab(index) {
+            sound.playClick();
+            activeTab = index;
+            readTabs.add(index);
+
+            renderTutorialTabs();
+            updateTabContent();
+            checkTutorialUnlock();
+        }
+
+        function updateTabContent() {
+            const data = tutorialData[activeTab];
+            document.getElementById('tab-badge').innerText = activeTab + 1;
+            document.getElementById('tab-title').innerText = data.title;
+            document.getElementById('tab-content').innerText = data.content;
+            document.getElementById('tab-step-info').innerText = `第 ${activeTab + 1} / 5 項目`;
+            
+            const isRead = readTabs.has(activeTab);
+            document.getElementById('tab-read-status').innerHTML = isRead 
+                ? '<i class="fa-solid fa-check"></i> 已閱讀' 
+                : '未閱讀';
+        }
+
+        function checkTutorialUnlock() {
+            const progressCount = readTabs.size;
+            document.getElementById('unlock-progress-text').innerText = `特訓完成進度：已學習 ${progressCount} / 5 個知識點`;
+
+            const btn = document.getElementById('start-game-btn');
+            const lockIcon = document.getElementById('lock-icon');
+
+            if (progressCount >= 5) {
+                if (btn.disabled) {
+                    sound.playUnlock();
+                }
+                btn.disabled = false;
+                btn.className = "w-full sm:w-auto py-3.5 px-8 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black text-base sm:text-lg shadow-xl hover:shadow-2xl transition transform active:scale-95 flex items-center justify-center gap-2 cursor-pointer animate-bounce";
+                lockIcon.className = "fa-solid fa-unlock text-emerald-500";
+            } else {
+                btn.disabled = true;
+                btn.className = "w-full sm:w-auto py-3.5 px-8 rounded-2xl bg-slate-300 text-slate-500 font-black text-base sm:text-lg cursor-not-allowed transition transform shadow-none flex items-center justify-center gap-2";
+                lockIcon.className = "fa-solid fa-lock text-amber-500";
+            }
+        }
+
+        function startGameFromTutorial() {
+            sound.playClick();
+            document.getElementById('tutorial-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            
+            resizeCanvas();
+            loadLevel();
+        }
+
+        /* Quiz Logic */
+        function loadLevel() {
+            const currentData = quizData[currentLevel];
+            
+            document.getElementById('level-display').innerText = `任務 ${currentLevel + 1}/5`;
+            document.getElementById('score-display').innerText = `${score} 分`;
+            
+            const clarityPercentage = 20 + currentLevel * 16;
+            const finalClarity = currentLevel === 5 ? 100 : clarityPercentage;
+            document.getElementById('clarity-text').innerText = `${finalClarity}%`;
+            document.getElementById('clarity-bar').style.width = `${finalClarity}%`;
+
+            const statusIcon = document.getElementById('status-icon');
+            const statusText = document.getElementById('status-text');
+            if (currentLevel === 0) {
+                statusText.innerText = "警告：溪水高度混濁且含有大量垃圾！";
+                statusIcon.className = "fa-solid fa-triangle-exclamation text-amber-400";
+            } else if (currentLevel < 3) {
+                statusText.innerText = "改善中：污水減量，出現微弱生態！";
+                statusIcon.className = "fa-solid fa-filter text-sky-400";
+            } else if (currentLevel < 5) {
+                statusText.innerText = "良好：溪水逐漸清澈，小魚悠游！";
+                statusIcon.className = "fa-solid fa-fish text-emerald-400";
+            } else {
+                statusText.innerText = "完美：溪水蔚藍透徹，生態全面復甦！";
+                statusIcon.className = "fa-solid fa-sparkles text-amber-300";
+            }
+
+            initRiverElements();
+
+            document.getElementById('task-title').innerText = currentData.task;
+            document.getElementById('question-text').innerText = currentData.question;
+
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+
+            currentData.options.forEach((optText, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-4 rounded-2xl bg-white border-2 border-slate-200 hover:border-sky-400 hover:bg-sky-50/50 font-semibold text-slate-700 transition transform active:scale-98 shadow-sm hover:shadow flex items-start gap-3 group";
+                btn.onclick = () => selectAnswer(idx);
+
+                btn.innerHTML = `
+                    <span class="w-8 h-8 rounded-xl bg-slate-100 group-hover:bg-sky-500 group-hover:text-white text-slate-500 flex items-center justify-center font-bold text-sm shrink-0 transition">
+                        ${String.fromCharCode(65 + idx)}
+                    </span>
+                    <span class="pt-1 text-base leading-snug">${optText.substring(4)}</span>
+                `;
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function selectAnswer(selectedIndex) {
+            const currentData = quizData[currentLevel];
+            const isCorrect = selectedIndex === currentData.answer;
+
+            const modalHeader = document.getElementById('modal-header-bg');
+            const modalIcon = document.getElementById('modal-icon');
+            const modalTitle = document.getElementById('modal-result-title');
+            const modalSub = document.getElementById('modal-result-sub');
+
+            if (isCorrect) {
+                sound.playCorrect();
+                score += 20;
+                modalHeader.className = "absolute top-0 left-0 right-0 h-24 bg-emerald-500 flex items-center justify-center";
+                modalIcon.innerHTML = `<i class="fa-solid fa-check text-emerald-500"></i>`;
+                modalTitle.innerText = "答對了！太棒了！";
+                modalTitle.className = "text-2xl font-black mb-1 text-emerald-600";
+                modalSub.innerText = "守護積分 +20，小溪恢復部分清澈！";
+            } else {
+                sound.playWrong();
+                modalHeader.className = "absolute top-0 left-0 right-0 h-24 bg-rose-500 flex items-center justify-center";
+                modalIcon.innerHTML = `<i class="fa-solid fa-xmark text-rose-500"></i>`;
+                modalTitle.innerText = "可惜答錯囉！";
+                modalTitle.className = "text-2xl font-black mb-1 text-rose-600";
+                modalSub.innerText = "沒關係，仔細閱讀解析，吸收守護新知識！";
+            }
+
+            document.getElementById('modal-knowledge-text').innerText = currentData.knowledge;
+            
+            const modal = document.getElementById('knowledge-modal');
+            modal.classList.remove('hidden');
+        }
+
+        function nextLevel() {
+            document.getElementById('knowledge-modal').classList.add('hidden');
+            currentLevel++;
+
+            if (currentLevel < quizData.length) {
+                loadLevel();
+            } else {
+                showSettlementScreen();
+            }
+        }
+
+        function getSettlementConfig(s) {
+            if (s >= 100) return {
+                title: '大獲全勝！',
+                subtitle: '小溪重獲新生，變得十分湛藍清澈！',
+                stars: 5,
+                badge: '🏅 榮譽勳章：頂尖水質守護小隊長',
+                comment: '太棒了！你成功清空了小溪的垃圾，成為合格的水質守護小隊長！請將今天學到的省水、減污妙招分享給家人吧！',
+                color: 'text-emerald-600',
+                confetti: true
+            };
+            if (s >= 80) return {
+                title: '表現優異！',
+                subtitle: '小溪已經變得相當清澈，魚兒回來了！',
+                stars: 4,
+                badge: '🌟 榮譽勳章：資深水質守護員',
+                comment: '很厲害！答對了 4 題，只差一點就滿分。再複習一下答錯的知識點，下次一定能拿滿分！',
+                color: 'text-sky-600',
+                confetti: true
+            };
+            if (s >= 60) return {
+                title: '還不錯喔！',
+                subtitle: '小溪正逐漸恢復生機，需要你繼續努力！',
+                stars: 3,
+                badge: '💧 榮譽勳章：水質守護新兵',
+                comment: '不錯的開始！答對 3 題，已經掌握了大部分技巧。回到知識補給站複習一下，用水小習慣再加強就能更好！',
+                color: 'text-sky-600',
+                confetti: false
+            };
+            if (s >= 40) return {
+                title: '再接再厲！',
+                subtitle: '小溪稍微變乾淨了，但還有垃圾需要清理！',
+                stars: 2,
+                badge: '🌱 榮譽勳章：見習守護員',
+                comment: '答對 2 題，有進步空間。建議回到知識補給站把 5 個知識點重新看一次，特別留意生活污水和廢油處理喔！',
+                color: 'text-amber-600',
+                confetti: false
+            };
+            if (s >= 20) return {
+                title: '加油，還要努力！',
+                subtitle: '小溪仍然混濁，魚兒還在等待救援。',
+                stars: 1,
+                badge: '📚 榮譽勳章：努力學習中',
+                comment: '答對 1 題，不要氣餒！水污染的知識需要多練習，回到知識補給站逐一閱讀，再挑戰一次一定會進步！',
+                color: 'text-orange-600',
+                confetti: false
+            };
+            return {
+                title: '需要再加把勁！',
+                subtitle: '小溪依然高度混濁，等待你來搶救！',
+                stars: 0,
+                badge: '💪 榮譽勳章：勇敢挑戰者',
+                comment: '這次 0 分沒關係，每個守護者都是從零開始。回到知識補給站把 5 個頁籤都仔細讀完，掌握「一水多用」和「廢油不倒水槽」兩個關鍵，下次再戰！',
+                color: 'text-rose-600',
+                confetti: false
+            };
+        }
+
+        function renderStars(count) {
+            const container = document.getElementById('star-rating');
+            container.innerHTML = '';
+            for (let i = 0; i < 5; i++) {
+                const star = document.createElement('i');
+                star.className = i < count ? 'fa-solid fa-star' : 'fa-regular fa-star text-slate-300';
+                container.appendChild(star);
+            }
+            // 額外：0 顆星時顯示鼓勵文字
+            if (count === 0) {
+                container.innerHTML = '<span class="text-sm text-slate-400 font-bold">還沒有星星，再試一次一定會亮起來！</span>';
+            }
+        }
+
+        function showSettlementScreen() {
+            // 依分數決定是否播放勝利音效
+            const cfg = getSettlementConfig(score);
+            if (cfg.confetti) sound.playVictory();
+
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('settlement-screen').classList.remove('hidden');
+
+            document.getElementById('level-display').innerText = `已完成 5/5`;
+            document.getElementById('score-display').innerText = `${score} 分`;
+            const clarityFinal = score === 0 ? 20 : 20 + Math.round((score/100)*80);
+            document.getElementById('clarity-text').innerText = `${clarityFinal}%`;
+            document.getElementById('clarity-bar').style.width = `${clarityFinal}%`;
+            
+            document.getElementById('final-score').innerText = `${score} / 100`;
+            // 動態更新結算畫面
+            document.querySelector('#settlement-screen h2').innerText = cfg.title;
+            document.querySelector('#settlement-screen h2').className = `text-3xl sm:text-4xl font-black mb-2 ${cfg.color}`;
+            document.querySelector('#settlement-screen h2 + p').innerText = cfg.subtitle;
+            document.querySelector('#settlement-screen .bg-white .inline-block').innerText = cfg.badge;
+            document.getElementById('final-comment').innerText = cfg.comment;
+            renderStars(cfg.stars);
+
+            if (typeof confetti === 'function' && cfg.confetti) {
+                const duration = 3 * 1000;
+                const end = Date.now() + duration;
+
+                (function frame() {
+                    confetti({
+                        particleCount: 5,
+                        angle: 60,
+                        spread: 55,
+                        origin: { x: 0 }
+                    });
+                    confetti({
+                        particleCount: 5,
+                        angle: 120,
+                        spread: 55,
+                        origin: { x: 1 }
+                    });
+
+                    if (Date.now() < end) {
+                        requestAnimationFrame(frame);
+                    }
+                })();
+            }
+        }
+
+        function restartGame() {
+            currentLevel = 0;
+            score = 0;
+            activeTab = 0;
+            readTabs = new Set([0]);
+
+            document.getElementById('settlement-screen').classList.add('hidden');
+            document.getElementById('hero-screen').classList.remove('hidden');
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+
+        window.onload = function() {
+            resizeCanvas();
+            drawRiver();
+        };
+    </script>
+</body>
+</html>
