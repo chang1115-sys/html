@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>國小六上國語 第七課形近字線上測驗</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter & Noto Sans TC -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Noto Sans TC', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#035485',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f8fafc;
+        }
+        .custom-radio:checked + label {
+            border-color: #0284c7;
+            background-color: #f0f9ff;
+            color: #0369a1;
+            font-weight: 700;
+            box-shadow: 0 4px 6px -1px rgba(2, 132, 199, 0.1), 0 2px 4px -1px rgba(2, 132, 199, 0.06);
+        }
+        .custom-radio:checked + label .option-icon {
+            background-color: #0284c7;
+            color: white;
+            border-color: #0284c7;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-slate-800">
+
+    <!-- 頂端標題區 -->
+    <header class="bg-white shadow-sm sticky top-0 z-30 border-b border-slate-100">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-brand-500 text-white flex items-center justify-center font-bold text-xl shadow-md">
+                    <i class="fa-solid fa-pen-nib"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-slate-800">國小六上國語 線上測驗</h1>
+                    <p class="text-xs text-slate-500 font-medium">第七課 形近字字形字義辨析</p>
+                </div>
+            </div>
+            
+            <div id="header-progress" class="w-full sm:w-auto flex items-center gap-3">
+                <div class="text-xs font-bold text-slate-500 min-w-[70px]">進度: <span id="answered-count" class="text-brand-600">0</span>/12</div>
+                <div class="w-full sm:w-36 bg-slate-200 h-2.5 rounded-full overflow-hidden">
+                    <div id="progress-bar" class="bg-brand-500 h-full w-0 transition-all duration-300"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要內容區 -->
+    <main class="flex-grow max-w-4xl w-full mx-auto px-4 py-6 sm:py-8">
+        
+        <!-- 歡迎/說明卡片 -->
+        <div id="welcome-card" class="bg-white rounded-2xl shadow-sm p-6 sm:p-8 mb-6 border border-slate-100">
+            <div class="flex items-start gap-4">
+                <div class="p-3 bg-amber-100 text-amber-600 rounded-xl hidden sm:block">
+                    <i class="fa-solid fa-circle-info text-2xl"></i>
+                </div>
+                <div>
+                    <h2 class="text-lg font-bold text-slate-800 mb-2">測驗說明</h2>
+                    <ul class="text-sm text-slate-600 space-y-1 list-disc list-inside">
+                        <li>本測驗共包含 <span class="font-bold text-brand-600">12 道單選題</span>，每題 8.33 分（總分 100 分）。</li>
+                        <li>請仔細閱讀題目，選出最適合的答案。</li>
+                        <li>完成所有題目後，點擊底部的「提交測驗」即可取得成績！</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 測驗題目表單 -->
+        <form id="quiz-form" onsubmit="handleQuizSubmit(event)">
+            <div id="questions-container" class="space-y-6">
+                <!-- 題目將透過 JS 動態生成 -->
+            </div>
+
+            <!-- 提交按鈕區 -->
+            <div id="submit-section" class="mt-8 text-center bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <div id="unanswered-warning" class="hidden mb-4 text-amber-600 font-bold text-sm bg-amber-50 py-2 px-4 rounded-lg inline-block">
+                    <i class="fa-solid fa-triangle-exclamation mr-1"></i> 您還有未回答的題目，請完成所有題目後再交卷喔！
+                </div>
+                <div>
+                    <button type="submit" id="btn-submit" class="w-full sm:w-auto px-10 py-3.5 bg-brand-500 hover:bg-brand-600 active:bg-brand-700 text-white font-bold rounded-xl shadow-lg shadow-brand-500/30 transition duration-200 text-base flex items-center justify-center gap-2 mx-auto">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        <span>提交測驗交卷</span>
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <!-- 測驗結果頁面 (預設隱藏) -->
+        <div id="result-page" class="hidden">
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden text-center border border-slate-100">
+                <!-- 結果頂端色塊 -->
+                <div id="result-header" class="bg-gradient-to-r from-brand-500 to-brand-600 text-white p-8 sm:p-12 relative overflow-hidden">
+                    <div class="relative z-10">
+                        <div id="result-badge" class="w-20 h-20 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center mx-auto mb-4 border border-white/30 text-4xl">
+                            <i class="fa-solid fa-trophy text-amber-300"></i>
+                        </div>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold mb-1">測驗完成！</h2>
+                        <p id="result-subtitle" class="text-brand-100 text-sm sm:text-base font-medium">這是您的最終成績</p>
+                    </div>
+                </div>
+
+                <!-- 分數展示 -->
+                <div class="p-6 sm:p-10">
+                    <div class="mb-6">
+                        <span class="text-slate-400 text-sm font-bold uppercase tracking-wider block mb-1">總分 / 100 分</span>
+                        <div class="text-6xl sm:text-7xl font-black text-slate-800 tracking-tight" id="final-score">
+                            0
+                        </div>
+                    </div>
+
+                    <!-- 成績詳細數據 -->
+                    <div class="grid grid-cols-2 gap-4 max-w-md mx-auto mb-8">
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                            <span class="text-xs font-bold text-slate-400 block mb-1">答對題數</span>
+                            <span class="text-2xl font-bold text-emerald-600" id="correct-count">0</span>
+                            <span class="text-xs text-slate-400"> / 12 題</span>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                            <span class="text-xs font-bold text-slate-400 block mb-1">答錯題數</span>
+                            <span class="text-2xl font-bold text-rose-500" id="wrong-count">0</span>
+                            <span class="text-xs text-slate-400"> / 12 題</span>
+                        </div>
+                    </div>
+
+                    <!-- 評語卡片 -->
+                    <div id="feedback-card" class="p-4 rounded-xl text-base font-bold mb-8 max-w-md mx-auto bg-slate-100 text-slate-700">
+                        努力學習，再接再厲！
+                    </div>
+
+                    <!-- 重新測驗按鈕 -->
+                    <button onclick="restartQuiz()" class="w-full sm:w-auto px-8 py-3.5 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl shadow-md transition duration-200 inline-flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-rotate-right"></i>
+                        <span>重新測驗 (重新抽題)</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 頁尾區 -->
+    <footer class="bg-white border-t border-slate-200 py-4 mt-auto">
+        <div class="max-w-4xl mx-auto px-4 text-center text-xs text-slate-400">
+            國小六上國語形近字學習測驗系統 &copy; 數位學習輔助工具
+        </div>
+    </footer>
+
+    <!-- 測驗邏輯腳本 -->
+    <script>
+        // 12 組形近字題庫
+        const quizData = [
+            {
+                id: 1,
+                group: "抉 / 決 / 缺 / 快 / 擇",
+                question: "人生常面臨重要的「抉____」，我們必須展現「____斷」力，做出明智的選擇。",
+                options: [
+                    "擇、決",
+                    "擇、缺",
+                    "快、決",
+                    "缺、擇"
+                ],
+                answer: 0
+            },
+            {
+                id: 2,
+                group: "缺 / 快",
+                question: "下列哪一個選項「」中的字使用完全**正確**？",
+                options: [
+                    "這台機器的「快」點是耗電量較大。",
+                    "他在跑道上「快」速奔馳，勇奪第一。",
+                    "這本字典欠「快」很多重要頁數。",
+                    "聽到這個好消息，大家都感到很「缺」樂。"
+                ],
+                answer: 1
+            },
+            {
+                id: 3,
+                group: "擇 / 譯 / 釋",
+                question: "下列詞語與字義的搭配，哪一組是**錯誤**的？",
+                options: [
+                    "「擇」友：選擇朋友",
+                    "「譯」者：從事翻譯工作的人",
+                    "「釋」懷：解釋說明字詞含義",
+                    "「擇」期：挑選合適的日期"
+                ],
+                answer: 2
+            },
+            {
+                id: 4,
+                group: "跆 / 抬 / 治",
+                question: "下列句中的「字形」，哪一個選項填入後最完全**正確**？<br>「他在____拳競賽中獲得金牌，受到大家的____愛與讚賞。」",
+                options: [
+                    "跆、抬",
+                    "抬、跆",
+                    "治、抬",
+                    "跆、治"
+                ],
+                answer: 0
+            },
+            {
+                id: 5,
+                group: "治 / 抽 / 油",
+                question: "小明去醫院接受「____療」，回家時順便到超市買了「醬____」和參加「____獎」活動。請問依序應填入哪些字？",
+                options: [
+                    "治、油、抽",
+                    "抽、油、治",
+                    "治、抽、油",
+                    "油、治、抽"
+                ],
+                answer: 0
+            },
+            {
+                id: 6,
+                group: "蹣 / 滿 / 珊",
+                question: "老爺爺步履「蹣____」，走到花園看著「____開」的花朵，感到意興闌「____」。請問依序應填入哪些字？",
+                options: [
+                    "跚、滿、珊",
+                    "珊、滿、跚",
+                    "滿、跚、珊",
+                    "跚、珊、滿"
+                ],
+                answer: 0
+            },
+            {
+                id: 7,
+                group: "灶 / 社 / 肚 / 吐",
+                question: "下列句中的「」錯別字，哪一個修正後完全**正確**？",
+                options: [
+                    "媽媽在古老的石「杜」上煮飯。 ➔ 改為「灶」",
+                    "他很有「社」量，從不和人計較。 ➔ 改為「吐」",
+                    "我們應該積極參與「灶」區活動。 ➔ 改為「肚」",
+                    "他將內心的不滿傾「肚」出來。 ➔ 改為「社」"
+                ],
+                answer: 0
+            },
+            {
+                id: 8,
+                group: "壤 / 讓",
+                question: "「他們的實力相差極大，簡直有天____之別；但在比賽結束後，兩人依然互相禮____表達敬意。」請問劃線處應填入？",
+                options: [
+                    "壤、讓",
+                    "讓、壤",
+                    "壤、壤",
+                    "讓、讓"
+                ],
+                answer: 0
+            },
+            {
+                id: 9,
+                group: "苞 / 泡 / 跑 / 抱 / 飽",
+                question: "請選出「」中字形使用**錯誤**的句子：",
+                options: [
+                    "這朵玫瑰花含「苞」待放，十分嬌豔。",
+                    "他在這項賽「跑」項目中打破了學校紀錄。",
+                    "吃「飽」喝足後，他高高興興地去「泡」澡。",
+                    "他懷抱著遠大的「飽」負，準備出國留學。"
+                ],
+                answer: 3
+            },
+            {
+                id: 10,
+                group: "芽 / 呀 / 訝",
+                question: "「小明發「____」的豆子發芽了，他發出『唉「____」！真的長出來了！』的驚「____」聲。」請問依序應填入？",
+                options: [
+                    "芽、呀、訝",
+                    "呀、芽、訝",
+                    "訝、呀、芽",
+                    "芽、訝、呀"
+                ],
+                answer: 0
+            },
+            {
+                id: 11,
+                group: "維 / 雅",
+                question: "「這兩位「高____」的學者長期保持聯繫，以此「____繫」彼此深厚的友誼。」請問依序應填入？",
+                options: [
+                    "雅、維",
+                    "維、雅",
+                    "雅、雅",
+                    "維、維"
+                ],
+                answer: 0
+            },
+            {
+                id: 12,
+                group: "牲 / 性 / 姓",
+                question: "下列句中「」內的字，何者使用**完全正確**？",
+                options: [
+                    "他做事很有「姓」格，深受大家喜愛。",
+                    "農夫細心照料農場裡的「牲」口與禽畜。",
+                    "請在表格上寫下您的「性」名與聯絡方式。",
+                    "這家店的商品獲得「性」氏大家族的一致好評。"
+                ],
+                answer: 1
+            }
+        ];
+
+        let currentQuestions = [];
+        let userAnswers = {};
+
+        // 頁面載入後初始化
+        window.onload = function() {
+            initQuiz();
+        };
+
+        // 初始化測驗 (包含洗牌)
+        function initQuiz() {
+            userAnswers = {};
+            // 深拷貝並洗牌題目順序
+            currentQuestions = JSON.parse(JSON.stringify(quizData));
+            shuffleArray(currentQuestions);
+
+            const container = document.getElementById('questions-container');
+            container.innerHTML = '';
+
+            currentQuestions.forEach((q, index) => {
+                const qNum = index + 1;
+                
+                // 建立題目卡片
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-2xl shadow-sm p-5 sm:p-7 border border-slate-100 transition duration-200 hover:shadow-md";
+                card.id = `q-card-${qNum}`;
+
+                let optionsHTML = '';
+                const optionLabels = ['A', 'B', 'C', 'D'];
+
+                q.options.forEach((opt, optIdx) => {
+                    optionsHTML += `
+                        <div class="relative">
+                            <input type="radio" 
+                                   id="q${qNum}_opt${optIdx}" 
+                                   name="question_${qNum}" 
+                                   value="${optIdx}" 
+                                   class="custom-radio sr-only"
+                                   onchange="onSelectOption(${qNum}, ${optIdx})">
+                            <label for="q${qNum}_opt${optIdx}" 
+                                   class="flex items-center gap-3 p-3.5 sm:p-4 rounded-xl border border-slate-200 cursor-pointer transition duration-150 hover:bg-slate-50 text-sm sm:text-base text-slate-700">
+                                <span class="option-icon w-7 h-7 sm:w-8 sm:h-8 rounded-lg border border-slate-300 flex items-center justify-center font-bold text-xs sm:text-sm text-slate-500 shrink-0 transition-colors">
+                                    ${optionLabels[optIdx]}
+                                </span>
+                                <span class="leading-relaxed flex-grow">${opt}</span>
+                            </label>
+                        </div>
+                    `;
+                });
+
+                card.innerHTML = `
+                    <div class="flex items-start justify-between gap-3 mb-4">
+                        <div class="flex items-center gap-2">
+                            <span class="bg-brand-500 text-white font-black text-xs px-2.5 py-1 rounded-lg">第 ${qNum} 題</span>
+                            <span class="text-xs font-semibold text-slate-400 bg-slate-100 px-2 py-1 rounded-md">形近字辨析</span>
+                        </div>
+                    </div>
+                    <h3 class="text-base sm:text-lg font-bold text-slate-800 leading-snug mb-5">
+                        ${q.question}
+                    </h3>
+                    <div class="grid grid-cols-1 gap-3">
+                        ${optionsHTML}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            updateProgress();
+            
+            // 顯示表單，隱藏結果
+            document.getElementById('quiz-form').classList.remove('hidden');
+            document.getElementById('welcome-card').classList.remove('hidden');
+            document.getElementById('header-progress').classList.remove('hidden');
+            document.getElementById('result-page').classList.add('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 選擇答案時的處理
+        function onSelectOption(questionNum, selectedOptionIndex) {
+            userAnswers[questionNum] = selectedOptionIndex;
+            updateProgress();
+            
+            // 隱藏未完成警告
+            const warning = document.getElementById('unanswered-warning');
+            if (Object.keys(userAnswers).length === currentQuestions.length) {
+                warning.classList.add('hidden');
+            }
+        }
+
+        // 更新進度條
+        function updateProgress() {
+            const answeredCount = Object.keys(userAnswers).length;
+            const total = currentQuestions.length;
+            const percentage = (answeredCount / total) * 100;
+
+            document.getElementById('answered-count').innerText = answeredCount;
+            document.getElementById('progress-bar').style.width = `${percentage}%`;
+        }
+
+        // 提交測驗處理
+        function handleQuizSubmit(e) {
+            e.preventDefault();
+
+            const answeredCount = Object.keys(userAnswers).length;
+            const total = currentQuestions.length;
+
+            if (answeredCount < total) {
+                const warning = document.getElementById('unanswered-warning');
+                warning.classList.remove('hidden');
+                
+                // 找出第一題未答並捲動至該處
+                for (let i = 1; i <= total; i++) {
+                    if (userAnswers[i] === undefined) {
+                        const unCard = document.getElementById(`q-card-${i}`);
+                        unCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        unCard.classList.add('ring-2', 'ring-amber-400');
+                        setTimeout(() => unCard.classList.remove('ring-2', 'ring-amber-400'), 2000);
+                        break;
+                    }
+                }
+                return;
+            }
+
+            // 計算得分
+            let correctNum = 0;
+            currentQuestions.forEach((q, index) => {
+                const qNum = index + 1;
+                if (userAnswers[qNum] === q.answer) {
+                    correctNum++;
+                }
+            });
+
+            const wrongNum = total - correctNum;
+            // 滿分 100 分，每題約 8.33 分
+            const score = Math.round((correctNum / total) * 100);
+
+            // 顯示成績結果
+            showResult(score, correctNum, wrongNum);
+        }
+
+        // 顯示結果頁面 (完全隱藏解析)
+        function showResult(score, correctCount, wrongCount) {
+            document.getElementById('quiz-form').classList.add('hidden');
+            document.getElementById('welcome-card').classList.add('hidden');
+            document.getElementById('header-progress').classList.add('hidden');
+
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('correct-count').innerText = correctCount;
+            document.getElementById('wrong-count').innerText = wrongCount;
+
+            const feedbackCard = document.getElementById('feedback-card');
+            const resultBadge = document.getElementById('result-badge');
+            const resultHeader = document.getElementById('result-header');
+
+            if (score === 100) {
+                feedbackCard.className = "p-4 rounded-xl text-base font-bold mb-8 max-w-md mx-auto bg-emerald-100 text-emerald-800 border border-emerald-200";
+                feedbackCard.innerHTML = '<i class="fa-solid fa-star text-amber-500 mr-1"></i> 太棒了！完美滿分！形近字大師就是你！';
+                resultBadge.innerHTML = '<i class="fa-solid fa-trophy text-amber-300"></i>';
+                resultHeader.className = "bg-gradient-to-r from-emerald-500 to-teal-600 text-white p-8 sm:p-12 relative overflow-hidden";
+            } else if (score >= 80) {
+                feedbackCard.className = "p-4 rounded-xl text-base font-bold mb-8 max-w-md mx-auto bg-sky-100 text-sky-800 border border-sky-200";
+                feedbackCard.innerHTML = '<i class="fa-solid fa-thumbs-up text-sky-600 mr-1"></i> 表現非常好！字形掌握得很精準喔！';
+                resultBadge.innerHTML = '<i class="fa-solid fa-medal text-amber-200"></i>';
+                resultHeader.className = "bg-gradient-to-r from-brand-500 to-brand-600 text-white p-8 sm:p-12 relative overflow-hidden";
+            } else if (score >= 60) {
+                feedbackCard.className = "p-4 rounded-xl text-base font-bold mb-8 max-w-md mx-auto bg-amber-100 text-amber-800 border border-amber-200";
+                feedbackCard.innerHTML = '<i class="fa-solid fa-award text-amber-600 mr-1"></i> 及格囉！再稍微複習一下相似字會更厲害！';
+                resultBadge.innerHTML = '<i class="fa-solid fa-award text-amber-300"></i>';
+                resultHeader.className = "bg-gradient-to-r from-amber-500 to-orange-500 text-white p-8 sm:p-12 relative overflow-hidden";
+            } else {
+                feedbackCard.className = "p-4 rounded-xl text-base font-bold mb-8 max-w-md mx-auto bg-rose-100 text-rose-800 border border-rose-200";
+                feedbackCard.innerHTML = '<i class="fa-solid fa-heart-pulse text-rose-500 mr-1"></i> 不要灰心，多看幾次課本形近字，再試一次吧！';
+                resultBadge.innerHTML = '<i class="fa-solid fa-book-open text-white"></i>';
+                resultHeader.className = "bg-gradient-to-r from-slate-600 to-slate-700 text-white p-8 sm:p-12 relative overflow-hidden";
+            }
+
+            const resultPage = document.getElementById('result-page');
+            resultPage.classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 重新測驗
+        function restartQuiz() {
+            initQuiz();
+        }
+
+        // 洗牌演算法 (Fisher-Yates Shuffle)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+    </script>
+</body>
+</html>
