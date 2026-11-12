@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>比和比值互動學習</title>
+<style>
+:root{--bg:#fffaf0;--card:#fff;--text:#2b2b2b;--mute:#6b6b6b;--pri:#e8590c;--pri2:#fff0e6;--ok:#2b8a3e;--bad:#c92a2a;--line:#f0d9c4;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1c1a17;--card:#292622;--text:#f1ece6;--mute:#b0a79c;--pri:#ff922b;--pri2:#3a2e22;--ok:#69db7c;--bad:#ff8787;--line:#4a4137}}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;line-height:1.7;font-size:17px}
+main{max-width:720px;margin:0 auto;padding:16px}
+h1{font-size:1.6rem;margin:8px 0}
+h2{font-size:1.2rem;margin:0 0 8px;color:var(--pri)}
+.card{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:16px;margin:16px 0}
+.mute{color:var(--mute);font-size:.92rem}
+.box{background:var(--pri2);border-radius:12px;padding:10px 14px;margin:10px 0}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.emo{font-size:1.5rem;min-height:2.2rem;word-break:break-all}
+input[type=range]{flex:1;min-width:140px;accent-color:var(--pri)}
+input[type=number]{width:72px;font-size:1.1rem;padding:6px;border:2px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text)}
+button{font:inherit;background:var(--pri);color:#fff;border:0;border-radius:10px;padding:8px 16px;cursor:pointer;margin:4px 4px 4px 0}
+button.alt{background:var(--pri2);color:var(--pri);border:2px solid var(--pri)}
+.opt{display:block;width:100%;text-align:left;background:var(--bg);color:var(--text);border:2px solid var(--line)}
+.opt.right{border-color:var(--ok);background:var(--pri2)}
+.opt.wrong{border-color:var(--bad)}
+.fb{min-height:1.6em;font-weight:700;margin-top:6px}
+.ok{color:var(--ok)}.bad{color:var(--bad)}
+.big{font-size:1.3rem;font-weight:700}
+button.lv{background:var(--pri2);color:var(--pri);border:2px solid var(--pri)}
+button.lv.on{background:var(--pri);color:#fff}
+</style>
+</head>
+<body>
+<main>
+<h1>🍎 比和比值互動學習</h1>
+<p class="mute">六年級數學:一起動手玩玩看吧!</p>
+<section class="card">
+<h2>選擇難度</h2>
+<button class="lv on" id="lv0" onclick="setL(0)">⭐ 基礎</button><button class="lv" id="lv1" onclick="setL(1)">⭐⭐ 進階</button><button class="lv" id="lv2" onclick="setL(2)">⭐⭐⭐ 挑戰</button>
+<div class="mute" id="lvd"></div>
+</section>
+
+<section class="card">
+<h2>① 認識比與比值</h2>
+<p>拖拉滑桿,改變蘋果和橘子的數量。</p>
+<div class="row"><span>🍎 蘋果</span><input type="range" id="a" min="1" max="12" value="3"><b id="av">3</b></div>
+<div class="emo" id="ae"></div>
+<div class="row"><span>🍊 橘子</span><input type="range" id="b" min="1" max="12" value="5"><b id="bv">5</b></div>
+<div class="emo" id="be"></div>
+<div class="box">
+<div>蘋果和橘子的<b>比</b>是 <span class="big" id="r1"></span>(前項是 <span id="f1"></span>,後項是 <span id="k1"></span>)</div>
+<div><b>比值</b> = 前項 ÷ 後項 = <span class="big" id="r2"></span></div>
+</div>
+<p class="mute">想一想:把蘋果和橘子對調,比和比值會一樣嗎?</p>
+</section>
+
+<section class="card">
+<h2>② 化簡比</h2>
+<p>前後項同除以相同的數(不是 0),比值不變。請把下面的比化成最簡單的整數比。</p>
+<div class="box big" id="sq"></div>
+<div class="row"><input type="number" id="s1" min="1"> : <input type="number" id="s2" min="1">
+<button onclick="chkS()">檢查</button><button class="alt" onclick="newS()">換一題</button></div>
+<div class="fb" id="sfb"></div>
+</section>
+
+<section class="card">
+<h2>③ 比例分配</h2>
+<div class="box" id="dq"></div>
+<div class="row"><input type="number" id="d1" min="0"> <span id="du"></span>
+<button onclick="chkD()">檢查</button><button class="alt" onclick="newD()">換一題</button></div>
+<div class="fb" id="dfb"></div>
+</section>
+
+<section class="card">
+<h2>④ 小測驗</h2>
+<div id="quiz"></div>
+<div class="fb big" id="score"></div>
+<button class="alt" onclick="initQ()">重新作答</button>
+</section>
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+const gcd=(x,y)=>y?gcd(y,x%y):x;
+const rnd=(lo,hi)=>lo+Math.floor(Math.random()*(hi-lo+1));
+function fmt(n){return Math.round(n*1000)/1000}
+
+// ① 認識比
+function upd(){
+  const a=+$('a').value,b=+$('b').value;
+  $('av').textContent=a;$('bv').textContent=b;
+  $('ae').textContent='🍎'.repeat(a);$('be').textContent='🍊'.repeat(b);
+  $('r1').textContent=a+' : '+b;$('f1').textContent=a;$('k1').textContent=b;
+  const g=gcd(a,b);
+  let s=a+'/'+b+' = '+fmt(a/b);
+  if(g>1)s+=(' (化簡後 '+a/g+' : '+b/g+',比值不變)');
+  $('r2').textContent=s;
+}
+$('a').oninput=upd;$('b').oninput=upd;upd();
+
+// ② 化簡
+let S;
+function newS(){
+  const g=rnd(2,9);let p,q;
+  do{p=rnd(1,9);q=rnd(1,9)}while(gcd(p,q)!==1||p===q);
+  S={p,q,x:p*g,y:q*g};
+  $('sq').textContent=S.x+' : '+S.y;
+  $('s1').value='';$('s2').value='';$('sfb').textContent='';
+}
+function chkS(){
+  const u=+$('s1').value,v=+$('s2').value,f=$('sfb');
+  if(!u||!v){f.className='fb';f.textContent='請先填入兩個數字。';return}
+  if(u===S.p&&v===S.q){f.className='fb ok';f.textContent='答對了!同除以 '+S.x/S.p+',得到 '+S.p+' : '+S.q+'。'}
+  else if(u*S.y===v*S.x){f.className='fb bad';f.textContent='比值是對的,但還能再化簡喔!試試看同除以更大的數。'}
+  else{f.className='fb bad';f.textContent='再想想:前後項要同除以同一個數。可以先找兩數的最大公因數。'}
+}
+newS();
+
+// ③ 比例分配
+let D;
+function newD(){
+  const items=[['紅筆','藍筆','支'],['男生','女生','人'],['糖果','餅乾','個'],['水','果汁','毫升']];
+  const it=items[rnd(0,items.length-1)];
+  let m,n;do{m=rnd(1,5);n=rnd(1,5)}while(m===n||gcd(m,n)!==1);
+  const k=rnd(2,8)*(it[2]==='毫升'?50:1);
+  const total=(m+n)*k;
+  const askFirst=Math.random()<.5;
+  D={m,n,k,total,ans:(askFirst?m:n)*k};
+  $('dq').innerHTML=it[0]+'和'+it[1]+'的比是 <b>'+m+' : '+n+'</b>,一共有 <b>'+total+' '+it[2]+'</b>。請問<b>'+(askFirst?it[0]:it[1])+'</b>有多少?';
+  $('du').textContent=it[2];$('d1').value='';$('dfb').textContent='';
+}
+function chkD(){
+  const v=+$('d1').value,f=$('dfb');
+  if(!$('d1').value){f.className='fb';f.textContent='請先填入答案。';return}
+  if(v===D.ans){f.className='fb ok';f.textContent='答對了!總份數 '+D.m+'+'+D.n+'='+(D.m+D.n)+' 份,每份 '+D.k+',所以答案是 '+D.ans+'。'}
+  else{f.className='fb bad';f.textContent='提示:先算總共有幾份('+D.m+'+'+D.n+'),再求一份是多少,最後乘上所求的份數。'}
+}
+newD();
+
+// ④ 小測驗
+const Q=[
+ {q:'蘋果 4 顆、橘子 7 顆,蘋果與橘子的比是?',o:['4 : 7','7 : 4','4 : 11','11 : 4'],a:0,e:'「蘋果比橘子」前項是蘋果,所以是 4 : 7。'},
+ {q:'3 : 5 的比值是?',o:['5/3','3/5','3/8','8/5'],a:1,e:'比值 = 前項 ÷ 後項 = 3 ÷ 5 = 3/5。'},
+ {q:'下列哪一個比與 2 : 3 相等?',o:['4 : 5','6 : 9','3 : 2','8 : 10'],a:1,e:'2 : 3 前後項同乘 3,得到 6 : 9。'},
+ {q:'0.5 : 1.5 化成最簡整數比是?',o:['5 : 15','1 : 3','1 : 5','3 : 1'],a:1,e:'同乘 10 得 5 : 15,再同除以 5 得 1 : 3。'},
+ {q:'30 公分與 1 公尺的比,化成最簡整數比是?',o:['30 : 1','1 : 30','3 : 10','10 : 3'],a:2,e:'先換單位:30 : 100,同除以 10 得 3 : 10。'}
+];
+let got=0,done=0;
+function initQ(){
+  got=0;done=0;$('score').textContent='';
+  $('quiz').innerHTML=Q.map((x,i)=>'<div class="box"><div><b>第 '+(i+1)+' 題</b> '+x.q+'</div>'+
+    x.o.map((t,j)=>'<button class="opt" id="o'+i+'_'+j+'" onclick="pick('+i+','+j+')">'+t+'</button>').join('')+
+    '<div class="fb" id="e'+i+'"></div></div>').join('');
+}
+function pick(i,j){
+  if(document.getElementById('e'+i).dataset.d)return;
+  const x=Q[i],e=$('e'+i);e.dataset.d=1;done++;
+  $('o'+i+'_'+x.a).classList.add('right');
+  if(j===x.a){got++;e.className='fb ok';e.textContent='答對了!'+x.e}
+  else{$('o'+i+'_'+j).classList.add('wrong');e.className='fb bad';e.textContent='再想想。'+x.e}
+  if(done===Q.length){$('score').textContent='你答對了 '+got+' / '+Q.length+' 題'+(got===Q.length?' 🎉 太棒了!':' 💪 再練習一次吧!')}
+}
+initQ();
+</script>
+<script>
+let L=0,cq=[];
+const LD=['基礎:小數字,先熟悉比、比值和化簡。','進階:較大的數字和單位換算。','挑戰:小數、分數的比,以及連比、周長等應用。'];
+function setL(i){
+  L=i;[0,1,2].forEach(j=>$('lv'+j).classList.toggle('on',j===i));
+  $('lvd').textContent=LD[i];newS();newD();initQ();
+}
+newS=function(){
+  const g=L===0?rnd(2,5):rnd(2,9);let p,q;
+  const mx=L===0?5:9;
+  do{p=rnd(1,mx);q=rnd(1,mx)}while(gcd(p,q)!==1||p===q);
+  S={p,q,x:p*g,y:q*g,dec:L===2};
+  $('sq').textContent=L===2?fmt(S.x/10)+' : '+fmt(S.y/10):S.x+' : '+S.y;
+  $('s1').value='';$('s2').value='';$('sfb').textContent='';
+};
+chkS=function(){
+  const u=+$('s1').value,v=+$('s2').value,f=$('sfb');
+  if(!u||!v){f.className='fb';f.textContent='請先填入兩個數字。';return}
+  if(u===S.p&&v===S.q){
+    f.className='fb ok';
+    f.textContent=S.dec?'答對了!先同乘 10 變成 '+S.x+' : '+S.y+',再同除以 '+S.x/S.p+',得到 '+S.p+' : '+S.q+'。':'答對了!同除以 '+S.x/S.p+',得到 '+S.p+' : '+S.q+'。';
+  }else if(u*S.y===v*S.x){f.className='fb bad';f.textContent='比值是對的,但還能再化簡喔!'}
+  else{f.className='fb bad';f.textContent=S.dec?'提示:先同乘 10(或 100)把小數變成整數,再找最大公因數。':'再想想:前後項要同除以同一個數。可以先找兩數的最大公因數。'}
+};
+newD=function(){
+  const items=[['紅筆','藍筆','支'],['男生','女生','人'],['糖果','餅乾','個'],['水','果汁','毫升']];
+  const it=items[rnd(0,items.length-1)];
+  const mx=L===0?3:(L===1?5:9);let m,n;
+  do{m=rnd(1,mx);n=rnd(1,mx)}while(m===n||gcd(m,n)!==1);
+  const k=(L===0?rnd(2,5):rnd(2,9))*(it[2]==='毫升'?50:1);
+  const total=(m+n)*k;
+  const t=L===2?rnd(0,2):rnd(0,1);
+  let ask,ans;
+  if(t===0){ask=it[0];ans=m*k}else if(t===1){ask=it[1];ans=n*k}
+  else{ask=null;ans=Math.abs(m-n)*k}
+  D={m,n,k,total,ans};
+  $('dq').innerHTML=it[0]+'和'+it[1]+'的比是 <b>'+m+' : '+n+'</b>,一共有 <b>'+total+' '+it[2]+'</b>。'+(ask?'請問<b>'+ask+'</b>有多少?':'請問<b>'+it[0]+'和'+it[1]+'相差</b>多少?');
+  $('du').textContent=it[2];$('d1').value='';$('dfb').textContent='';
+};
+const QB=[
+[
+{q:'紅球 2 個、藍球 5 個,紅球與藍球的比是?',o:['2 : 5','5 : 2','2 : 7','7 : 2'],e:'「紅球比藍球」前項是紅球,所以是 2 : 5。'},
+{q:'1 : 4 的前項是?',o:['1','4','5','3'],e:'比的寫法是 前項 : 後項,所以前項是 1。'},
+{q:'2 : 5 的比值是?',o:['5/2','2/5','2/7','7/5'],e:'比值 = 2 ÷ 5 = 2/5。'},
+{q:'下列哪個比與 1 : 2 相等?',o:['2 : 4','2 : 3','3 : 5','1 : 3'],e:'1 : 2 前後項同乘 2,得到 2 : 4。'},
+{q:'8 : 12 化成最簡整數比是?',o:['4 : 6','2 : 3','1 : 2','3 : 2'],e:'同除以 4,得到 2 : 3。'},
+{q:'男生 6 人、女生 9 人,男生與女生的比化簡後是?',o:['3 : 2','2 : 3','6 : 9','1 : 3'],e:'6 : 9 同除以 3,得到 2 : 3。'}
+],[
+{q:'蘋果 4 顆、橘子 7 顆,蘋果與橘子的比是?',o:['4 : 7','7 : 4','4 : 11','11 : 4'],e:'「蘋果比橘子」前項是蘋果,所以是 4 : 7。'},
+{q:'3 : 5 的比值是?',o:['5/3','3/5','3/8','8/5'],e:'比值 = 3 ÷ 5 = 3/5。'},
+{q:'下列哪一個比與 2 : 3 相等?',o:['4 : 5','6 : 9','3 : 2','8 : 10'],e:'2 : 3 前後項同乘 3,得到 6 : 9。'},
+{q:'0.5 : 1.5 化成最簡整數比是?',o:['5 : 15','1 : 3','1 : 5','3 : 1'],e:'同乘 10 得 5 : 15,再同除以 5 得 1 : 3。'},
+{q:'30 公分與 1 公尺的比,化成最簡整數比是?',o:['30 : 1','1 : 30','3 : 10','10 : 3'],e:'先換單位:30 : 100,同除以 10 得 3 : 10。'},
+{q:'甲 : 乙 = 3 : 4,甲是 12,乙是多少?',o:['9','16','12','15'],e:'12 ÷ 3 = 4(一份),乙 = 4 × 4 = 16。'}
+],[
+{q:'0.6 : 2.4 化成最簡整數比是?',o:['1 : 4','6 : 24','1 : 3','2 : 5'],e:'同乘 10 得 6 : 24,同除以 6 得 1 : 4。'},
+{q:'1/2 : 1/3 化成最簡整數比是?',o:['1 : 1','2 : 3','3 : 2','1 : 6'],e:'同乘 6(分母的最小公倍數)得 3 : 2。'},
+{q:'25 分鐘與 1 小時的比,比值是?',o:['5/12','25/1','12/5','5/6'],e:'先換單位:25 : 60 = 5 : 12,比值是 5/12。'},
+{q:'糖與水的比是 1 : 9,糖水共 500 克,糖有多少克?',o:['50','55','100','450'],e:'共 10 份,一份 50 克,糖是 1 份 = 50 克。'},
+{q:'甲 : 乙 = 2 : 3,乙 : 丙 = 4 : 5,甲 : 乙 : 丙 = ?',o:['8 : 12 : 15','2 : 3 : 5','2 : 4 : 5','4 : 6 : 5'],e:'乙的 3 和 4 取最小公倍數 12:甲 8、乙 12、丙 15。'},
+{q:'長方形長與寬的比是 5 : 3,周長 64 公分,長是多少公分?',o:['20','12','24','15'],e:'長 + 寬 = 32,共 8 份,一份 4 公分,長 = 5 × 4 = 20。'}
+]];
+initQ=function(){
+  got=0;done=0;$('score').textContent='';
+  cq=QB[L].map(x=>{
+    const arr=x.o.map((t,i)=>({t,c:i===0}));
+    for(let i=arr.length-1;i>0;i--){const j=rnd(0,i);[arr[i],arr[j]]=[arr[j],arr[i]]}
+    return {q:x.q,o:arr.map(z=>z.t),a:arr.findIndex(z=>z.c),e:x.e};
+  });
+  $('quiz').innerHTML=cq.map((x,i)=>'<div class="box"><div><b>第 '+(i+1)+' 題</b> '+x.q+'</div>'+
+    x.o.map((t,j)=>'<button class="opt" id="o'+i+'_'+j+'" onclick="pick('+i+','+j+')">'+t+'</button>').join('')+
+    '<div class="fb" id="e'+i+'"></div></div>').join('');
+};
+pick=function(i,j){
+  const e=$('e'+i);if(e.dataset.d)return;
+  const x=cq[i];e.dataset.d=1;done++;
+  $('o'+i+'_'+x.a).classList.add('right');
+  if(j===x.a){got++;e.className='fb ok';e.textContent='答對了!'+x.e}
+  else{$('o'+i+'_'+j).classList.add('wrong');e.className='fb bad';e.textContent='再想想。'+x.e}
+  if(done===cq.length){$('score').textContent='你答對了 '+got+' / '+cq.length+' 題'+(got===cq.length?' 🎉 太棒了!可以挑戰下一個難度!':' 💪 再練習一次吧!')}
+};
+setL(0);
+</script>
+</body>
+</html>
