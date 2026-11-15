@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>7天野外求生教我的事──閱讀測驗</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Sans TC"', 'Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        forest: {
+                            950: '#111d17',
+                            900: '#1a2e25',
+                            800: '#243e32',
+                            700: '#2f5242',
+                            600: '#3d6955',
+                            100: '#e6efe9',
+                            50: '#f3f7f4',
+                        },
+                        earth: {
+                            50: '#faf8f5',
+                            100: '#f2ede4',
+                            200: '#e5dccb',
+                            300: '#d2c3a8',
+                            600: '#8c7355',
+                            800: '#594733',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #f2ede4;
+            color: #1a2e25;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .option-card {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .option-card:active {
+            transform: scale(0.995);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-forest-700 selection:text-white">
+
+    <!-- 頂部固定導覽與作答進度列 -->
+    <header class="sticky top-0 z-30 bg-forest-900/95 backdrop-blur-md text-earth-50 shadow-md border-b border-forest-800">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-2.5 min-w-0">
+                <!-- 山岳 SVG 圖示 -->
+                <div class="w-8 h-8 rounded-lg bg-forest-700 flex items-center justify-center shrink-0 border border-forest-600">
+                    <svg class="w-5 h-5 text-earth-100" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 20h18L14.5 7.5 11 13l-2.5-3.5L3 20z" />
+                    </svg>
+                </div>
+                <h1 class="text-sm sm:text-base font-bold tracking-wide truncate">
+                    7天野外求生教我的事｜閱讀測驗
+                </h1>
+            </div>
+
+            <!-- 進度指示器 -->
+            <div id="progress-badge" class="flex items-center gap-2.5 shrink-0 bg-forest-950/60 px-3 py-1.5 rounded-full border border-forest-700/60">
+                <span class="text-xs text-earth-200 font-medium">已作答</span>
+                <span id="progress-text" class="text-xs sm:text-sm font-bold text-white tabular-nums">0 / 8 題</span>
+            </div>
+        </div>
+        <!-- 細長進度條 -->
+        <div class="w-full h-1 bg-forest-950">
+            <div id="progress-bar" class="h-full bg-earth-300 transition-all duration-300 ease-out" style="width: 0%"></div>
+        </div>
+    </header>
+
+    <!-- 主內容區 -->
+    <main class="flex-grow max-w-3xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-10">
+        
+        <!-- 測驗作答視圖 -->
+        <div id="quiz-view" class="space-y-6">
+            <!-- 測驗標題卡片 -->
+            <section class="bg-forest-900 text-earth-50 rounded-2xl p-6 sm:p-8 shadow-lg relative overflow-hidden">
+                <div class="relative z-10">
+                    <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold tracking-wider bg-forest-800 text-earth-200 border border-forest-700 mb-3">
+                        登山安全與野外求生
+                    </span>
+                    <h2 class="text-xl sm:text-2xl font-bold leading-snug mb-2">
+                        《7天野外求生教我的事──百岳老手的山難生還》
+                    </h2>
+                    <p class="text-sm text-earth-200/90 leading-relaxed">
+                        全卷共 8 題單選題，每題 12.5 分，滿分 100 分。請依據報導內容選出最適當的答案，全部作答完成後點擊下方按鈕交卷計分。
+                    </p>
+                </div>
+                <!-- 背景裝飾山稜線 -->
+                <svg class="absolute right-0 bottom-0 w-48 h-32 text-forest-800/40 pointer-events-none" viewBox="0 0 200 120" fill="currentColor">
+                    <path d="M0 120 L65 35 L110 85 L155 20 L200 120 Z" />
+                </svg>
+            </section>
+
+            <!-- 題目容器 -->
+            <div id="questions-container" class="space-y-5"></div>
+
+            <!-- 提醒訊息框（取代 alert） -->
+            <div id="warning-box" class="hidden rounded-xl bg-amber-900/10 border border-amber-800/30 text-amber-950 px-4 py-3.5 text-sm flex items-center justify-between gap-3">
+                <div class="flex items-center gap-2.5">
+                    <svg class="w-5 h-5 text-amber-800 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                    </svg>
+                    <span id="warning-text" class="font-medium">尚有題目未作答，請完成所有題目後再交卷。</span>
+                </div>
+                <button type="button" id="jump-unanswered-btn" class="text-xs font-bold underline text-amber-900 hover:text-amber-700 shrink-0 cursor-pointer">
+                    前往未答題目
+                </button>
+            </div>
+
+            <!-- 交卷按鈕區 -->
+            <div class="pt-4 pb-8 flex flex-col items-center">
+                <button type="button" id="submit-btn"
+                    class="w-full sm:w-auto min-w-[240px] px-8 py-4 rounded-xl bg-forest-800 hover:bg-forest-700 active:bg-forest-900 text-white font-bold text-base tracking-wide shadow-md hover:shadow-lg transition-all cursor-pointer flex items-center justify-center gap-2">
+                    <span>交卷計分</span>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- 測驗結果視圖（僅顯示總分、答對題數與重新測驗按鈕） -->
+        <div id="result-view" class="hidden">
+            <div class="bg-earth-50 rounded-2xl border border-earth-200 shadow-xl p-8 sm:p-12 text-center max-w-xl mx-auto mt-4">
+                <div class="w-16 h-16 rounded-2xl bg-forest-100 text-forest-800 mx-auto flex items-center justify-center mb-6 border border-forest-700/20">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                    </svg>
+                </div>
+
+                <p class="text-sm font-semibold tracking-widest text-earth-600 uppercase mb-2">
+                    測驗成績結算
+                </p>
+
+                <!-- 總分顯示 -->
+                <div class="my-6 py-6 px-4 rounded-2xl bg-forest-900 text-earth-50 shadow-inner">
+                    <div class="text-xs text-earth-200 mb-1">總分（滿分 100 分）</div>
+                    <div class="flex items-baseline justify-center gap-1.5">
+                        <span id="final-score" class="text-5xl sm:text-6xl font-bold tracking-tight tabular-nums text-white">0</span>
+                        <span class="text-lg font-medium text-earth-200">分</span>
+                    </div>
+                </div>
+
+                <!-- 答對題數統計 -->
+                <div class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-earth-100 border border-earth-200 text-forest-900 font-semibold text-base mb-8">
+                    <span>答對題數：</span>
+                    <span id="correct-count" class="font-bold text-forest-800 tabular-nums">0 / 8 題</span>
+                </div>
+
+                <div>
+                    <button type="button" id="restart-btn"
+                        class="w-full sm:w-auto min-w-[220px] px-8 py-3.5 rounded-xl bg-forest-800 hover:bg-forest-700 active:bg-forest-900 text-white font-bold text-base shadow-md transition-all cursor-pointer inline-flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        <span>重新測驗</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="py-6 text-center text-xs text-earth-600">
+        閱讀測驗素材取材自《報導者》〈7天野外求生教我的事──百岳老手的山難生還〉
+    </footer>
+
+    <script>
+        // 原始題庫資料（每題 12.5 分，共 8 題）
+        const RAW_QUESTIONS = [
+            {
+                id: 1,
+                question: "根據報導內容，何先生在朋珂斷橋附近迷路的主要地理環境原因為何？",
+                options: [
+                    { text: "原本的古道已經崩塌，他未順著河床繞道而誤上緩坡路徑。", isCorrect: true },
+                    { text: "他為了尋找水源而刻意離開主線，結果在濃霧中失去方向感。", isCorrect: false },
+                    { text: "古道上的指示牌被颱風吹毀，導致他在三叉路口選錯方向。", isCorrect: false },
+                    { text: "為了躲避野生動物的追趕，他偏離步道跑進了濃密的箭竹林。", isCorrect: false }
+                ]
+            },
+            {
+                id: 2,
+                question: "何先生在確認自己迷路且面對上方破碎峭壁時，採取了哪一項關鍵的決策順序？",
+                options: [
+                    { text: "先放下背包席地而坐冷靜評估機率，決定向上尋找通訊點待援。", isCorrect: true },
+                    { text: "趁著天色未暗加快腳步下切溪谷，希望能沿著水路走回登山口。", isCorrect: false },
+                    { text: "立刻攀爬眼前的破碎峭壁，試圖翻越稜線接回原本的八通關古道。", isCorrect: false },
+                    { text: "原地生起營火製造濃煙，並大聲呼救直到耗盡體力為止。", isCorrect: false }
+                ]
+            },
+            {
+                id: 3,
+                question: "除了本身的野外求生技巧外，何先生在出發前做的哪一項準備，成為他受困時能保持冷靜並獲救的重要基礎？",
+                options: [
+                    { text: "事前列出詳細裝備清單與行程表，並留一份給家人掌握狀況。", isCorrect: true },
+                    { text: "在出發前一個月每天進行高強度負重訓練，並預先在沿途藏好糧食。", isCorrect: false },
+                    { text: "攜帶了兩支不同電信業者的衛星電話，確保在山谷也能隨時通話。", isCorrect: false },
+                    { text: "事先向當地原住民獵人請教該路段的地形，並約定好每日報平安時間。", isCorrect: false }
+                ]
+            },
+            {
+                id: 4,
+                question: "在失去對外通訊的7天求生過程中，何先生紀錄自身狀況的方式經歷了怎樣的轉變？",
+                options: [
+                    { text: "從最初的文字紀錄，改為使用錄音，最後轉為直接錄影紀錄。", isCorrect: true },
+                    { text: "從手機錄影開始，為了節省電池電量而逐步改為錄音與紙筆書寫。", isCorrect: false },
+                    { text: "全程僅使用隨身攜帶的防水筆記本手寫遺書與求生日記。", isCorrect: false },
+                    { text: "利用相機定時自拍記錄體重變化，並將路線圖刻在樹幹上。", isCorrect: false }
+                ]
+            },
+            {
+                id: 5,
+                question: "事後檢討這起山難發生的根本原因時，何先生與原訂領隊賴小銘各自指出了什麼關鍵疏失？",
+                options: [
+                    { text: "何先生自省打破未走過路線應跟團的原則；領隊指出他未帶可用衛星電話。", isCorrect: true },
+                    { text: "何先生認為自己糧食帶得不夠多；領隊則批評他沒有在出發前申請入山證。", isCorrect: false },
+                    { text: "何先生自責體能訓練不足；領隊認為他在迷路當下不該留下樹枝記號。", isCorrect: false },
+                    { text: "兩人一致認為是國家公園管理處未及時修復斷橋才導致意外發生。", isCorrect: false }
+                ]
+            },
+            {
+                id: 6,
+                question: "獲救返家後，這場山難在何先生的身心層面留下了什麼影響與心理糾結？",
+                options: [
+                    { text: "出現創傷後壓力反應，且不斷自我懷疑當時原地待援是否算是一種「擺爛」。", isCorrect: true },
+                    { text: "因為體重驟降8公斤導致身體機能嚴重受損，從此無法再進行任何戶外活動。", isCorrect: false },
+                    { text: "對搜救隊的救援速度感到不滿，並與原本取消出團的隊友徹底決裂。", isCorrect: false },
+                    { text: "認為自己既然能獨自生還7天，反而變得更加自信並熱衷於挑戰冬季獨攀。", isCorrect: false }
+                ]
+            },
+            {
+                id: 7,
+                question: "山難兩年後，何先生與隊友重返八通關古道進行「畢業旅行」，這趟行程包含了哪些具體目的？",
+                options: [
+                    { text: "修復心理創傷、撿回當年遺留的垃圾，並在迷路地段綁上警示布條。", isCorrect: true },
+                    { text: "測試新購買的衛星電話訊號，並重新挑戰在7天內完成全段單人速攀。", isCorrect: false },
+                    { text: "帶領「登山借問站」的社團成員進行野外求生實地演練與體能測驗。", isCorrect: false },
+                    { text: "尋找當年遺失在峭壁上的登山裝備，並拍攝山難紀錄片以警世人。", isCorrect: false }
+                ]
+            },
+            {
+                id: 8,
+                question: "針對山區常見的「指引布條」存廢爭議，何先生以山難生還者的經驗提出了什麼主張？",
+                options: [
+                    { text: "不應以環保為由全數拆除，因為布條能有效降低迷途機率並減少搜救資源耗費。", isCorrect: true },
+                    { text: "贊成全面拆除所有布條以維護山林原貌，登山者應完全依賴GPS導航。", isCorrect: false },
+                    { text: "建議將所有布條統一更換為太陽能LED警示燈，以提升夜間辨識度。", isCorrect: false },
+                    { text: "認為只有百岳路線才需要保留布條，一般古道與中級山則應全數清除。", isCorrect: false }
+                ]
+            }
+        ];
+
+        const OPTION_LABELS = ['A', 'B', 'C', 'D'];
+        let currentQuestions = [];
+        let userAnswers = {}; // key: questionId, value: shuffled option index
+
+        // Fisher-Yates 洗牌演算法
+        function shuffleArray(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        // 初始化測驗狀態並打亂選項
+        function initQuiz() {
+            userAnswers = {};
+            currentQuestions = RAW_QUESTIONS.map(q => ({
+                ...q,
+                shuffledOptions: shuffleArray(q.options)
+            }));
+
+            renderQuestions();
+            updateProgress();
+
+            document.getElementById('warning-box').classList.add('hidden');
+            document.getElementById('result-view').classList.add('hidden');
+            document.getElementById('quiz-view').classList.remove('hidden');
+            document.getElementById('progress-badge').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 渲染所有題目卡片
+        function renderQuestions() {
+            const container = document.getElementById('questions-container');
+            container.innerHTML = '';
+
+            currentQuestions.forEach((q, qIdx) => {
+                const card = document.createElement('article');
+                card.id = `question-card-${q.id}`;
+                card.className = 'bg-earth-50 rounded-2xl border border-earth-200 p-5 sm:p-7 shadow-sm transition-all';
+
+                const headerHtml = `
+                    <div class="flex items-start gap-3.5 mb-5">
+                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-forest-800 text-earth-50 font-bold text-sm shrink-0 mt-0.5">
+                            ${qIdx + 1}
+                        </span>
+                        <h3 class="text-base sm:text-lg font-bold text-forest-950 leading-relaxed">
+                            ${q.question}
+                        </h3>
+                    </div>
+                `;
+
+                const optionsWrapper = document.createElement('div');
+                optionsWrapper.className = 'space-y-2.5 sm:pl-11';
+
+                q.shuffledOptions.forEach((opt, optIdx) => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.dataset.qid = q.id;
+                    btn.dataset.optIdx = optIdx;
+                    btn.className = 'option-card w-full text-left p-3.5 sm:p-4 rounded-xl border border-earth-200 bg-white hover:border-forest-600 hover:bg-forest-50/60 flex items-start gap-3 cursor-pointer group';
+
+                    btn.innerHTML = `
+                        <span class="opt-badge w-6 h-6 rounded-full border border-earth-300 text-earth-800 group-hover:border-forest-700 group-hover:text-forest-800 text-xs font-bold flex items-center justify-center shrink-0 mt-0.5 transition-colors">
+                            ${OPTION_LABELS[optIdx]}
+                        </span>
+                        <span class="text-sm sm:text-base text-forest-900 leading-relaxed">
+                            ${opt.text}
+                        </span>
+                    `;
+
+                    btn.addEventListener('click', () => handleSelectOption(q.id, optIdx));
+                    optionsWrapper.appendChild(btn);
+                });
+
+                card.innerHTML = headerHtml;
+                card.appendChild(optionsWrapper);
+                container.appendChild(card);
+            });
+        }
+
+        // 處理選項點擊（僅更新選取外觀，不顯示對錯或提示）
+        function handleSelectOption(questionId, selectedIdx) {
+            userAnswers[questionId] = selectedIdx;
+
+            const card = document.getElementById(`question-card-${questionId}`);
+            card.classList.remove('ring-2', 'ring-amber-600/60');
+
+            const optionButtons = card.querySelectorAll('.option-card');
+            optionButtons.forEach((btn, idx) => {
+                const badge = btn.querySelector('.opt-badge');
+                if (idx === selectedIdx) {
+                    btn.classList.remove('bg-white', 'border-earth-200', 'hover:bg-forest-50/60');
+                    btn.classList.add('bg-forest-100/80', 'border-forest-700', 'ring-1', 'ring-forest-700');
+                    badge.classList.remove('border-earth-300', 'text-earth-800');
+                    badge.classList.add('bg-forest-800', 'border-forest-800', 'text-white');
+                } else {
+                    btn.classList.add('bg-white', 'border-earth-200', 'hover:bg-forest-50/60');
+                    btn.classList.remove('bg-forest-100/80', 'border-forest-700', 'ring-1', 'ring-forest-700');
+                    badge.classList.add('border-earth-300', 'text-earth-800');
+                    badge.classList.remove('bg-forest-800', 'border-forest-800', 'text-white');
+                }
+            });
+
+            updateProgress();
+
+            // 若所有題目都已作答，隱藏未作答提醒框
+            if (Object.keys(userAnswers).length === currentQuestions.length) {
+                document.getElementById('warning-box').classList.add('hidden');
+            }
+        }
+
+        // 更新頂部進度條與文字
+        function updateProgress() {
+            const answeredCount = Object.keys(userAnswers).length;
+            const total = currentQuestions.length;
+            const percent = (answeredCount / total) * 100;
+
+            document.getElementById('progress-text').textContent = `${answeredCount} / ${total} 題`;
+            document.getElementById('progress-bar').style.width = `${percent}%`;
+        }
+
+        // 交卷與計分邏輯
+        function handleSubmit() {
+            const unanswered = currentQuestions.filter(q => userAnswers[q.id] === undefined);
+
+            if (unanswered.length > 0) {
+                const warningBox = document.getElementById('warning-box');
+                const warningText = document.getElementById('warning-text');
+                warningText.textContent = `尚有 ${unanswered.length} 題未作答，請完成所有題目後再交卷。`;
+                warningBox.classList.remove('hidden');
+
+                // 標示未作答卡片外框
+                unanswered.forEach(q => {
+                    const card = document.getElementById(`question-card-${q.id}`);
+                    card.classList.add('ring-2', 'ring-amber-600/60');
+                });
+                return;
+            }
+
+            // 計算答對題數與總分（每題 12.5 分）
+            let correctCount = 0;
+            currentQuestions.forEach(q => {
+                const chosenIdx = userAnswers[q.id];
+                if (q.shuffledOptions[chosenIdx]?.isCorrect) {
+                    correctCount++;
+                }
+            });
+
+            const totalScore = correctCount * 12.5;
+            // 若為整數則顯示整數，若有 .5 則顯示至小數點後一位
+            const formattedScore = Number.isInteger(totalScore) ? totalScore.toString() : totalScore.toFixed(1);
+
+            document.getElementById('final-score').textContent = formattedScore;
+            document.getElementById('correct-count').textContent = `${correctCount} / ${currentQuestions.length} 題`;
+
+            // 切換至結果畫面
+            document.getElementById('quiz-view').classList.add('hidden');
+            document.getElementById('progress-badge').classList.add('hidden');
+            document.getElementById('result-view').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 捲動至第一題未作答題目
+        function jumpToFirstUnanswered() {
+            const firstUnanswered = currentQuestions.find(q => userAnswers[q.id] === undefined);
+            if (firstUnanswered) {
+                const card = document.getElementById(`question-card-${firstUnanswered.id}`);
+                const headerOffset = 80;
+                const elementPosition = card.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.scrollY - headerOffset;
+                window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+            }
+        }
+
+        // 綁定事件
+        document.getElementById('submit-btn').addEventListener('click', handleSubmit);
+        document.getElementById('restart-btn').addEventListener('click', initQuiz);
+        document.getElementById('jump-unanswered-btn').addEventListener('click', jumpToFirstUnanswered);
+
+        // 啟動測驗
+        window.addEventListener('DOMContentLoaded', initQuiz);
+    </script>
+</body>
+</html>
