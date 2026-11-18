@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>國語形近字測驗卷｜線上互動練習</title>
+  <!-- 載入 Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- 載入 Google Fonts: Noto Serif TC (書卷風標題) 與 Noto Sans TC (清晰內文與注音) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700;900&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            paper: '#FAF7F0',       // 宣紙米白背景
+            card: '#FFFFFF',        // 試卷卡片純白
+            ink: '#26231F',         // 深墨色主文字
+            inkLight: '#5C554C',    // 淡墨色輔助文字
+            cinnabar: '#B83B2A',    // 朱紅色印章強調色
+            cinnabarLight: '#FDF2F0',
+            indigoInk: '#2B4C65',   // 靛藍色強調色
+            indigoLight: '#EFF5F9',
+            bamboo: '#2E6F40',      // 竹青色（答對狀態）
+            bambooLight: '#EEF7F0',
+            borderPaper: '#E6DFD3', // 紙張邊框線
+          },
+          fontFamily: {
+            serif: ['"Noto Serif TC"', 'serif'],
+            sans: ['"Noto Sans TC"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* 細膩紙張紋理與基礎樣式 */
+    body {
+      background-color: #FAF7F0;
+      background-image: radial-gradient(#E6DFD3 0.75px, transparent 0.75px);
+      background-size: 20px 20px;
+      color: #26231F;
+      font-family: "Noto Sans TC", sans-serif;
+    }
+    
+    /* 確保注音符號清晰易讀 */
+    .bopomofo-text {
+      letter-spacing: 0.04em;
+      line-height: 1.75;
+    }
+
+    /* 平滑捲動 */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* 印章效果 */
+    .seal-badge {
+      border: 2px solid #B83B2A;
+      color: #B83B2A;
+      transform: rotate(-4deg);
+      box-shadow: inset 0 0 0 1px rgba(184, 59, 42, 0.2);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-indigoInk selection:text-white">
+
+  <!-- 頂部固定狀態列 (進度與模式控制) -->
+  <header class="sticky top-0 z-30 bg-paper/95 backdrop-blur-md border-b border-borderPaper shadow-sm">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 py-3">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <!-- 標題與徽章 -->
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-lg bg-indigoInk text-white flex items-center justify-center font-serif font-bold text-lg shadow-sm">
+            語
+          </div>
+          <div>
+            <h1 class="font-serif font-bold text-lg sm:text-xl text-ink tracking-wide">
+              國語形近字測驗卷
+            </h1>
+            <p class="text-xs text-inkLight hidden sm:block">
+              共 12 題單選題・滿分 100 分
+            </p>
+          </div>
+        </div>
+
+        <!-- 進度統計與檢視切換 -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          <!-- 作答進度膠囊 -->
+          <div id="progress-pill" class="px-3 py-1.5 rounded-full bg-white border border-borderPaper text-xs sm:text-sm font-medium text-ink shadow-2xs flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-indigoInk inline-block"></span>
+            <span>已作答：<strong id="answered-count" class="text-indigoInk">0</strong> / 12 題</span>
+          </div>
+
+          <!-- 模式切換按鈕 (作答中顯示) -->
+          <div id="view-toggle-group" class="inline-flex rounded-xl bg-white p-1 border border-borderPaper shadow-2xs">
+            <button type="button" id="btn-mode-all" onclick="setViewMode('all')"
+              class="px-2.5 py-1 text-xs sm:text-sm font-medium rounded-lg transition-all bg-indigoInk text-white">
+              一頁瀏覽
+            </button>
+            <button type="button" id="btn-mode-single" onclick="setViewMode('single')"
+              class="px-2.5 py-1 text-xs sm:text-sm font-medium rounded-lg transition-all text-inkLight hover:text-ink">
+              逐題作答
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 進度條 -->
+      <div class="w-full h-1.5 bg-borderPaper/70 rounded-full overflow-hidden mt-2.5">
+        <div id="progress-bar" class="h-full bg-indigoInk transition-all duration-300 ease-out rounded-full" style="width: 0%;"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主要內容區 -->
+  <main class="flex-grow max-w-4xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8">
+
+    <!-- 測驗說明卡片 (作答中顯示) -->
+    <div id="exam-intro-banner" class="mb-6 bg-white rounded-2xl border border-borderPaper p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div class="space-y-1">
+        <div class="inline-flex items-center gap-2 text-xs font-bold tracking-wider uppercase text-cinnabar bg-cinnabarLight px-2.5 py-0.5 rounded-md">
+          測驗規則
+        </div>
+        <p class="text-sm sm:text-base text-ink leading-relaxed">
+          本測驗共 <strong>12 題</strong>（第 1～8 題每題 8 分，第 9～12 題每題 9 分，總分 100 分）。作答過程中不提供提示，請仔細辨別字形與讀音。
+        </p>
+      </div>
+      <!-- 題號快速導覽列 -->
+      <div class="flex flex-wrap gap-1.5 sm:max-w-[260px] justify-start sm:justify-end" id="quick-nav-dots">
+        <!-- 由 JS 動態生成 1~12 題號按鈕 -->
+      </div>
+    </div>
+
+    <!-- 交卷成績總結面板 (交卷後顯示) -->
+    <section id="result-summary" class="hidden mb-8 bg-white rounded-2xl border-2 border-indigoInk/20 p-6 sm:p-8 shadow-md relative overflow-hidden">
+      <!-- 裝飾角落 -->
+      <div class="absolute top-0 right-0 w-32 h-32 bg-indigoLight/50 rounded-bl-full -z-0"></div>
+
+      <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="text-center md:text-left space-y-2 flex-1">
+          <div class="inline-block px-3 py-1 rounded-full bg-indigoLight text-indigoInk text-xs font-bold tracking-wider">
+            測驗批改完成
+          </div>
+          <h2 id="result-comment-title" class="font-serif text-2xl sm:text-3xl font-bold text-ink">
+            表現優異！
+          </h2>
+          <p id="result-comment-desc" class="text-sm sm:text-base text-inkLight leading-relaxed">
+            你對形近字的辨析相當敏銳，繼續保持這份細心！
+          </p>
+
+          <!-- 統計小卡 -->
+          <div class="pt-3 flex flex-wrap items-center justify-center md:justify-start gap-3">
+            <div class="px-4 py-2 rounded-xl bg-bambooLight border border-bamboo/20 text-bamboo text-sm font-medium">
+              答對：<strong id="stat-correct" class="text-lg font-bold">0</strong> 題
+            </div>
+            <div class="px-4 py-2 rounded-xl bg-cinnabarLight border border-cinnabar/20 text-cinnabar text-sm font-medium">
+              答錯：<strong id="stat-wrong" class="text-lg font-bold">0</strong> 題
+            </div>
+          </div>
+        </div>
+
+        <!-- 分數印章區塊 -->
+        <div class="flex flex-col items-center justify-center bg-paper border border-borderPaper rounded-2xl px-8 py-5 min-w-[180px] shadow-inner">
+          <span class="text-xs font-bold tracking-widest text-inkLight uppercase mb-1">總得分</span>
+          <div class="flex items-baseline gap-1">
+            <span id="final-score" class="font-serif text-5xl sm:text-6xl font-black text-cinnabar">0</span>
+            <span class="text-base font-bold text-inkLight">/ 100</span>
+          </div>
+          <div id="score-grade-stamp" class="mt-2 px-2.5 py-0.5 text-xs font-serif font-bold rounded seal-badge">
+            甲上
+          </div>
+        </div>
+      </div>
+
+      <!-- 重新測驗控制列 -->
+      <div class="relative z-10 mt-6 pt-5 border-t border-borderPaper flex flex-wrap items-center justify-between gap-3">
+        <label class="inline-flex items-center gap-2 text-sm text-ink cursor-pointer select-none">
+          <input type="checkbox" id="shuffle-checkbox" class="w-4 h-4 rounded text-indigoInk focus:ring-indigoInk border-borderPaper">
+          <span>重新測驗時隨機打亂題目順序</span>
+        </label>
+
+        <div class="flex flex-wrap items-center gap-2.5">
+          <button type="button" onclick="scrollToFirstWrong()" id="btn-jump-wrong"
+            class="hidden px-4 py-2.5 rounded-xl border border-cinnabar text-cinnabar hover:bg-cinnabarLight font-medium text-sm transition-colors">
+            檢視錯題解析
+          </button>
+          <button type="button" onclick="resetQuiz()"
+            class="px-5 py-2.5 rounded-xl bg-indigoInk hover:bg-indigoInk/90 text-white font-medium text-sm shadow-sm transition-all flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            重新測驗
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 題目容器 -->
+    <div id="questions-container" class="space-y-5">
+      <!-- 由 JavaScript 動態渲染題目卡片 -->
+    </div>
+
+    <!-- 逐題作答模式的上下題控制列 -->
+    <div id="single-mode-controls" class="hidden mt-6 flex items-center justify-between gap-4">
+      <button type="button" id="btn-prev-q" onclick="navigateSingle(-1)"
+        class="px-5 py-3 rounded-xl bg-white border border-borderPaper text-ink hover:bg-paper font-medium text-sm shadow-2xs disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1.5">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        上一題
+      </button>
+
+      <span id="single-page-indicator" class="text-sm font-medium text-inkLight">
+        第 1 題 / 共 12 題
+      </span>
+
+      <button type="button" id="btn-next-q" onclick="navigateSingle(1)"
+        class="px-5 py-3 rounded-xl bg-white border border-borderPaper text-ink hover:bg-paper font-medium text-sm shadow-2xs disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1.5">
+        下一題
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+
+    <!-- 底部交卷區塊 (作答中顯示) -->
+    <div id="submit-section" class="mt-8 bg-white rounded-2xl border border-borderPaper p-6 text-center shadow-xs">
+      <p class="text-sm text-inkLight mb-4">
+        完成作答後，請點擊下方按鈕進行系統批改與計分。
+      </p>
+      <button type="button" onclick="handleSubmitClick()"
+        class="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-cinnabar hover:bg-cinnabar/90 active:scale-[0.99] text-white font-bold text-base shadow-md transition-all inline-flex items-center justify-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        交卷並計分
+      </button>
+    </div>
+
+  </main>
+
+  <!-- 頁尾 -->
+  <footer class="border-t border-borderPaper bg-paper py-5 text-center text-xs text-inkLight">
+    <p>國語文形近字辨析練習系統・專注字形與讀音基礎訓練</p>
+  </footer>
+
+  <!-- 未作答提醒自訂對話框 (取代 alert/confirm) -->
+  <div id="unanswered-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-ink/50 backdrop-blur-xs p-4">
+    <div class="bg-white rounded-2xl border border-borderPaper max-w-md w-full p-6 shadow-xl animate-[fadeIn_0.15s_ease-out]">
+      <div class="flex items-start gap-3.5">
+        <div class="w-10 h-10 rounded-full bg-cinnabarLight text-cinnabar flex items-center justify-center shrink-0 mt-0.5">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <div class="flex-1">
+          <h3 class="font-serif text-lg font-bold text-ink">尚有題目未作答</h3>
+          <p id="modal-unanswered-text" class="text-sm text-inkLight mt-1.5 leading-relaxed">
+            您還有題目尚未選擇答案，確定要直接交卷嗎？
+          </p>
+          <div id="modal-unanswered-badges" class="flex flex-wrap gap-1.5 mt-3">
+            <!-- 未作答題號按鈕 -->
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-6 flex flex-col-reverse sm:flex-row justify-end gap-2.5">
+        <button type="button" onclick="forceSubmitQuiz()"
+          class="px-4 py-2.5 rounded-xl border border-borderPaper text-inkLight hover:text-ink hover:bg-paper text-sm font-medium transition-colors">
+          仍要直接交卷
+        </button>
+        <button type="button" id="btn-jump-first-unanswered" onclick="jumpToFirstUnanswered()"
+          class="px-5 py-2.5 rounded-xl bg-indigoInk hover:bg-indigoInk/90 text-white text-sm font-medium shadow-xs transition-colors">
+          前往未作答題目
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * 完整 12 題國語形近字題庫資料
+     * 第 1～8 題每題 8 分（共 64 分），第 9～12 題每題 9 分（共 36 分），總分 100 分
+     */
+    const RAW_QUESTIONS = [
+      {
+        id: 1,
+        points: 8,
+        question: '下列「　」中的字，何者寫法完全正確？',
+        options: [
+          { key: 'A', text: '他遇到挫折總是「自怨自艾」，從不檢討自己。' },
+          { key: 'B', text: '面對強敵，他絲毫不退縮，展現出「氣陷逼人」的氣勢。' },
+          { key: 'C', text: '歹徒趁著夜色「逃鼠」無蹤，警方正全力追緝。' },
+          { key: 'D', text: '經過一番整理，這件事終於理出了一點「頭諸」。' }
+        ],
+        answer: 'A',
+        explanation: '(B) 應為氣「焰」逼人；(C) 應為逃「竄」；(D) 應為頭「緒」。'
+      },
+      {
+        id: 2,
+        points: 8,
+        question: '「做人要腳踏實地，切勿心存僥倖，否則容易掉入別人設下的□□。」空格中應填入下列何者？',
+        options: [
+          { key: 'A', text: '陷害' },
+          { key: 'B', text: '陷阱' },
+          { key: 'C', text: '氣焰' },
+          { key: 'D', text: '焰火' }
+        ],
+        answer: 'B',
+        explanation: '「陷阱」指設計害人的圈套，符合「掉入別人設下的……」語意。'
+      },
+      {
+        id: 3,
+        points: 8,
+        question: '下列各組「　」中的字，讀音完全相同的是哪一項？',
+        options: [
+          { key: 'A', text: '「怨」言／「怒」火' },
+          { key: 'B', text: '枕「藉」／「耽」誤' },
+          { key: 'C', text: '「壁」虎／「譬」喻' },
+          { key: 'D', text: '屈「膝」／油「漆」' }
+        ],
+        answer: 'C',
+        explanation: '「壁」與「譬」皆讀作「ㄅㄧˋ」。(A) ㄩㄢˋ／ㄋㄨˋ；(B) ㄐㄧㄝˋ／ㄉㄢ；(D) ㄒㄧ／ㄑㄧ。'
+      },
+      {
+        id: 4,
+        points: 8,
+        question: '「在□□的陽光下，我們一定要做好防曬，以免□□被曬傷。」空格中依序應填入下列何者？',
+        options: [
+          { key: 'A', text: '熾烈／肌膚' },
+          { key: 'B', text: '織烈／飢膚' },
+          { key: 'C', text: '熾烈／飢膚' },
+          { key: 'D', text: '織烈／肌膚' }
+        ],
+        answer: 'A',
+        explanation: '「熾烈」指火勢猛烈、陽光強烈；「肌膚」指皮膚（「飢」為飢餓之意）。'
+      },
+      {
+        id: 5,
+        points: 8,
+        question: '下列文句中，哪一個句子沒有錯別字？',
+        options: [
+          { key: 'A', text: '這道菜是用木灰慢火細烤而成的，風味獨特。' },
+          { key: 'B', text: '弟弟的頭髮太長了，媽媽決定帶他去修剪一下鬍型。' },
+          { key: 'C', text: '老師請大家在週末閱讀一篇課外文章，並寫下心得。' },
+          { key: 'D', text: '運動時戴上護漆，可以有效保護關節不受傷害。' }
+        ],
+        answer: 'C',
+        explanation: '(A) 應為木「炭」；(B) 應為「髮」型；(D) 應為護「膝」。'
+      },
+      {
+        id: 6,
+        points: 8,
+        question: '「警察在現場仔細搜尋，試圖從微小的細節中□□出嫌犯的身分。」空格中應填入下列何者？',
+        options: [
+          { key: 'A', text: '認識' },
+          { key: 'B', text: '辨識' },
+          { key: 'C', text: '紡織' },
+          { key: 'D', text: '職責' }
+        ],
+        answer: 'B',
+        explanation: '「辨識」指辨別認識，符合從細節中找出嫌犯身分的語境。'
+      },
+      {
+        id: 7,
+        points: 8,
+        question: '下列「　」中的詞語，何者使用最恰當？',
+        options: [
+          { key: 'A', text: '考試成績不理想，讓他感到十分「懊惱」。' },
+          { key: 'B', text: '為了慶祝生日，她買了一頂「鬆鬚」的假髮。' },
+          { key: 'C', text: '這裡的空氣品質很差，到處都是「炭塵」。' },
+          { key: 'D', text: '只要有心學習，無論選擇哪種「識業」都能發光發熱。' }
+        ],
+        answer: 'A',
+        explanation: '(B) 應為「鬍」鬚或「鬚」眉（假髮應形容蓬鬆或美髮）；(C) 應為「灰」塵；(D) 應為「職」業。'
+      },
+      {
+        id: 8,
+        points: 8,
+        question: '下列哪一組字的部首與「錄」字（金部）不同，且字義與「顏色」有關？',
+        options: [
+          { key: 'A', text: '剝' },
+          { key: 'B', text: '綠' },
+          { key: 'C', text: '鼠' },
+          { key: 'D', text: '竄' }
+        ],
+        answer: 'B',
+        explanation: '「綠」為糸部，字義指綠色，與「錄」（金部）部首不同。'
+      },
+      {
+        id: 9,
+        points: 9,
+        question: '「他在手臂上貼了一個老鷹圖案的□□，看起來十分威風。」空格中應填入下列何者？',
+        options: [
+          { key: 'A', text: '臂彎' },
+          { key: 'B', text: '壁章' },
+          { key: 'C', text: '臂章' },
+          { key: 'D', text: '譬如' }
+        ],
+        answer: 'C',
+        explanation: '「臂章」指佩帶在衣袖上臂處的標誌。'
+      },
+      {
+        id: 10,
+        points: 9,
+        question: '下列各組語詞中，哪一組的用字完全正確？',
+        options: [
+          { key: 'A', text: '剝奪／綠野／錄音' },
+          { key: 'B', text: '竄改／逃鼠／滑鼠' },
+          { key: 'C', text: '鬢眉／鬍鬚／放鬆' },
+          { key: 'D', text: '懊腦／電腦／頭腦' }
+        ],
+        answer: 'A',
+        explanation: '(B) 應為逃「竄」；(C) 應為「鬚」眉；(D) 應為懊「惱」。'
+      },
+      {
+        id: 11,
+        points: 9,
+        question: '「經過長年的風吹雨打，這棟老房子的牆面油漆已經嚴重□□了。」空格中應填入下列何者？',
+        options: [
+          { key: 'A', text: '剝奪' },
+          { key: 'B', text: '剝落' },
+          { key: 'C', text: '錄影' },
+          { key: 'D', text: '綠野' }
+        ],
+        answer: 'B',
+        explanation: '「剝落」指物體表面成片脫落，符合老房子牆面油漆脫落的描述。'
+      },
+      {
+        id: 12,
+        points: 9,
+        question: '關於下列形近字的讀音配對，何者「錯誤」？',
+        options: [
+          { key: 'A', text: '艾：ㄧˋ' },
+          { key: 'B', text: '耽：ㄉㄢ' },
+          { key: 'C', text: '熾：ㄓˋ' },
+          { key: 'D', text: '緒：ㄒㄩˋ' }
+        ],
+        answer: 'C',
+        explanation: '「熾」讀作「ㄔˋ」，「織」、「職」才讀作「ㄓ」。'
+      }
+    ];
+
+    // 應用程式狀態管理
+    let state = {
+      questions: JSON.parse(JSON.stringify(RAW_QUESTIONS)), // 當前題目清單
+      userAnswers: {},      // 儲存使用者作答 { questionIndex: 'A' | 'B' | 'C' | 'D' }
+      isSubmitted: false,   // 是否已交卷
+      viewMode: 'all',      // 'all' (一頁瀏覽) 或 'single' (逐題作答)
+      currentIndex: 0       // 逐題作答時的當前題目索引 (0 ~ 11)
+    };
+
+    /**
+     * 初始化測驗畫面
+     */
+    function initQuiz() {
+      renderQuickNavDots();
+      renderQuestions();
+      updateProgressUI();
+    }
+
+    /**
+     * 切換檢視模式：一頁瀏覽 ('all') 或 逐題作答 ('single')
+     */
+    function setViewMode(mode) {
+      if (state.isSubmitted) return;
+      state.viewMode = mode;
+
+      const btnAll = document.getElementById('btn-mode-all');
+      const btnSingle = document.getElementById('btn-mode-single');
+      const singleControls = document.getElementById('single-mode-controls');
+
+      if (mode === 'all') {
+        btnAll.className = 'px-2.5 py-1 text-xs sm:text-sm font-medium rounded-lg transition-all bg-indigoInk text-white';
+        btnSingle.className = 'px-2.5 py-1 text-xs sm:text-sm font-medium rounded-lg transition-all text-inkLight hover:text-ink';
+        singleControls.classList.add('hidden');
+      } else {
+        btnSingle.className = 'px-2.5 py-1 text-xs sm:text-sm font-medium rounded-lg transition-all bg-indigoInk text-white';
+        btnAll.className = 'px-2.5 py-1 text-xs sm:text-sm font-medium rounded-lg transition-all text-inkLight hover:text-ink';
+        singleControls.classList.remove('hidden');
+      }
+
+      renderQuestions();
+      updateSingleControls();
+    }
+
+    /**
+     * 逐題模式下的前後切換
+     */
+    function navigateSingle(step) {
+      const nextIdx = state.currentIndex + step;
+      if (nextIdx >= 0 && nextIdx < state.questions.length) {
+        state.currentIndex = nextIdx;
+        renderQuestions();
+        updateSingleControls();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    /**
+     * 更新逐題模式按鈕與頁碼顯示
+     */
+    function updateSingleControls() {
+      const prevBtn = document.getElementById('btn-prev-q');
+      const nextBtn = document.getElementById('btn-next-q');
+      const indicator = document.getElementById('single-page-indicator');
+
+      prevBtn.disabled = state.currentIndex === 0;
+      nextBtn.disabled = state.currentIndex === state.questions.length - 1;
+      indicator.textContent = `第 ${state.currentIndex + 1} 題 / 共 ${state.questions.length} 題`;
+    }
+
+    /**
+     * 渲染頂部說明欄的 1~12 題號快速導覽點
+     */
+    function renderQuickNavDots() {
+      const container = document.getElementById('quick-nav-dots');
+      container.innerHTML = state.questions.map((q, idx) => {
+        const isAnswered = Boolean(state.userAnswers[idx]);
+        const isCurrent = state.viewMode === 'single' && state.currentIndex === idx && !state.isSubmitted;
+        
+        let btnClass = 'w-7 h-7 rounded-lg text-xs font-bold transition-all flex items-center justify-center border ';
+        if (state.isSubmitted) {
+          const isCorrect = state.userAnswers[idx] === q.answer;
+          btnClass += isCorrect
+            ? 'bg-bamboo text-white border-bamboo'
+            : 'bg-cinnabar text-white border-cinnabar';
+        } else if (isCurrent) {
+          btnClass += 'bg-indigoInk text-white border-indigoInk ring-2 ring-indigoInk/30';
+        } else if (isAnswered) {
+          btnClass += 'bg-indigoLight text-indigoInk border-indigoInk/40';
+        } else {
+          btnClass += 'bg-paper text-inkLight border-borderPaper hover:border-indigoInk/50';
+        }
+
+        return `<button type="button" onclick="jumpToQuestion(${idx})" class="${btnClass}" title="跳至第 ${idx + 1} 題">${idx + 1}</button>`;
+      }).join('');
+    }
+
+    /**
+     * 點擊題號跳轉至指定題目
+     */
+    function jumpToQuestion(idx) {
+      if (!state.isSubmitted && state.viewMode === 'single') {
+        state.currentIndex = idx;
+        renderQuestions();
+        updateSingleControls();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        const card = document.getElementById(`question-card-${idx}`);
+        if (card) {
+          const headerOffset = 90;
+          const elementPosition = card.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+          window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+        }
+      }
+    }
+
+    /**
+     * 選擇某題的選項
+     */
+    function selectOption(qIdx, optionKey) {
+      if (state.isSubmitted) return; // 交卷後鎖定不可更改
+      state.userAnswers[qIdx] = optionKey;
+      
+      renderQuestions();
+      renderQuickNavDots();
+      updateProgressUI();
+    }
+
+    /**
+     * 更新頂部進度條與已作答題數
+     */
+    function updateProgressUI() {
+      const answeredCount = Object.keys(state.userAnswers).length;
+      const total = state.questions.length;
+      const percentage = Math.round((answeredCount / total) * 100);
+
+      document.getElementById('answered-count').textContent = answeredCount;
+      document.getElementById('progress-bar').style.width = `${percentage}%`;
+    }
+
+    /**
+     * 渲染所有題目或單一題目卡片
+     */
+    function renderQuestions() {
+      const container = document.getElementById('questions-container');
+      const itemsToRender = (!state.isSubmitted && state.viewMode === 'single')
+        ? [{ q: state.questions[state.currentIndex], idx: state.currentIndex }]
+        : state.questions.map((q, idx) => ({ q, idx }));
+
+      container.innerHTML = itemsToRender.map(({ q, idx }) => {
+        const userChoice = state.userAnswers[idx];
+        const isCorrect = userChoice === q.answer;
+        const displayNum = idx + 1;
+
+        // 卡片外框狀態樣式
+        let cardBorderClass = 'border-borderPaper';
+        if (state.isSubmitted) {
+          cardBorderClass = isCorrect ? 'border-bamboo/50 ring-1 ring-bamboo/20' : 'border-cinnabar/50 ring-1 ring-cinnabar/20';
+        }
+
+        // 批改狀態徽章 (僅交卷後顯示)
+        let statusBadgeHTML = '';
+        if (state.isSubmitted) {
+          if (isCorrect) {
+            statusBadgeHTML = `
+              <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-bambooLight text-bamboo text-xs font-bold">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                答對（+${q.points} 分）
+              </span>`;
+          } else {
+            statusBadgeHTML = `
+              <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-cinnabarLight text-cinnabar text-xs font-bold">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                ${userChoice ? '答錯' : '未作答'}（0 分）
+              </span>`;
+          }
+        }
+
+        // 選項列表 HTML
+        const optionsHTML = q.options.map(opt => {
+          const isSelected = userChoice === opt.key;
+          const isRightAnswer = opt.key === q.answer;
+
+          let optClasses = 'w-full text-left p-3.5 sm:p-4 rounded-xl border transition-all flex items-start gap-3.5 ';
+          let badgeClasses = 'w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold shrink-0 mt-0.5 border transition-colors ';
+          let rightIconHTML = '';
+
+          if (!state.isSubmitted) {
+            // 作答中樣式 (不提供任何提示)
+            if (isSelected) {
+              optClasses += 'bg-indigoLight/80 border-indigoInk text-ink shadow-2xs';
+              badgeClasses += 'bg-indigoInk text-white border-indigoInk';
+            } else {
+              optClasses += 'bg-paper/40 hover:bg-paper border-borderPaper text-ink cursor-pointer';
+              badgeClasses += 'bg-white text-inkLight border-borderPaper';
+            }
+          } else {
+            // 交卷批改後樣式
+            optClasses += 'cursor-default ';
+            if (isRightAnswer) {
+              optClasses += 'bg-bambooLight/80 border-bamboo text-ink font-medium';
+              badgeClasses += 'bg-bamboo text-white border-bamboo';
+              rightIconHTML = `<span class="ml-auto text-xs font-bold text-bamboo shrink-0 self-center px-2 py-0.5 bg-white rounded-md border border-bamboo/20">正確答案</span>`;
+            } else if (isSelected && !isRightAnswer) {
+              optClasses += 'bg-cinnabarLight/80 border-cinnabar text-ink';
+              badgeClasses += 'bg-cinnabar text-white border-cinnabar';
+              rightIconHTML = `<span class="ml-auto text-xs font-bold text-cinnabar shrink-0 self-center px-2 py-0.5 bg-white rounded-md border border-cinnabar/20">你的選擇</span>`;
+            } else {
+              optClasses += 'bg-white/60 border-borderPaper/60 text-inkLight opacity-75';
+              badgeClasses += 'bg-paper text-inkLight border-borderPaper';
+            }
+          }
+
+          return `
+            <button type="button" 
+              ${state.isSubmitted ? 'disabled' : `onclick="selectOption(${idx}, '${opt.key}')"`}
+              class="${optClasses}">
+              <span class="${badgeClasses}">${opt.key}</span>
+              <span class="bopomofo-text text-base sm:text-[17px] flex-1">${opt.text}</span>
+              ${rightIconHTML}
+            </button>
+          `;
+        }).join('');
+
+        // 詳細解析區塊 (僅交卷後顯示)
+        const explanationHTML = state.isSubmitted ? `
+          <div class="mt-4 pt-4 border-t border-borderPaper bg-paper/70 rounded-xl p-4">
+            <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs sm:text-sm mb-1.5">
+              <span class="font-bold text-indigoInk">【詳解與辨析】</span>
+              <span class="text-inkLight">你的作答：<strong class="${isCorrect ? 'text-bamboo' : 'text-cinnabar'}">${userChoice ? `(${userChoice})` : '未作答'}</strong></span>
+              <span class="text-inkLight">正確答案：<strong class="text-bamboo">(${q.answer})</strong></span>
+            </div>
+            <p class="bopomofo-text text-sm sm:text-base text-ink leading-relaxed">
+              ${q.explanation}
+            </p>
+          </div>
+        ` : '';
+
+        return `
+          <article id="question-card-${idx}" class="bg-white rounded-2xl border ${cardBorderClass} p-5 sm:p-6 shadow-xs transition-all">
+            <!-- 題目標頭 -->
+            <div class="flex items-center justify-between gap-2 mb-3.5">
+              <div class="flex items-center gap-2.5">
+                <span class="px-2.5 py-1 rounded-lg bg-paper border border-borderPaper font-serif font-bold text-sm text-ink">
+                  第 ${displayNum} 題
+                </span>
+                <span class="text-xs font-medium text-inkLight bg-paper px-2 py-1 rounded-md">
+                  配分 ${q.points} 分
+                </span>
+              </div>
+              ${statusBadgeHTML}
+            </div>
+
+            <!-- 題幹 -->
+            <h3 class="bopomofo-text text-base sm:text-lg font-bold text-ink mb-4 leading-relaxed">
+              ${q.question}
+            </h3>
+
+            <!-- 選項區 -->
+            <div class="space-y-2.5">
+              ${optionsHTML}
+            </div>
+
+            <!-- 解析區 -->
+            ${explanationHTML}
+          </article>
+        `;
+      }).join('');
+    }
+
+    /**
+     * 點擊「交卷並計分」檢查是否全部作答
+     */
+    function handleSubmitClick() {
+      const unansweredIndices = [];
+      state.questions.forEach((_, idx) => {
+        if (!state.userAnswers[idx]) {
+          unansweredIndices.push(idx);
+        }
+      });
+
+      if (unansweredIndices.length > 0) {
+        // 顯示友善提醒 Modal
+        const modal = document.getElementById('unanswered-modal');
+        const textEl = document.getElementById('modal-unanswered-text');
+        const badgesEl = document.getElementById('modal-unanswered-badges');
+
+        textEl.textContent = `您尚有 ${unansweredIndices.length} 題未作答（如下列題號），交卷後未作答題目將以 0 分計算。是否要先前往補答？`;
+        badgesEl.innerHTML = unansweredIndices.map(idx => `
+          <button type="button" onclick="closeModalAndJump(${idx})"
+            class="px-2.5 py-1 rounded-lg bg-cinnabarLight hover:bg-cinnabar hover:text-white text-cinnabar text-xs font-bold transition-colors">
+            第 ${idx + 1} 題
+          </button>
+        `).join('');
+
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      } else {
+        forceSubmitQuiz();
+      }
+    }
+
+    /**
+     * 關閉提醒視窗並跳轉至第一題未作答題目
+     */
+    function jumpToFirstUnanswered() {
+      const firstIdx = state.questions.findIndex((_, idx) => !state.userAnswers[idx]);
+      if (firstIdx !== -1) {
+        closeModalAndJump(firstIdx);
+      }
+    }
+
+    function closeModalAndJump(idx) {
+      const modal = document.getElementById('unanswered-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      jumpToQuestion(idx);
+    }
+
+    /**
+     * 執行正式交卷與計分
+     */
+    function forceSubmitQuiz() {
+      const modal = document.getElementById('unanswered-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+
+      state.isSubmitted = true;
+
+      // 計算分數與答對/答錯題數
+      let totalScore = 0;
+      let correctCount = 0;
+      let wrongCount = 0;
+
+      state.questions.forEach((q, idx) => {
+        if (state.userAnswers[idx] === q.answer) {
+          totalScore += q.points;
+          correctCount++;
+        } else {
+          wrongCount++;
+        }
+      });
+
+      // 設定評語與印章等第
+      const commentTitle = document.getElementById('result-comment-title');
+      const commentDesc = document.getElementById('result-comment-desc');
+      const gradeStamp = document.getElementById('score-grade-stamp');
+
+      if (totalScore === 100) {
+        commentTitle.textContent = '滿分百步穿楊，字字精準！';
+        commentDesc.textContent = '太厲害了！12 道形近字考題全數答對，你對字形結構與讀音的掌握已達爐火純青之境！';
+        gradeStamp.textContent = '滿分狀元';
+      } else if (totalScore >= 85) {
+        commentTitle.textContent = '表現優異，明察秋毫！';
+        commentDesc.textContent = '成績相當出色！絕大多數的形近字陷阱都難不倒你，檢視一下少數錯題即可邁向滿分。';
+        gradeStamp.textContent = '成績優異';
+      } else if (totalScore >= 60) {
+        commentTitle.textContent = '穩紮穩打，漸入佳境！';
+        commentDesc.textContent = '已經掌握了基本的形近字概念，建議仔細閱讀下方錯題的部首與讀音解析，能讓你更上一層樓！';
+        gradeStamp.textContent = '再接再厲';
+      } else {
+        commentTitle.textContent = '別氣餒，細節藏在字形裡！';
+        commentDesc.textContent = '形近字容易讓人眼花撩亂，透過下方的逐題解析認識每個字的部首與讀音，再挑戰一次一定會大幅進步！';
+        gradeStamp.textContent = '勤能補拙';
+      }
+
+      // 更新成績看板數值
+      document.getElementById('final-score').textContent = totalScore;
+      document.getElementById('stat-correct').textContent = correctCount;
+      document.getElementById('stat-wrong').textContent = wrongCount;
+
+      // 顯示「檢視錯題解析」按鈕（若有錯題）
+      const btnJumpWrong = document.getElementById('btn-jump-wrong');
+      if (wrongCount > 0) {
+        btnJumpWrong.classList.remove('hidden');
+      } else {
+        btnJumpWrong.classList.add('hidden');
+      }
+
+      // 切換 UI 顯示狀態（交卷後強制展開全部題目方便對照解析）
+      document.getElementById('result-summary').classList.remove('hidden');
+      document.getElementById('submit-section').classList.add('hidden');
+      document.getElementById('view-toggle-group').classList.add('hidden');
+      document.getElementById('single-mode-controls').classList.add('hidden');
+
+      renderQuestions();
+      renderQuickNavDots();
+
+      // 平滑捲動至頂部成績單
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /**
+     * 捲動至第一道答錯的題目
+     */
+    function scrollToFirstWrong() {
+      const firstWrongIdx = state.questions.findIndex((q, idx) => state.userAnswers[idx] !== q.answer);
+      if (firstWrongIdx !== -1) {
+        jumpToQuestion(firstWrongIdx);
+      }
+    }
+
+    /**
+     * 重新測驗（可選擇是否隨機打亂題目順序）
+     */
+    function resetQuiz() {
+      const shouldShuffle = document.getElementById('shuffle-checkbox').checked;
+      let nextQuestions = JSON.parse(JSON.stringify(RAW_QUESTIONS));
+
+      if (shouldShuffle) {
+        // Fisher-Yates 洗牌演算法打亂題目順序
+        for (let i = nextQuestions.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [nextQuestions[i], nextQuestions[j]] = [nextQuestions[j], nextQuestions[i]];
+        }
+      }
+
+      state.questions = nextQuestions;
+      state.userAnswers = {};
+      state.isSubmitted = false;
+      state.currentIndex = 0;
+
+      // 恢復作答介面元件
+      document.getElementById('result-summary').classList.add('hidden');
+      document.getElementById('submit-section').classList.remove('hidden');
+      document.getElementById('view-toggle-group').classList.remove('hidden');
+
+      if (state.viewMode === 'single') {
+        document.getElementById('single-mode-controls').classList.remove('hidden');
+        updateSingleControls();
+      }
+
+      renderQuickNavDots();
+      renderQuestions();
+      updateProgressUI();
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // 網頁載入完成後啟動測驗
+    window.addEventListener('DOMContentLoaded', initQuiz);
+  </script>
+</body>
+</html>
