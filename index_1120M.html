@@ -1,0 +1,1451 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>國小六年級數學：扇形面積大挑戰</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Google Fonts: Noto Sans TC 與 Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #f0f9ff;
+            color: #1e293b;
+        }
+        /* 分數垂直排版樣式 */
+        .fraction {
+            display: inline-flex;
+            flex-direction: column;
+            vertical-align: middle;
+            text-align: center;
+            font-size: 0.9em;
+            line-height: 1.1;
+            margin: 0 3px;
+        }
+        .fraction .num {
+            border-bottom: 1.5px solid currentColor;
+            padding: 0 3px 1px 3px;
+        }
+        .fraction .den {
+            padding: 1px 3px 0 3px;
+        }
+        /* 自訂捲軸 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        /* 畫布游標 */
+        #scratchpadCanvas {
+            touch-action: none;
+            cursor: crosshair;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- 頂部導覽列 -->
+    <header class="bg-gradient-to-r from-teal-600 via-sky-600 to-indigo-600 text-white shadow-md sticky top-0 z-30">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="bg-white/20 p-2 rounded-xl backdrop-blur-sm">
+                    <svg class="w-7 h-7 text-amber-300" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c2.76 0 5.26-1.12 7.07-2.93L12 12V2z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-xl font-bold tracking-wide">扇形面積計算互動測驗</h1>
+                    <p class="text-xs text-sky-100">國小六年級數學 • 圓周率一律以 3.14 計算</p>
+                </div>
+            </div>
+
+            <!-- 模式切換與控制按鈕 -->
+            <div class="flex flex-wrap items-center gap-2">
+                <!-- 練習模式連勝徽章 -->
+                <div id="streakBadge" class="bg-white/15 border border-white/25 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5">
+                    <span>🔥 連勝：</span>
+                    <span id="streakCount" class="text-amber-300 text-base">0</span>
+                    <span>題</span>
+                </div>
+
+                <div class="bg-sky-900/40 p-1 rounded-xl flex text-sm font-medium">
+                    <button id="btnModePractice" onclick="switchMode('practice')" class="px-3 py-1.5 rounded-lg bg-white text-sky-700 shadow-sm transition">
+                        單題練習模式
+                    </button>
+                    <button id="btnModeExam" onclick="switchMode('exam')" class="px-3 py-1.5 rounded-lg text-white hover:bg-white/10 transition">
+                        100分模擬測驗
+                    </button>
+                </div>
+                <button onclick="resetAndGenerate()" class="bg-amber-400 hover:bg-amber-500 text-slate-900 font-bold px-3.5 py-1.5 rounded-xl text-sm shadow-sm flex items-center gap-1.5 transition active:scale-95">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                    <span>重新出題</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要內容區 -->
+    <main class="flex-grow max-w-6xl w-full mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- 左側/主測驗區域 (佔 8 欄) -->
+        <div class="lg:col-span-8 flex flex-col gap-5">
+
+            <!-- 狀態列與進度條 -->
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80 flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <span id="badgeMode" class="bg-teal-100 text-teal-800 text-xs font-bold px-3 py-1 rounded-full">
+                        單題練習模式
+                    </span>
+                    <span id="questionCounter" class="font-bold text-slate-700 text-base">
+                        第 1 題
+                    </span>
+                    <span id="questionCategory" class="text-xs bg-indigo-50 text-indigo-600 border border-indigo-200 px-2.5 py-0.5 rounded-md font-medium">
+                        題型一：角度扇形面積
+                    </span>
+                </div>
+
+                <!-- 難度/題型篩選 (僅練習模式顯示) -->
+                <div id="practiceFilterBox" class="flex items-center gap-2 text-sm">
+                    <label for="typeFilter" class="text-slate-500 font-medium hidden sm:inline">指定題型：</label>
+                    <select id="typeFilter" onchange="generatePracticeQuestion()" class="bg-slate-50 border border-slate-300 text-slate-700 rounded-lg px-2.5 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        <option value="all">🎲 全部綜合出題</option>
+                        <option value="type1">題型一：角度扇形面積</option>
+                        <option value="type2">題型二：幾分之幾圓面積</option>
+                        <option value="type3">題型三：逆向反推與牛吃草</option>
+                        <option value="type4">題型四：複合圖形塗色面積</option>
+                    </select>
+                </div>
+
+                <!-- 模擬測驗題號導覽列 (僅測驗模式顯示) -->
+                <div id="examNavContainer" class="hidden w-full pt-2 border-t border-slate-100">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div id="examDots" class="flex flex-wrap gap-1.5">
+                            <!-- 動態產生 1~10 題按鈕 -->
+                        </div>
+                        <button id="btnSubmitExam" onclick="submitExam()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-1.5 rounded-xl text-sm shadow transition">
+                            交卷並計分
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 測驗成績總結卡片 (僅測驗交卷後顯示) -->
+            <div id="examResultBanner" class="hidden bg-gradient-to-br from-indigo-600 to-teal-600 text-white rounded-2xl p-6 shadow-lg">
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div>
+                        <div class="text-teal-100 text-sm font-medium mb-1">100分模擬測驗成績單</div>
+                        <h2 class="text-3xl font-black tracking-tight flex items-baseline gap-2">
+                            總分：<span id="finalScoreDisplay" class="text-5xl text-amber-300">100</span> 分
+                            <span id="finalComment" class="text-base font-normal text-white/90 ml-2">太厲害了！完全掌握！</span>
+                        </h2>
+                        <p class="text-sm text-teal-100 mt-2">點擊上方題號可檢視每一題的「詳細算式解析」與「錯題提醒」。</p>
+                    </div>
+                    <button onclick="resetAndGenerate()" class="bg-white text-indigo-700 hover:bg-sky-50 font-bold px-5 py-3 rounded-xl shadow transition shrink-0">
+                        再挑戰一次新題目
+                    </button>
+                </div>
+            </div>
+
+            <!-- 題目主卡片 -->
+            <div id="questionCard" class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80 flex flex-col gap-6">
+                
+                <!-- 題目文字與動態 SVG 區 -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                    <!-- SVG 幾何圖形容器 -->
+                    <div class="md:col-span-5 bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex flex-col items-center justify-center relative min-h-[235px]">
+                        <span class="absolute top-2.5 left-3 text-[11px] font-semibold text-slate-400 tracking-wider">幾何示意圖</span>
+                        <div id="svgContainer" class="w-full max-w-[235px] aspect-square flex items-center justify-center">
+                            <!-- 動態 SVG 插入處 -->
+                        </div>
+                    </div>
+
+                    <!-- 題目敘述與作答區 -->
+                    <div class="md:col-span-7 flex flex-col justify-between gap-5">
+                        <div>
+                            <div id="questionText" class="text-lg sm:text-xl font-bold text-slate-800 leading-relaxed">
+                                <!-- 題目文字動態插入 -->
+                            </div>
+                            <p class="text-xs text-slate-500 mt-2 flex items-center gap-1">
+                                <svg class="w-4 h-4 text-teal-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                圓周率以 3.14 計算，請輸入數字答案（若為小數請算到完整位數）。
+                            </p>
+                        </div>
+
+                        <!-- 輸入框與按鈕 -->
+                        <div class="bg-teal-50/60 border border-teal-100 rounded-xl p-4">
+                            <label for="answerInput" class="block text-sm font-bold text-slate-700 mb-2">請輸入計算結果：</label>
+                            <div class="flex flex-wrap items-center gap-3">
+                                <div class="relative flex-grow max-w-[240px]">
+                                    <input type="number" step="any" id="answerInput" placeholder="例如：78.5" 
+                                        onkeydown="if(event.key==='Enter') handleAnswerSubmit()"
+                                        class="w-full text-lg font-bold text-slate-800 bg-white border-2 border-slate-300 focus:border-teal-500 focus:outline-none rounded-xl px-4 py-2.5 pr-20 transition">
+                                    <span id="unitLabel" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 font-bold text-sm">平方公分</span>
+                                </div>
+
+                                <button id="btnCheckAnswer" onclick="handleAnswerSubmit()" class="bg-teal-600 hover:bg-teal-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-sm transition active:scale-95">
+                                    送出答案
+                                </button>
+
+                                <button id="btnNextQuestion" onclick="nextQuestion()" class="hidden bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-5 py-2.5 rounded-xl shadow-sm flex items-center gap-1 transition">
+                                    <span>下一題</span>
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                                </button>
+                            </div>
+
+                            <!-- 提示訊息框 (無 alert) -->
+                            <div id="feedbackMessage" class="hidden mt-3 text-sm font-bold rounded-lg px-3.5 py-2"></div>
+                        </div>
+
+                        <!-- 公式提示摺疊按鈕 -->
+                        <div>
+                            <button onclick="toggleFormulaHint()" class="text-sm text-amber-700 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 px-3.5 py-1.5 rounded-lg font-medium inline-flex items-center gap-1.5 transition">
+                                <svg class="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14c.015-.34.208-.646.477-.859a4 4 0 10-4.954 0c.27.213.462.519.476.859h4.002z"/></svg>
+                                <span>忘記公式了嗎？點我看扇形面積解題錦囊</span>
+                            </button>
+                            <div id="formulaHintBox" class="hidden mt-2.5 bg-amber-50/90 border border-amber-200 rounded-xl p-3.5 text-sm text-slate-700 space-y-1.5">
+                                <p class="font-bold text-amber-900">💡 扇形面積核心公式：</p>
+                                <ul class="list-disc list-inside space-y-1 text-slate-700">
+                                    <li><strong>圓面積</strong> ＝ 半徑 × 半徑 × 3.14（<span class="text-rose-600 font-bold">若題目給直徑，務必先 ÷ 2 算出半徑！</span>）</li>
+                                    <li><strong>扇形面積</strong> ＝ 半徑 × 半徑 × 3.14 × <span class="fraction"><span class="num">圓心角</span><span class="den">360°</span></span>（或 幾分之幾圓）</li>
+                                    <li><strong>解題妙招</strong>：先將「半徑 × 半徑」與「分母」約分，最後再乘 3.14 最不容易算錯！</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 模擬測驗模式上下題切換列 -->
+                <div id="examPrevNextBar" class="hidden pt-4 border-t border-slate-100 flex justify-between items-center">
+                    <button onclick="prevExamQuestion()" id="btnExamPrev" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm transition">
+                        ← 上一題
+                    </button>
+                    <span class="text-xs text-slate-400">作答後會自動暫存本題答案</span>
+                    <button onclick="nextExamQuestion()" id="btnExamNext" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm transition">
+                        下一題 →
+                    </button>
+                </div>
+
+                <!-- 詳細逐步算式解析區 -->
+                <div id="explanationCard" class="hidden border-t-2 border-dashed border-slate-200 pt-5 mt-2">
+                    <div class="bg-emerald-50/70 border border-emerald-200 rounded-2xl p-5">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                            <h3 class="text-base font-bold text-emerald-900 flex items-center gap-2">
+                                <span class="bg-emerald-600 text-white w-6 h-6 rounded-full inline-flex items-center justify-center text-xs">解</span>
+                                <span>逐步算式詳解與觀念解析</span>
+                            </h3>
+                            <span class="text-sm font-bold text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full">
+                                正確答案：<span id="expCorrectAnswer"></span> <span id="expCorrectUnit">平方公分</span>
+                            </span>
+                        </div>
+                        
+                        <div id="explanationSteps" class="space-y-2.5 text-slate-700 text-sm sm:text-base leading-relaxed">
+                            <!-- 動態產生步驟 -->
+                        </div>
+
+                        <div id="explanationWarning" class="mt-4 bg-rose-50 border-l-4 border-rose-500 p-3 rounded-r-lg text-xs sm:text-sm text-rose-800">
+                            <!-- 常見錯誤提醒 -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 右側輔助工具欄：計算草稿紙 & 簡易小算盤 (佔 4 欄) -->
+        <div class="lg:col-span-4 flex flex-col gap-5">
+            
+            <!-- 工具切換頁籤 -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden flex flex-col">
+                <div class="bg-slate-100 p-1.5 flex gap-1 border-b border-slate-200">
+                    <button id="tabScratchpad" onclick="switchTool('scratchpad')" class="flex-1 py-2 text-sm font-bold rounded-xl bg-white text-slate-800 shadow-sm transition">
+                        ✏️ 手寫計算草稿紙
+                    </button>
+                    <button id="tabCalculator" onclick="switchTool('calculator')" class="flex-1 py-2 text-sm font-bold rounded-xl text-slate-600 hover:bg-white/50 transition">
+                        🧮 輔助計算機
+                    </button>
+                </div>
+
+                <!-- 1. 手寫草稿紙面板 -->
+                <div id="panelScratchpad" class="p-4 flex flex-col gap-3">
+                    <div class="flex flex-wrap items-center justify-between gap-1 text-xs text-slate-500">
+                        <span>畫筆與橡皮擦：</span>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="setPenTool('#1e293b', 2.5)" class="w-5 h-5 rounded-full bg-slate-800 border-2 border-white shadow ring-1 ring-slate-300" title="黑色筆"></button>
+                            <button onclick="setPenTool('#0284c7', 2.5)" class="w-5 h-5 rounded-full bg-sky-600 border-2 border-white shadow" title="藍色筆"></button>
+                            <button onclick="setPenTool('#e11d48', 2.5)" class="w-5 h-5 rounded-full bg-rose-600 border-2 border-white shadow" title="紅色筆"></button>
+                            <button onclick="setEraserTool()" class="px-2 py-1 bg-amber-100 hover:bg-amber-200 text-amber-800 font-bold rounded-lg transition" title="橡皮擦">
+                                橡皮擦
+                            </button>
+                            <button onclick="clearCanvas()" class="px-2 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-lg transition">
+                                清除
+                            </button>
+                        </div>
+                    </div>
+                    <div class="border-2 border-slate-200 rounded-xl overflow-hidden bg-[#fffdf7] relative">
+                        <canvas id="scratchpadCanvas" class="w-full h-[290px] block"></canvas>
+                    </div>
+                </div>
+
+                <!-- 2. 簡易輔助小算盤面板 -->
+                <div id="panelCalculator" class="hidden p-4 flex flex-col gap-3">
+                    <div class="bg-slate-800 text-white rounded-xl p-3 text-right">
+                        <div id="calcHistory" class="text-xs text-slate-400 h-4 overflow-hidden"></div>
+                        <div id="calcDisplay" class="text-2xl font-mono font-bold tracking-wider truncate">0</div>
+                    </div>
+                    <!-- 快捷 平方 & π 按鈕 -->
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="calcSquare()" class="bg-teal-100 hover:bg-teal-200 text-teal-800 font-bold py-2 rounded-xl text-xs transition">
+                            平方 (x²)
+                        </button>
+                        <button onclick="calcInsertPi()" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-800 font-bold py-2 rounded-xl text-xs transition">
+                            乘以 × 3.14
+                        </button>
+                        <button onclick="calcClear()" class="bg-rose-100 hover:bg-rose-200 text-rose-700 font-bold py-2 rounded-xl text-xs transition">
+                            歸零 (AC)
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-4 gap-2 font-bold text-lg">
+                        <button onclick="calcAppend('7')" class="bg-slate-100 hover:bg-slate-200 py-2.5 rounded-xl">7</button>
+                        <button onclick="calcAppend('8')" class="bg-slate-100 hover:bg-slate-200 py-2.5 rounded-xl">8</button>
+                        <button onclick="calcAppend('9')" class="bg-slate-100 hover:bg-slate-200 py-2.5 rounded-xl">9</button>
+                        <button onclick="calcOp('/')" class="bg-sky-100 hover:bg-sky-200 text-sky-700 py-2.5 rounded-xl">÷</button>
+
+                        <button onclick="calcAppend('4')" class="bg-slate-100 hover:bg-slate-200 py-2.5 rounded-xl">4</button>
+                        <button onclick="calcAppend('5')" class="bg-slate-100 hover:bg-slate-200 py-2.5 rounded-xl">5</button>
+                        <button onclick="calcAppend('6')" class="bg-slate-100 hover:bg-slate-200 py-2.5 rounded-xl">6</button>
+                        <button onclick="calcOp('*')" class="bg-sky-100 hover:bg-sky-200 text-sky-700 py-2.5 rounded-xl">×</button>
+
+                        <button onclick="calcAppend('1')" class="bg-slate-100 hover:bg-slate-200 py-2.5 rounded-xl">1</button>
+                        <button onclick="calcAppend('2')" class="bg-slate-100 hover:bg-slate-200 py-2.5 rounded-xl">2</button>
+                        <button onclick="calcAppend('3')" class="bg-slate-100 hover:bg-slate-200 py-2.5 rounded-xl">3</button>
+                        <button onclick="calcOp('-')" class="bg-sky-100 hover:bg-sky-200 text-sky-700 py-2.5 rounded-xl">−</button>
+
+                        <button onclick="calcAppend('0')" class="bg-slate-100 hover:bg-slate-200 py-2.5 rounded-xl">0</button>
+                        <button onclick="calcAppend('.')" class="bg-slate-100 hover:bg-slate-200 py-2.5 rounded-xl">.</button>
+                        <button onclick="calcEqual()" class="bg-emerald-500 hover:bg-emerald-600 text-white py-2.5 rounded-xl">＝</button>
+                        <button onclick="calcOp('+')" class="bg-sky-100 hover:bg-sky-200 text-sky-700 py-2.5 rounded-xl">＋</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 學習小叮嚀卡片：r² × 3.14 面積速記表 -->
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80 text-sm space-y-2.5">
+                <h4 class="font-bold text-slate-800 flex items-center gap-1.5">
+                    <span class="text-base">📌</span> 常用圓面積 (r² × 3.14) 速記表
+                </h4>
+                <div class="grid grid-cols-2 gap-1.5 text-xs font-mono">
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-100">r=2 → 4×3.14 = <b>12.56</b></div>
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-100">r=3 → 9×3.14 = <b>28.26</b></div>
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-100">r=4 → 16×3.14 = <b>50.24</b></div>
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-100">r=5 → 25×3.14 = <b>78.5</b></div>
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-100">r=6 → 36×3.14 = <b>113.04</b></div>
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-100">r=8 → 64×3.14 = <b>200.96</b></div>
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-100">r=9 → 81×3.14 = <b>254.34</b></div>
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-100">r=10 → 100×3.14 = <b>314</b></div>
+                </div>
+                <div class="pt-1 border-t border-slate-100 text-xs text-slate-600 space-y-1">
+                    <div>🍀 <strong>正方形內葉子形</strong> ＝ 邊長 × 邊長 × <strong>0.57</strong></div>
+                    <div>📐 <strong>正方形挖去 1/4 圓</strong> ＝ 邊長 × 邊長 × <strong>0.215</strong></div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // =========================================================================
+        // 1. 數學工具函式：確保浮點數精準度
+        // =========================================================================
+        function roundClean(num) {
+            return Math.round(num * 10000) / 10000;
+        }
+
+        function randChoice(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        // =========================================================================
+        // 2. 動態 SVG 幾何圖形生成器（專為面積塗色題設計）
+        // =========================================================================
+        function polarToCartesian(cx, cy, r, angleInDegrees) {
+            const angleInRadians = (-angleInDegrees * Math.PI) / 180.0;
+            return {
+                x: cx + r * Math.cos(angleInRadians),
+                y: cy + r * Math.sin(angleInRadians)
+            };
+        }
+
+        // 繪製單一扇形面積 SVG（含斜線網格塗色與清楚半徑/直徑標註）
+        function createSectorSVG(angleDeg, labelVal, isDiameter = false, angleText = "", extraNote = "") {
+            const cx = 110, cy = 115, r = 72;
+            const start = polarToCartesian(cx, cy, r, 0);
+            const end = polarToCartesian(cx, cy, r, angleDeg);
+            const largeArcFlag = angleDeg > 180 ? 1 : 0;
+
+            let pathData = "";
+            if (angleDeg === 360) {
+                pathData = `M ${cx - r}, ${cy} a ${r},${r} 0 1,0 ${r * 2},0 a ${r},${r} 0 1,0 -${r * 2},0`;
+            } else {
+                pathData = `M ${cx} ${cy} L ${start.x} ${start.y} A ${r} ${r} 0 ${largeArcFlag} 0 ${end.x} ${end.y} Z`;
+            }
+
+            let angleMarker = "";
+            if (angleDeg === 90) {
+                angleMarker = `<polyline points="${cx + 16},${cy} ${cx + 16},${cy - 16} ${cx},${cy - 16}" fill="none" stroke="#e11d48" stroke-width="2"/>`;
+            } else if (angleDeg < 360) {
+                const ar = 22;
+                const aStart = polarToCartesian(cx, cy, ar, 0);
+                const aEnd = polarToCartesian(cx, cy, ar, angleDeg);
+                angleMarker = `<path d="M ${aStart.x} ${aStart.y} A ${ar} ${ar} 0 ${largeArcFlag} 0 ${aEnd.x} ${aEnd.y}" fill="none" stroke="#e11d48" stroke-width="2"/>`;
+            }
+
+            const textPos = polarToCartesian(cx, cy, 40, angleDeg / 2);
+
+            let diameterLine = "";
+            let labelSVG = "";
+            if (isDiameter && angleDeg === 180) {
+                diameterLine = `<line x1="${cx - r}" y1="${cy}" x2="${cx + r}" y2="${cy}" stroke="#0f766e" stroke-width="2.5" stroke-dasharray="4,3"/>`;
+                labelSVG = `<text x="${cx}" y="${cy + 18}" text-anchor="middle" fill="#0f766e" font-size="13" font-weight="bold">直徑 ${labelVal}</text>`;
+            } else if (isDiameter) {
+                labelSVG = `<text x="${cx + r / 2}" y="${cy + 17}" text-anchor="middle" fill="#0f766e" font-size="12" font-weight="bold">(直徑 ${labelVal})</text>`;
+            } else {
+                labelSVG = `<text x="${cx + r / 2}" y="${cy + 17}" text-anchor="middle" fill="#0f766e" font-size="13" font-weight="bold">半徑 ${labelVal}</text>`;
+            }
+
+            return `
+            <svg viewBox="0 0 220 220" class="w-full h-full">
+                <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4,4"/>
+                <path d="${pathData}" fill="#5eead4" fill-opacity="0.55" stroke="#0d9488" stroke-width="2.6" stroke-linejoin="round"/>
+                ${diameterLine}
+                ${angleMarker}
+                <circle cx="${cx}" cy="${cy}" r="3.5" fill="#0f172a"/>
+                ${angleText ? `<text x="${textPos.x}" y="${textPos.y}" text-anchor="middle" dominant-baseline="middle" fill="#be123c" font-size="12" font-weight="bold">${angleText}</text>` : ''}
+                ${labelSVG}
+                ${extraNote ? `<text x="110" y="210" text-anchor="middle" fill="#475569" font-size="12" font-weight="bold">${extraNote}</text>` : ''}
+            </svg>`;
+        }
+
+        // 繪製牛吃草（穀倉角落綁繩子）SVG
+        function createCowGrazingSVG(barnW, barnH, ropeLen) {
+            // 穀倉畫在左上偏中，繩子綁在穀倉右下角，牛在右下方 3/4 圓 + 轉彎小 1/4 圓吃草
+            const scale = 68 / ropeLen;
+            const rMain = ropeLen * scale;
+            const bW = Math.min(barnW * scale, 55);
+            const bH = Math.min(barnH * scale, 55);
+
+            // 綁繩點 (bx, by)
+            const bx = 95, by = 105;
+            const rTurnH = Math.max(0, (ropeLen - barnH) * scale);
+            const rTurnW = Math.max(0, (ropeLen - barnW) * scale);
+
+            // 主 3/4 圓：從正上方(90度) 順時針繞 270 度到正左方(180度)
+            // 在 SVG 座標中：正上方是 (bx, by - rMain)，正右方是 (bx + rMain, by)，正下方是 (bx, by + rMain)，正左方是 (bx - rMain, by)
+            const mainSector = `
+                M ${bx} ${by}
+                L ${bx} ${by - rMain}
+                A ${rMain} ${rMain} 0 1 1 ${bx - rMain} ${by}
+                Z
+            `;
+
+            // 若繩長 > 穀倉高，在穀倉右上角 (bx, by - bH) 往上再轉一個 1/4 圓
+            let turnTopSector = "";
+            if (rTurnH > 0) {
+                const tx = bx, ty = by - bH;
+                turnTopSector = `
+                    M ${tx} ${ty}
+                    L ${tx - rTurnH} ${ty}
+                    A ${rTurnH} ${rTurnH} 0 0 1 ${tx} ${ty - rTurnH}
+                    Z
+                `;
+            }
+
+            // 若繩長 > 穀倉寬，在穀倉左下角 (bx - bW, by) 往左再轉一個 1/4 圓
+            let turnLeftSector = "";
+            if (rTurnW > 0) {
+                const lx = bx - bW, ly = by;
+                turnLeftSector = `
+                    M ${lx} ${ly}
+                    L ${lx - rTurnW} ${ly}
+                    A ${rTurnW} ${rTurnW} 0 0 1 ${lx} ${ly - rTurnW}
+                    Z
+                `;
+            }
+
+            return `
+            <svg viewBox="0 0 220 220" class="w-full h-full">
+                <!-- 主 3/4 圓草地 -->
+                <path d="${mainSector}" fill="#86efac" fill-opacity="0.65" stroke="#16a34a" stroke-width="2"/>
+                <!-- 轉彎處小 1/4 圓草地 -->
+                ${turnTopSector ? `<path d="${turnTopSector}" fill="#fde047" fill-opacity="0.75" stroke="#ca8a04" stroke-width="1.8"/>` : ''}
+                ${turnLeftSector ? `<path d="${turnLeftSector}" fill="#fde047" fill-opacity="0.75" stroke="#ca8a04" stroke-width="1.8"/>` : ''}
+                <!-- 穀倉本體 -->
+                <rect x="${bx - bW}" y="${by - bH}" width="${bW}" height="${bH}" fill="#cbd5e1" stroke="#475569" stroke-width="2"/>
+                <text x="${bx - bW / 2}" y="${by - bH / 2 + 4}" text-anchor="middle" fill="#1e293b" font-size="11" font-weight="bold">穀倉</text>
+                <!-- 綁繩木樁 -->
+                <circle cx="${bx}" cy="${by}" r="4.5" fill="#dc2626"/>
+                <!-- 繩長標示 -->
+                <line x1="${bx}" y1="${by}" x2="${bx + rMain}" y2="${by}" stroke="#dc2626" stroke-width="2" stroke-dasharray="3,2"/>
+                <text x="${bx + rMain / 2}" y="${by - 6}" text-anchor="middle" fill="#b91c1c" font-size="11" font-weight="bold">繩長${ropeLen}m</text>
+            </svg>`;
+        }
+
+        // 繪製甜甜圈扇形（扇形環）面積 SVG
+        function createAnnulusSectorSVG(angleDeg, R, r) {
+            const cx = 110, cy = 122, outerR = 78, innerR = 42;
+            const largeArcFlag = angleDeg > 180 ? 1 : 0;
+
+            const p1 = polarToCartesian(cx, cy, outerR, 0);
+            const p2 = polarToCartesian(cx, cy, outerR, angleDeg);
+            const p3 = polarToCartesian(cx, cy, innerR, angleDeg);
+            const p4 = polarToCartesian(cx, cy, innerR, 0);
+
+            const pathData = `
+                M ${p1.x} ${p1.y}
+                A ${outerR} ${outerR} 0 ${largeArcFlag} 0 ${p2.x} ${p2.y}
+                L ${p3.x} ${p3.y}
+                A ${innerR} ${innerR} 0 ${largeArcFlag} 1 ${p4.x} ${p4.y}
+                Z
+            `;
+            const textPos = polarToCartesian(cx, cy, 24, angleDeg / 2);
+
+            return `
+            <svg viewBox="0 0 220 220" class="w-full h-full">
+                <line x1="${cx}" y1="${cy}" x2="${p4.x}" y2="${p4.y}" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="3,3"/>
+                <line x1="${cx}" y1="${cy}" x2="${p3.x}" y2="${p3.y}" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="3,3"/>
+                <path d="${pathData}" fill="#fdba74" fill-opacity="0.75" stroke="#ea580c" stroke-width="2.5" stroke-linejoin="round"/>
+                <circle cx="${cx}" cy="${cy}" r="3" fill="#0f172a"/>
+                <text x="${textPos.x}" y="${textPos.y}" text-anchor="middle" dominant-baseline="middle" fill="#9a3412" font-size="12" font-weight="bold">${angleDeg}°</text>
+                <text x="${cx + 58}" y="${cy + 16}" text-anchor="middle" fill="#0369a1" font-size="11" font-weight="bold">外R=${R}</text>
+                <text x="${cx + 22}" y="${cy + 16}" text-anchor="middle" fill="#be123c" font-size="11" font-weight="bold">內r=${r}</text>
+            </svg>`;
+        }
+
+        // 繪製葉子形面積 SVG
+        function createLeafSVG(side) {
+            const x0 = 50, y0 = 38, s = 120;
+            const x1 = x0 + s, y1 = y0 + s;
+            const leafPath = `
+                M ${x0} ${y0}
+                A ${s} ${s} 0 0 1 ${x1} ${y1}
+                A ${s} ${s} 0 0 1 ${x0} ${y0}
+                Z
+            `;
+            return `
+            <svg viewBox="0 0 220 220" class="w-full h-full">
+                <rect x="${x0}" y="${y0}" width="${s}" height="${s}" fill="#f8fafc" stroke="#64748b" stroke-width="2"/>
+                <path d="${leafPath}" fill="#6ee7b7" fill-opacity="0.85" stroke="#059669" stroke-width="2.5"/>
+                <text x="${x0 + s / 2}" y="${y1 + 20}" text-anchor="middle" fill="#334155" font-size="13" font-weight="bold">正方形邊長 ${side} 公分</text>
+            </svg>`;
+        }
+
+        // 繪製正方形內挖去 1/4 圓（角落剩餘塗色面積）SVG
+        function createSquareMinusSectorSVG(side) {
+            const x0 = 50, y0 = 38, s = 120;
+            const x1 = x0 + s, y1 = y0 + s;
+            // 以左下角 (x0, y1) 為圓心畫 1/4 圓弧從左上 (x0, y0) 到右下 (x1, y1)，塗色區域為右上角剩餘部分
+            const shadedPath = `
+                M ${x0} ${y0}
+                L ${x1} ${y0}
+                L ${x1} ${y1}
+                A ${s} ${s} 0 0 0 ${x0} ${y0}
+                Z
+            `;
+            return `
+            <svg viewBox="0 0 220 220" class="w-full h-full">
+                <rect x="${x0}" y="${y0}" width="${s}" height="${s}" fill="#ffffff" stroke="#64748b" stroke-width="2"/>
+                <path d="${shadedPath}" fill="#93c5fd" fill-opacity="0.8" stroke="#2563eb" stroke-width="2.5" stroke-linejoin="round"/>
+                <text x="${x0 + s / 2}" y="${y1 + 20}" text-anchor="middle" fill="#334155" font-size="13" font-weight="bold">正方形邊長 ${side} 公分</text>
+            </svg>`;
+        }
+
+        // 繪製太極半圓（大半圓內含兩個等大小半圓，塗色面積 = 大半圓的一半）或拱橋形
+        function createTaijiSemicircleSVG(bigD) {
+            const cx = 110, cy = 135, R = 76;
+            const r = R / 2;
+            // 左側白半圓凸起、右側塗色半圓凹入（經典太極半圓面積題，面積剛好等於大半圓的 1/2）
+            const shadedPath = `
+                M ${cx - R} ${cy}
+                A ${R} ${R} 0 0 1 ${cx + R} ${cy}
+                A ${r} ${r} 0 0 1 ${cx} ${cy}
+                A ${r} ${r} 0 0 0 ${cx - R} ${cy}
+                Z
+            `;
+            return `
+            <svg viewBox="0 0 220 220" class="w-full h-full">
+                <line x1="${cx - R}" y1="${cy}" x2="${cx + R}" y2="${cy}" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4,3"/>
+                <path d="${shadedPath}" fill="#c4b5fd" fill-opacity="0.85" stroke="#7c3aed" stroke-width="2.5"/>
+                <text x="${cx}" y="${cy + 22}" text-anchor="middle" fill="#4c1d95" font-size="13" font-weight="bold">大半圓直徑 ${bigD} 公分</text>
+            </svg>`;
+        }
+
+        // =========================================================================
+        // 3. 隨機出題引擎（扇形面積四大題型）
+        // =========================================================================
+        function generateQuestion(forcedType = 'all') {
+            const types = ['type1', 'type2', 'type3', 'type4'];
+            const selectedType = forcedType === 'all' ? randChoice(types) : forcedType;
+
+            // -----------------------------------------------------------------
+            // 題型一：【角度扇形面積】給定圓心角與半徑（或直徑），求面積
+            // -----------------------------------------------------------------
+            if (selectedType === 'type1') {
+                // 確保 r^2 能被 den 整除，讓 r^2 * num / den 為整數，乘以 3.14 後必為最多兩位小數
+                const angleConfigs = [
+                    { deg: 45, num: 1, den: 8, rList: [4, 8, 12, 16, 20] },
+                    { deg: 60, num: 1, den: 6, rList: [6, 12, 18] },
+                    { deg: 72, num: 1, den: 5, rList: [5, 10, 15, 20] },
+                    { deg: 90, num: 1, den: 4, rList: [2, 4, 6, 8, 10, 12, 14, 16, 20] },
+                    { deg: 120, num: 1, den: 3, rList: [3, 6, 9, 12, 15, 18] },
+                    { deg: 135, num: 3, den: 8, rList: [4, 8, 12, 16] },
+                    { deg: 150, num: 5, den: 12, rList: [6, 12, 18] },
+                    { deg: 180, num: 1, den: 2, rList: [2, 4, 6, 8, 10, 12, 14, 16, 20] },
+                    { deg: 216, num: 3, den: 5, rList: [5, 10, 15] },
+                    { deg: 240, num: 2, den: 3, rList: [3, 6, 9, 12, 15] },
+                    { deg: 270, num: 3, den: 4, rList: [4, 6, 8, 10, 12, 16] },
+                    { deg: 300, num: 5, den: 6, rList: [6, 12, 18] }
+                ];
+                const cfg = randChoice(angleConfigs);
+                const r = randChoice(cfg.rList);
+                const d = r * 2;
+                const useDiameter = Math.random() < 0.38; // 約 38% 機率給「直徑」，訓練學生先除以 2
+
+                const rSq = r * r;
+                const reducedFactor = roundClean((rSq * cfg.num) / cfg.den);
+                const ans = roundClean(reducedFactor * 3.14);
+
+                const qText = useDiameter
+                    ? `有一個<strong>直徑</strong>為 <span class="text-sky-600">${d} 公分</span>、圓心角為 <span class="text-rose-600">${cfg.deg}°</span> 的扇形，請問這個扇形的<strong>面積</strong>是多少平方公分？`
+                    : `有一個<strong>半徑</strong>為 <span class="text-sky-600">${r} 公分</span>、圓心角為 <span class="text-rose-600">${cfg.deg}°</span> 的扇形，請問這個扇形的<strong>面積</strong>是多少平方公分？`;
+
+                const stepDiameter = useDiameter
+                    ? [`<strong>步驟 1（先將直徑換成半徑）：</strong><br>半徑 ＝ 直徑 ÷ 2 ＝ ${d} ÷ 2 ＝ <strong>${r}</strong>（公分）`]
+                    : [];
+
+                const stepIdxOffset = useDiameter ? 1 : 0;
+
+                return {
+                    type: 'type1',
+                    categoryLabel: '題型一：角度扇形面積',
+                    questionHTML: qText,
+                    svgHTML: createSectorSVG(cfg.deg, useDiameter ? `${d} cm` : `${r} cm`, useDiameter, `${cfg.deg}°`),
+                    answer: ans,
+                    unit: '平方公分',
+                    steps: [
+                        ...stepDiameter,
+                        `<strong>步驟 ${1 + stepIdxOffset}（算圓心角占整個圓的幾分之幾）：</strong><br>${cfg.deg}° ÷ 360° ＝ <span class="fraction"><span class="num">${cfg.deg}</span><span class="den">360</span></span> ＝ <span class="fraction"><span class="num">${cfg.num}</span><span class="den">${cfg.den}</span></span> 圓`,
+                        `<strong>步驟 ${2 + stepIdxOffset}（套用扇形面積公式，先約分再乘 3.14）：</strong><br>扇形面積 ＝ 半徑 × 半徑 × 3.14 × <span class="fraction"><span class="num">${cfg.num}</span><span class="den">${cfg.den}</span></span><br>＝ ${r} × ${r} × 3.14 × <span class="fraction"><span class="num">${cfg.num}</span><span class="den">${cfg.den}</span></span><br>＝ ${reducedFactor} × 3.14 ＝ <strong class="text-emerald-700 text-lg">${ans}</strong>（平方公分）`
+                    ],
+                    warning: useDiameter
+                        ? `⚠️ <strong>直徑陷阱警報：</strong>題目給的是「直徑 ${d} 公分」，計算圓面積或扇形面積時，<strong>絕對不能直接用直徑相乘</strong>，一定要先除以 2 換成半徑（${r} 公分）！`
+                        : `⚠️ <strong>速算小撇步：</strong>計算「${r} × ${r} × 3.14 × ${cfg.num}/${cfg.den}」時，先算 ${rSq} × ${cfg.num} ÷ ${cfg.den} ＝ ${reducedFactor}，最後再算 ${reducedFactor} × 3.14，又快又不易算錯！`
+                };
+            }
+
+            // -----------------------------------------------------------------
+            // 題型二：【幾分之幾圓面積】給定分數圓與半徑（或直徑），求面積
+            // -----------------------------------------------------------------
+            if (selectedType === 'type2') {
+                const fracConfigs = [
+                    { num: 1, den: 2, deg: 180, rList: [4, 6, 8, 10, 12, 14, 16, 20] },
+                    { num: 1, den: 3, deg: 120, rList: [3, 6, 9, 12, 15] },
+                    { num: 1, den: 4, deg: 90, rList: [4, 6, 8, 10, 12, 16, 20] },
+                    { num: 1, den: 5, deg: 72, rList: [5, 10, 15, 20] },
+                    { num: 1, den: 6, deg: 60, rList: [6, 12, 18] },
+                    { num: 1, den: 8, deg: 45, rList: [4, 8, 12, 16] },
+                    { num: 2, den: 3, deg: 240, rList: [3, 6, 9, 12, 15] },
+                    { num: 3, den: 4, deg: 270, rList: [4, 6, 8, 10, 12, 16] },
+                    { num: 3, den: 5, deg: 216, rList: [5, 10, 15] },
+                    { num: 5, den: 6, deg: 300, rList: [6, 12, 18] },
+                    { num: 5, den: 8, deg: 225, rList: [4, 8, 12, 16] },
+                    { num: 7, den: 8, deg: 315, rList: [4, 8, 12, 16] }
+                ];
+                const cfg = randChoice(fracConfigs);
+                const r = randChoice(cfg.rList);
+                const d = r * 2;
+                const useDiameter = Math.random() < 0.35;
+
+                const rSq = r * r;
+                const reducedFactor = roundClean((rSq * cfg.num) / cfg.den);
+                const ans = roundClean(reducedFactor * 3.14);
+
+                const fracHTML = `<span class="fraction"><span class="num">${cfg.num}</span><span class="den">${cfg.den}</span></span>`;
+                const qText = useDiameter
+                    ? `有一個<strong>直徑</strong>為 <span class="text-sky-600">${d} 公分</span> 的 ${fracHTML} 圓扇形，請問它的<strong>面積</strong>是多少平方公分？`
+                    : `有一個<strong>半徑</strong>為 <span class="text-sky-600">${r} 公分</span> 的 ${fracHTML} 圓扇形，請問它的<strong>面積</strong>是多少平方公分？`;
+
+                return {
+                    type: 'type2',
+                    categoryLabel: '題型二：幾分之幾圓面積',
+                    questionHTML: qText,
+                    svgHTML: createSectorSVG(cfg.deg, useDiameter ? `${d} cm` : `${r} cm`, useDiameter, `${cfg.num}/${cfg.den}圓`),
+                    answer: ans,
+                    unit: '平方公分',
+                    steps: [
+                        useDiameter
+                            ? `<strong>步驟 1（直徑換半徑）：</strong><br>半徑 ＝ ${d} ÷ 2 ＝ <strong>${r}</strong>（公分）`
+                            : `<strong>步驟 1（確認半徑與公式）：</strong><br>扇形面積 ＝ 半徑 × 半徑 × 3.14 × ${fracHTML}`,
+                        `<strong>步驟 2（代入數字並先約分）：</strong><br>${r} × ${r} × 3.14 × ${fracHTML} ＝ ${rSq} × ${fracHTML} × 3.14 ＝ ${reducedFactor} × 3.14 ＝ <strong class="text-emerald-700 text-lg">${ans}</strong>（平方公分）`
+                    ],
+                    warning: `⚠️ <strong>面積 vs 周長別搞混：</strong>求扇形<strong>面積</strong>只要算「圓面積 × 幾分之幾圓」就好，<strong>不需要</strong>再加上兩條半徑喔！`
+                };
+            }
+
+            // -----------------------------------------------------------------
+            // 題型三：【逆向思維與生活應用】反推半徑 / 反推圓心角 / 牛吃草問題
+            // -----------------------------------------------------------------
+            if (selectedType === 'type3') {
+                const subType = randChoice(['revRadius', 'revAngle', 'cow']);
+
+                // 類型 A：已知扇形面積與圓心角，反推半徑
+                if (subType === 'revRadius') {
+                    const angleConfigs = [
+                        { deg: 90, num: 1, den: 4 },
+                        { deg: 72, num: 1, den: 5 },
+                        { deg: 120, num: 1, den: 3 },
+                        { deg: 144, num: 2, den: 5 },
+                        { deg: 180, num: 1, den: 2 }
+                    ];
+                    const cfg = randChoice(angleConfigs);
+                    const r = randChoice([2, 3, 4, 5, 6, 7, 8, 9, 10]);
+                    const rSq = r * r;
+                    const area = roundClean(rSq * 3.14 * cfg.num / cfg.den);
+                    const fullCircleArea = roundClean(rSq * 3.14);
+
+                    return {
+                        type: 'type3',
+                        categoryLabel: '題型三：逆向反推與牛吃草',
+                        questionHTML: `已知一個圓心角為 <span class="text-rose-600">${cfg.deg}°</span> 的扇形，它的<strong>面積</strong>是 <span class="text-sky-600">${area} 平方公分</span>。請問這個扇形的<strong>半徑</strong>是多少公分？`,
+                        svgHTML: createSectorSVG(cfg.deg, '? cm', false, `${cfg.deg}°`, `面積 = ${area} cm²`),
+                        answer: r,
+                        unit: '公分',
+                        steps: [
+                            `<strong>步驟 1（由扇形面積反推完整圓面積）：</strong><br>${cfg.deg}° 是 <span class="fraction"><span class="num">${cfg.deg}</span><span class="den">360</span></span> ＝ <span class="fraction"><span class="num">${cfg.num}</span><span class="den">${cfg.den}</span></span> 圓，<br>所以完整圓面積 ＝ ${area} ÷ <span class="fraction"><span class="num">${cfg.num}</span><span class="den">${cfg.den}</span></span> ＝ <strong>${fullCircleArea}</strong>（平方公分）`,
+                            `<strong>步驟 2（除以 3.14 算出「半徑 × 半徑」）：</strong><br>半徑 × 半徑 ＝ ${fullCircleArea} ÷ 3.14 ＝ <strong>${rSq}</strong>`,
+                            `<strong>步驟 3（找出哪個數自己乘自己等於 ${rSq}）：</strong><br>因為 ${r} × ${r} ＝ ${rSq}，所以半徑 ＝ <strong class="text-emerald-700 text-lg">${r}</strong>（公分）`
+                        ],
+                        warning: `⚠️ <strong>最後一步別忘記：</strong>算出「${fullCircleArea} ÷ 3.14 ＝ ${rSq}」之後，${rSq} 是「半徑 × 半徑」，還要找出平方根（${r} × ${r} ＝ ${rSq}），答案才是半徑 ${r} 公分喔！`
+                    };
+                }
+
+                // 類型 B：已知扇形面積與半徑，反推圓心角是幾度
+                if (subType === 'revAngle') {
+                    const angleConfigs = [
+                        { deg: 45, num: 1, den: 8, rList: [4, 8, 12] },
+                        { deg: 60, num: 1, den: 6, rList: [6, 12] },
+                        { deg: 72, num: 1, den: 5, rList: [5, 10] },
+                        { deg: 90, num: 1, den: 4, rList: [4, 6, 8, 10] },
+                        { deg: 120, num: 1, den: 3, rList: [3, 6, 9, 12] },
+                        { deg: 135, num: 3, den: 8, rList: [4, 8] },
+                        { deg: 150, num: 5, den: 12, rList: [6, 12] },
+                        { deg: 216, num: 3, den: 5, rList: [5, 10] },
+                        { deg: 240, num: 2, den: 3, rList: [6, 9, 12] },
+                        { deg: 270, num: 3, den: 4, rList: [4, 6, 8, 10] }
+                    ];
+                    const cfg = randChoice(angleConfigs);
+                    const r = randChoice(cfg.rList);
+                    const fullCircleArea = roundClean(r * r * 3.14);
+                    const area = roundClean((r * r * cfg.num / cfg.den) * 3.14);
+
+                    return {
+                        type: 'type3',
+                        categoryLabel: '題型三：逆向反推與牛吃草',
+                        questionHTML: `有一個半徑為 <span class="text-sky-600">${r} 公分</span> 的扇形，測得它的<strong>面積</strong>是 <span class="text-rose-600">${area} 平方公分</span>。請問這個扇形的<strong>圓心角</strong>是多少度？`,
+                        svgHTML: createSectorSVG(cfg.deg, `${r} cm`, false, '? °', `面積 = ${area} cm²`),
+                        answer: cfg.deg,
+                        unit: '度',
+                        steps: [
+                            `<strong>步驟 1（先算出同半徑完整圓的面積）：</strong><br>圓面積 ＝ ${r} × ${r} × 3.14 ＝ <strong>${fullCircleArea}</strong>（平方公分）`,
+                            `<strong>步驟 2（算出這個扇形占整個圓的幾分之幾）：</strong><br>扇形面積 ÷ 圓面積 ＝ ${area} ÷ ${fullCircleArea} ＝ <span class="fraction"><span class="num">${cfg.num}</span><span class="den">${cfg.den}</span></span>`,
+                            `<strong>步驟 3（乘以 360° 求出圓心角）：</strong><br>360° × <span class="fraction"><span class="num">${cfg.num}</span><span class="den">${cfg.den}</span></span> ＝ <strong class="text-emerald-700 text-lg">${cfg.deg}</strong>（度）`
+                        ],
+                        warning: `⚠️ <strong>單位注意：</strong>這題問的是「圓心角是幾度」，周角一圈是 360°，算出幾分之幾圓後乘以 360° 就能得到度數！`
+                    };
+                }
+
+                // 類型 C：生活應用「繩子綁柱子（牛吃草問題）」
+                const cowConfigs = [
+                    { shape: '正方形', w: 6, h: 6, rope: 8 },
+                    { shape: '正方形', w: 8, h: 8, rope: 10 },
+                    { shape: '正方形', w: 6, h: 6, rope: 10 },
+                    { shape: '長方形', w: 10, h: 6, rope: 8 },
+                    { shape: '長方形', w: 12, h: 8, rope: 10 },
+                    { shape: '長方形', w: 10, h: 4, rope: 8 }
+                ];
+                const ccfg = randChoice(cowConfigs);
+                // 主 3/4 圓半徑 = rope
+                const mainArea = roundClean(ccfg.rope * ccfg.rope * 3.14 * 0.75);
+                // 轉彎處 1：繩長超過 h 的部分
+                const turn1R = Math.max(0, ccfg.rope - ccfg.h);
+                const turn1Area = roundClean(turn1R * turn1R * 3.14 * 0.25);
+                // 轉彎處 2：繩長超過 w 的部分
+                const turn2R = Math.max(0, ccfg.rope - ccfg.w);
+                const turn2Area = roundClean(turn2R * turn2R * 3.14 * 0.25);
+                const totalCowArea = roundClean(mainArea + turn1Area + turn2Area);
+
+                const shapeDesc = ccfg.shape === '正方形'
+                    ? `邊長 <span class="text-slate-700">${ccfg.w} 公尺</span> 的正方形穀倉`
+                    : `長 <span class="text-slate-700">${ccfg.w} 公尺</span>、寬 <span class="text-slate-700">${ccfg.h} 公尺</span> 的長方形穀倉`;
+
+                let turnSteps = [];
+                if (turn1R > 0 && turn2R > 0 && turn1R === turn2R) {
+                    turnSteps.push(`<strong>步驟 2（穀倉兩個轉角處各有 1 個小 <span class="fraction"><span class="num">1</span><span class="den">4</span></span> 圓）：</strong><br>多出來的繩長 ＝ ${ccfg.rope} − ${ccfg.w} ＝ ${turn1R}（公尺）<br>兩個 <span class="fraction"><span class="num">1</span><span class="den">4</span></span> 圓面積 ＝ ${turn1R} × ${turn1R} × 3.14 × <span class="fraction"><span class="num">1</span><span class="den">4</span></span> × 2 ＝ <strong>${roundClean(turn1Area + turn2Area)}</strong>（平方公尺）`);
+                } else {
+                    if (turn1R > 0) {
+                        turnSteps.push(`<strong>步驟 2（短邊轉彎處的小 <span class="fraction"><span class="num">1</span><span class="den">4</span></span> 圓）：</strong><br>多出來的繩長 ＝ ${ccfg.rope} − ${ccfg.h} ＝ ${turn1R}（公尺）<br>小 <span class="fraction"><span class="num">1</span><span class="den">4</span></span> 圓面積 ＝ ${turn1R} × ${turn1R} × 3.14 × <span class="fraction"><span class="num">1</span><span class="den">4</span></span> ＝ <strong>${turn1Area}</strong>（平方公尺）`);
+                    }
+                    if (turn2R > 0) {
+                        turnSteps.push(`<strong>步驟 3（長邊轉彎處的小 <span class="fraction"><span class="num">1</span><span class="den">4</span></span> 圓）：</strong><br>多出來的繩長 ＝ ${ccfg.rope} − ${ccfg.w} ＝ ${turn2R}（公尺）<br>小 <span class="fraction"><span class="num">1</span><span class="den">4</span></span> 圓面積 ＝ ${turn2R} × ${turn2R} × 3.14 × <span class="fraction"><span class="num">1</span><span class="den">4</span></span> ＝ <strong>${turn2Area}</strong>（平方公尺）`);
+                    }
+                }
+
+                return {
+                    type: 'type3',
+                    categoryLabel: '題型三：逆向反推與牛吃草',
+                    questionHTML: `如圖，草地上有一座${shapeDesc}，農夫用一條長 <span class="text-rose-600">${ccfg.rope} 公尺</span> 的繩子把牛拴在穀倉的右下角（穀倉內部牛進不去）。請問這頭牛能吃到的<strong>最大草地面積</strong>是多少平方公尺？`,
+                    svgHTML: createCowGrazingSVG(ccfg.w, ccfg.h, ccfg.rope),
+                    answer: totalCowArea,
+                    unit: '平方公尺',
+                    steps: [
+                        `<strong>步驟 1（算不受阻擋的主 <span class="fraction"><span class="num">3</span><span class="den">4</span></span> 圓草地）：</strong><br>因為穀倉直角占去 <span class="fraction"><span class="num">1</span><span class="den">4</span></span> 圓，所以主活動區是半徑 ${ccfg.rope} 公尺的 <span class="fraction"><span class="num">3</span><span class="den">4</span></span> 圓：<br>${ccfg.rope} × ${ccfg.rope} × 3.14 × <span class="fraction"><span class="num">3</span><span class="den">4</span></span> ＝ <strong>${mainArea}</strong>（平方公尺）`,
+                        ...turnSteps,
+                        `<strong>最後一步（把所有吃得到的草地加起來）：</strong><br>${mainArea} ＋ ${roundClean(turn1Area + turn2Area)} ＝ <strong class="text-emerald-700 text-lg">${totalCowArea}</strong>（平方公尺）`
+                    ],
+                    warning: `⚠️ <strong>牛吃草轉彎關鍵：</strong>當繩子長度超過穀倉邊長時，繩子會貼著穀倉角落轉彎，多出來的繩長會再掃出半徑為「繩長 − 邊長」的小 <span class="fraction"><span class="num">1</span><span class="den">4</span></span> 圓！`
+                };
+            }
+
+            // -----------------------------------------------------------------
+            // 題型四：【複合圖形塗色面積】扇形環 / 葉子形 / 正方形挖去扇形 / 太極半圓
+            // -----------------------------------------------------------------
+            const compType = randChoice(['annulus', 'leaf', 'sqMinusSector', 'taiji']);
+
+            // 4A. 扇形環（甜甜圈扇形）面積
+            if (compType === 'annulus') {
+                const ringConfigs = [
+                    { deg: 90, num: 1, den: 4, R: 10, r: 6 },
+                    { deg: 90, num: 1, den: 4, R: 12, r: 8 },
+                    { deg: 90, num: 1, den: 4, R: 10, r: 8 },
+                    { deg: 60, num: 1, den: 6, R: 12, r: 6 },
+                    { deg: 120, num: 1, den: 3, R: 12, r: 6 },
+                    { deg: 120, num: 1, den: 3, R: 15, r: 9 },
+                    { deg: 180, num: 1, den: 2, R: 10, r: 4 },
+                    { deg: 180, num: 1, den: 2, R: 10, r: 6 }
+                ];
+                const cfg = randChoice(ringConfigs);
+                const diffSq = cfg.R * cfg.R - cfg.r * cfg.r;
+                const bigArea = roundClean(cfg.R * cfg.R * 3.14 * cfg.num / cfg.den);
+                const smallArea = roundClean(cfg.r * cfg.r * 3.14 * cfg.num / cfg.den);
+                const ans = roundClean((diffSq * cfg.num / cfg.den) * 3.14);
+
+                return {
+                    type: 'type4',
+                    categoryLabel: '題型四：複合圖形塗色面積',
+                    questionHTML: `如圖，一個圓心角為 <span class="text-rose-600">${cfg.deg}°</span> 的扇形環（甜甜圈扇形），外半徑為 <span class="text-sky-600">${cfg.R} 公分</span>，內半徑為 <span class="text-sky-600">${cfg.r} 公分</span>，請問橘色塗色部分的<strong>面積</strong>是多少平方公分？`,
+                    svgHTML: createAnnulusSectorSVG(cfg.deg, cfg.R, cfg.r),
+                    answer: ans,
+                    unit: '平方公分',
+                    steps: [
+                        `<strong>方法一（大扇形面積 − 小扇形面積）：</strong><br>大扇形 ＝ ${cfg.R} × ${cfg.R} × 3.14 × <span class="fraction"><span class="num">${cfg.num}</span><span class="den">${cfg.den}</span></span> ＝ ${bigArea}（平方公分）<br>小扇形 ＝ ${cfg.r} × ${cfg.r} × 3.14 × <span class="fraction"><span class="num">${cfg.num}</span><span class="den">${cfg.den}</span></span> ＝ ${smallArea}（平方公分）<br>塗色面積 ＝ ${bigArea} − ${smallArea} ＝ <strong class="text-emerald-700 text-lg">${ans}</strong>（平方公分）`,
+                        `<strong>方法二（分配律速算法 — 強烈推薦！）：</strong><br>先算（大半徑² − 小半徑²）再一起乘 3.14：<br>（${cfg.R} × ${cfg.R} − ${cfg.r} × ${cfg.r}）× 3.14 × <span class="fraction"><span class="num">${cfg.num}</span><span class="den">${cfg.den}</span></span> ＝（${cfg.R * cfg.R} − ${cfg.r * cfg.r}）× 3.14 × <span class="fraction"><span class="num">${cfg.num}</span><span class="den">${cfg.den}</span></span> ＝ ${diffSq} × <span class="fraction"><span class="num">${cfg.num}</span><span class="den">${cfg.den}</span></span> × 3.14 ＝ <strong>${ans}</strong>（平方公分）`
+                    ],
+                    warning: `⚠️ <strong>常見錯誤提醒：</strong>千萬不能寫成「(${cfg.R} − ${cfg.r}) × (${cfg.R} − ${cfg.r}) × 3.14」！必須各自平方後再相減（${cfg.R}² − ${cfg.r}²），才能算出正確的環形面積！`
+                };
+            }
+
+            // 4B. 正方形內的葉子形面積
+            if (compType === 'leaf') {
+                const side = randChoice([4, 6, 8, 10, 12, 20]);
+                const sqArea = side * side;
+                const twoQuarters = roundClean(sqArea * 3.14 * 0.5);
+                const ans = roundClean(twoQuarters - sqArea);
+
+                return {
+                    type: 'type4',
+                    categoryLabel: '題型四：複合圖形塗色面積',
+                    questionHTML: `如圖，在一個邊長為 <span class="text-sky-600">${side} 公分</span> 的正方形內，分別以左下角與右上角為圓心畫出兩個 <span class="fraction"><span class="num">1</span><span class="den">4</span></span> 圓，重疊部分形成綠色的「葉子形」。請問這片葉子形的<strong>面積</strong>是多少平方公分？`,
+                    svgHTML: createLeafSVG(side),
+                    answer: ans,
+                    unit: '平方公分',
+                    steps: [
+                        `<strong>步驟 1（算兩個 <span class="fraction"><span class="num">1</span><span class="den">4</span></span> 圓的面積總和）：</strong><br>兩個 <span class="fraction"><span class="num">1</span><span class="den">4</span></span> 圓合起來剛好是 <span class="fraction"><span class="num">1</span><span class="den">2</span></span> 圓（半圓）：<br>${side} × ${side} × 3.14 × <span class="fraction"><span class="num">1</span><span class="den">2</span></span> ＝ <strong>${twoQuarters}</strong>（平方公分）`,
+                        `<strong>步驟 2（減去整個正方形面積，即得重疊的葉子）：</strong><br>正方形面積 ＝ ${side} × ${side} ＝ <strong>${sqArea}</strong>（平方公分）<br>葉子面積 ＝ ${twoQuarters} − ${sqArea} ＝ <strong class="text-emerald-700 text-lg">${ans}</strong>（平方公分）`,
+                        `<strong>💡 速算驗證（邊長 × 邊長 × 0.57）：</strong><br>${side} × ${side} × 0.57 ＝ ${sqArea} × 0.57 ＝ <strong>${ans}</strong>（平方公分）`
+                    ],
+                    warning: `⚠️ <strong>幾何原理：</strong>「兩個 1/4 圓」相加時，中間的葉子剛好被重複算了兩次，所以只要減掉「1 個正方形」就會剛剛好剩下 1 片完整的葉子喔！`
+                };
+            }
+
+            // 4C. 正方形挖去 1/4 圓（角落剩餘塗色面積）
+            if (compType === 'sqMinusSector') {
+                const side = randChoice([4, 6, 8, 10, 12, 20]);
+                const sqArea = side * side;
+                const quarterArea = roundClean(sqArea * 3.14 * 0.25);
+                const ans = roundClean(sqArea - quarterArea);
+
+                return {
+                    type: 'type4',
+                    categoryLabel: '題型四：複合圖形塗色面積',
+                    questionHTML: `如圖，在一個邊長為 <span class="text-sky-600">${side} 公分</span> 的正方形內，以左下角為圓心畫出一個最大的 <span class="fraction"><span class="num">1</span><span class="den">4</span></span> 圓。請問右上角藍色塗色部分的<strong>面積</strong>是多少平方公分？`,
+                    svgHTML: createSquareMinusSectorSVG(side),
+                    answer: ans,
+                    unit: '平方公分',
+                    steps: [
+                        `<strong>步驟 1（算整個正方形面積）：</strong><br>${side} × ${side} ＝ <strong>${sqArea}</strong>（平方公分）`,
+                        `<strong>步驟 2（算空白處 <span class="fraction"><span class="num">1</span><span class="den">4</span></span> 圓扇形面積）：</strong><br>扇形半徑就是正方形邊長 ${side} 公分：<br>${side} × ${side} × 3.14 × <span class="fraction"><span class="num">1</span><span class="den">4</span></span> ＝ <strong>${quarterArea}</strong>（平方公分）`,
+                        `<strong>步驟 3（正方形面積 − 扇形面積）：</strong><br>${sqArea} − ${quarterArea} ＝ <strong class="text-emerald-700 text-lg">${ans}</strong>（平方公分）`
+                    ],
+                    warning: `⚠️ <strong>看清楚塗色位置：</strong>這題要求的是扇形「外面剩餘的角落面積」，不是扇形本身的面積，記得要用正方形去減掉扇形！`
+                };
+            }
+
+            // 4D. 太極半圓（割補法經典題：塗色面積 = 大半圓的 1/2 = 大圓的 1/4）
+            const bigD = randChoice([8, 12, 16, 20, 24, 28]);
+            const bigR = bigD / 2;
+            const ans = roundClean(bigR * bigR * 3.14 * 0.5);
+
+            return {
+                type: 'type4',
+                categoryLabel: '題型四：複合圖形塗色面積',
+                questionHTML: `如圖，在一個直徑為 <span class="text-sky-600">${bigD} 公分</span> 的大半圓內，分別以左右兩半的直徑畫出兩個大小相同的小半圓。請問紫色塗色部分的<strong>面積</strong>是多少平方公分？`,
+                svgHTML: createTaijiSemicircleSVG(bigD),
+                answer: ans,
+                unit: '平方公分',
+                steps: [
+                    `<strong>步驟 1（運用「割補法」移動圖形）：</strong><br>因為左右兩個小半圓的直徑都是 ${bigD / 2} 公分（完全一樣大），所以把左邊凸出的紫色小半圓，剛好補進右邊凹進去的白色小半圓裡，整個紫色塗色部分就會變成<strong>一整個完整的大半圓</strong>！`,
+                    `<strong>步驟 2（計算大半圓面積）：</strong><br>大半圓的半徑 ＝ ${bigD} ÷ 2 ＝ <strong>${bigR}</strong>（公分）<br>大半圓面積 ＝ ${bigR} × ${bigR} × 3.14 ÷ 2 ＝ <strong class="text-emerald-700 text-lg">${ans}</strong>（平方公分）`
+                ],
+                warning: `⚠️ <strong>割補法超省時：</strong>這題不需要傻傻算出小半圓再加加減減！只要觀察「一凸一凹完全相等」，直接算一個大半圓的面積就是答案囉！`
+            };
+        }
+
+        // =========================================================================
+        // 4. 應用程式狀態管理（練習模式 vs 100分模擬測驗模式）
+        // =========================================================================
+        let currentMode = 'practice'; // 'practice' | 'exam'
+        let practiceCount = 1;
+        let streakCount = 0;
+        let currentPracticeQuestion = null;
+        let practiceSubmitted = false;
+
+        // 模擬測驗狀態 (10題，每題10分)
+        let examQuestions = [];
+        let examUserAnswers = Array(10).fill('');
+        let examCurrentIdx = 0;
+        let examSubmitted = false;
+
+        function initApp() {
+            initCanvas();
+            generatePracticeQuestion();
+        }
+
+        function switchMode(mode) {
+            currentMode = mode;
+            const btnPractice = document.getElementById('btnModePractice');
+            const btnExam = document.getElementById('btnModeExam');
+
+            if (mode === 'practice') {
+                btnPractice.className = "px-3 py-1.5 rounded-lg bg-white text-sky-700 shadow-sm transition";
+                btnExam.className = "px-3 py-1.5 rounded-lg text-white hover:bg-white/10 transition";
+                document.getElementById('badgeMode').textContent = "單題練習模式";
+                document.getElementById('practiceFilterBox').classList.remove('hidden');
+                document.getElementById('streakBadge').classList.remove('hidden');
+                document.getElementById('examNavContainer').classList.add('hidden');
+                document.getElementById('examResultBanner').classList.add('hidden');
+                document.getElementById('examPrevNextBar').classList.add('hidden');
+                document.getElementById('btnCheckAnswer').classList.remove('hidden');
+
+                practiceCount = 1;
+                generatePracticeQuestion();
+            } else {
+                btnExam.className = "px-3 py-1.5 rounded-lg bg-white text-sky-700 shadow-sm transition";
+                btnPractice.className = "px-3 py-1.5 rounded-lg text-white hover:bg-white/10 transition";
+                document.getElementById('badgeMode').textContent = "100分模擬測驗 (10題)";
+                document.getElementById('practiceFilterBox').classList.add('hidden');
+                document.getElementById('streakBadge').classList.add('hidden');
+                document.getElementById('examNavContainer').classList.remove('hidden');
+                document.getElementById('examPrevNextBar').classList.remove('hidden');
+                document.getElementById('btnNextQuestion').classList.add('hidden');
+
+                startNewExam();
+            }
+        }
+
+        function resetAndGenerate() {
+            clearCanvas();
+            if (currentMode === 'practice') {
+                practiceCount = 1;
+                generatePracticeQuestion();
+            } else {
+                startNewExam();
+            }
+        }
+
+        // -----------------------------------------------------------------
+        // 單題練習模式邏輯
+        // -----------------------------------------------------------------
+        function generatePracticeQuestion() {
+            const filterVal = document.getElementById('typeFilter').value;
+            currentPracticeQuestion = generateQuestion(filterVal);
+            practiceSubmitted = false;
+
+            document.getElementById('questionCounter').textContent = `第 ${practiceCount} 題`;
+            renderQuestionToUI(currentPracticeQuestion, '', false);
+        }
+
+        function nextQuestion() {
+            practiceCount++;
+            clearCanvas();
+            generatePracticeQuestion();
+        }
+
+        // -----------------------------------------------------------------
+        // 100分模擬測驗模式邏輯
+        // -----------------------------------------------------------------
+        function startNewExam() {
+            // 均衡分配 10 題：題型一(3題)、題型二(2題)、題型三(2題)、題型四(3題)
+            const blueprint = ['type1', 'type1', 'type1', 'type2', 'type2', 'type3', 'type3', 'type4', 'type4', 'type4'];
+            examQuestions = blueprint.map(t => generateQuestion(t));
+            examUserAnswers = Array(10).fill('');
+            examCurrentIdx = 0;
+            examSubmitted = false;
+
+            document.getElementById('examResultBanner').classList.add('hidden');
+            document.getElementById('btnSubmitExam').classList.remove('hidden');
+            document.getElementById('btnCheckAnswer').classList.add('hidden');
+
+            renderExamDots();
+            loadExamQuestion(0);
+        }
+
+        function renderExamDots() {
+            const container = document.getElementById('examDots');
+            container.innerHTML = '';
+            for (let i = 0; i < 10; i++) {
+                const btn = document.createElement('button');
+                btn.textContent = i + 1;
+                let baseClass = "w-8 h-8 rounded-lg text-xs font-bold border transition flex items-center justify-center ";
+
+                if (examSubmitted) {
+                    const userVal = parseFloat(examUserAnswers[i]);
+                    const isCorrect = !isNaN(userVal) && Math.abs(userVal - examQuestions[i].answer) < 0.015;
+                    if (isCorrect) {
+                        baseClass += (i === examCurrentIdx)
+                            ? "bg-emerald-600 text-white border-emerald-700 ring-2 ring-emerald-300"
+                            : "bg-emerald-100 text-emerald-800 border-emerald-300";
+                    } else {
+                        baseClass += (i === examCurrentIdx)
+                            ? "bg-rose-600 text-white border-rose-700 ring-2 ring-rose-300"
+                            : "bg-rose-100 text-rose-800 border-rose-300";
+                    }
+                } else {
+                    const hasAns = examUserAnswers[i] !== '';
+                    if (i === examCurrentIdx) {
+                        baseClass += "bg-teal-600 text-white border-teal-700 shadow-sm";
+                    } else if (hasAns) {
+                        baseClass += "bg-teal-100 text-teal-800 border-teal-300";
+                    } else {
+                        baseClass += "bg-slate-50 text-slate-600 border-slate-300 hover:bg-slate-100";
+                    }
+                }
+
+                btn.className = baseClass;
+                btn.onclick = () => {
+                    saveCurrentExamInput();
+                    loadExamQuestion(i);
+                };
+                container.appendChild(btn);
+            }
+        }
+
+        function saveCurrentExamInput() {
+            if (currentMode === 'exam' && !examSubmitted) {
+                const val = document.getElementById('answerInput').value.trim();
+                examUserAnswers[examCurrentIdx] = val;
+            }
+        }
+
+        function loadExamQuestion(idx) {
+            examCurrentIdx = idx;
+            document.getElementById('questionCounter').textContent = `第 ${idx + 1} / 10 題（10分）`;
+            renderQuestionToUI(examQuestions[idx], examUserAnswers[idx], examSubmitted);
+            renderExamDots();
+
+            document.getElementById('btnExamPrev').disabled = (idx === 0);
+            document.getElementById('btnExamPrev').classList.toggle('opacity-40', idx === 0);
+            document.getElementById('btnExamNext').disabled = (idx === 9);
+            document.getElementById('btnExamNext').classList.toggle('opacity-40', idx === 9);
+        }
+
+        function prevExamQuestion() {
+            if (examCurrentIdx > 0) {
+                saveCurrentExamInput();
+                loadExamQuestion(examCurrentIdx - 1);
+            }
+        }
+
+        function nextExamQuestion() {
+            if (examCurrentIdx < 9) {
+                saveCurrentExamInput();
+                loadExamQuestion(examCurrentIdx + 1);
+            }
+        }
+
+        function submitExam() {
+            saveCurrentExamInput();
+            examSubmitted = true;
+
+            let score = 0;
+            for (let i = 0; i < 10; i++) {
+                const userVal = parseFloat(examUserAnswers[i]);
+                if (!isNaN(userVal) && Math.abs(userVal - examQuestions[i].answer) < 0.015) {
+                    score += 10;
+                }
+            }
+
+            document.getElementById('finalScoreDisplay').textContent = score;
+            let comment = "";
+            if (score === 100) comment = "🎉 滿分滿分！你已經是扇形面積計算大師了！";
+            else if (score >= 80) comment = "👏 表現非常優秀！檢視一下錯題就能拿滿分囉！";
+            else if (score >= 60) comment = "💪 已經及格囉！記得多注意「直徑要先除以 2 換成半徑」喔！";
+            else comment = "🌱 別灰心！打開下方詳解一步一步跟著算，再挑戰一次！";
+
+            document.getElementById('finalComment').textContent = comment;
+            document.getElementById('examResultBanner').classList.remove('hidden');
+            document.getElementById('btnSubmitExam').classList.add('hidden');
+
+            loadExamQuestion(examCurrentIdx);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // -----------------------------------------------------------------
+        // 共用畫面渲染與對答案邏輯
+        // -----------------------------------------------------------------
+        function renderQuestionToUI(qObj, savedVal, showResult) {
+            document.getElementById('questionCategory').textContent = qObj.categoryLabel;
+            document.getElementById('questionText').innerHTML = qObj.questionHTML;
+            document.getElementById('svgContainer').innerHTML = qObj.svgHTML;
+            document.getElementById('unitLabel').textContent = qObj.unit;
+
+            const inputEl = document.getElementById('answerInput');
+            inputEl.value = savedVal;
+            inputEl.disabled = showResult;
+
+            inputEl.oninput = () => {
+                if (currentMode === 'exam' && !examSubmitted) {
+                    examUserAnswers[examCurrentIdx] = inputEl.value.trim();
+                    renderExamDots();
+                }
+            };
+
+            const feedbackEl = document.getElementById('feedbackMessage');
+            const expCard = document.getElementById('explanationCard');
+            const btnCheck = document.getElementById('btnCheckAnswer');
+            const btnNext = document.getElementById('btnNextQuestion');
+
+            if (showResult) {
+                const userNum = parseFloat(savedVal);
+                const isCorrect = !isNaN(userNum) && Math.abs(userNum - qObj.answer) < 0.015;
+
+                feedbackEl.classList.remove('hidden');
+                if (isCorrect) {
+                    feedbackEl.className = "mt-3 text-sm font-bold rounded-xl px-4 py-2.5 bg-emerald-100 text-emerald-800 border border-emerald-300";
+                    feedbackEl.innerHTML = `✅ 答對了！你的答案 <strong>${savedVal}</strong> 完全正確！`;
+                } else {
+                    const displayUser = savedVal === '' ? '未作答' : savedVal;
+                    feedbackEl.className = "mt-3 text-sm font-bold rounded-xl px-4 py-2.5 bg-rose-100 text-rose-800 border border-rose-300";
+                    feedbackEl.innerHTML = `❌ 答錯囉！（你的答案：<strong>${displayUser}</strong>，正確答案是 <strong>${qObj.answer}</strong>）`;
+                }
+
+                // 顯示詳解
+                expCard.classList.remove('hidden');
+                document.getElementById('expCorrectAnswer').textContent = qObj.answer;
+                document.getElementById('expCorrectUnit').textContent = qObj.unit;
+                document.getElementById('explanationSteps').innerHTML = qObj.steps.map(s => `<div class="bg-white/80 p-3 rounded-xl border border-emerald-100">${s}</div>`).join('');
+                document.getElementById('explanationWarning').innerHTML = qObj.warning;
+
+                if (currentMode === 'practice') {
+                    btnCheck.classList.add('hidden');
+                    btnNext.classList.remove('hidden');
+                }
+            } else {
+                feedbackEl.classList.add('hidden');
+                expCard.classList.add('hidden');
+                if (currentMode === 'practice') {
+                    btnCheck.classList.remove('hidden');
+                    btnNext.classList.add('hidden');
+                }
+            }
+        }
+
+        function handleAnswerSubmit() {
+            if (currentMode === 'exam') {
+                saveCurrentExamInput();
+                if (examCurrentIdx < 9) {
+                    loadExamQuestion(examCurrentIdx + 1);
+                }
+                return;
+            }
+
+            if (practiceSubmitted) {
+                nextQuestion();
+                return;
+            }
+
+            const inputVal = document.getElementById('answerInput').value.trim();
+            const feedbackEl = document.getElementById('feedbackMessage');
+
+            if (inputVal === '' || isNaN(parseFloat(inputVal))) {
+                feedbackEl.classList.remove('hidden');
+                feedbackEl.className = "mt-3 text-sm font-bold rounded-xl px-4 py-2 bg-amber-100 text-amber-800 border border-amber-300";
+                feedbackEl.textContent = "⚠️ 請先在框框內輸入計算後的數字再送出喔！";
+                return;
+            }
+
+            practiceSubmitted = true;
+            const userNum = parseFloat(inputVal);
+            const isCorrect = Math.abs(userNum - currentPracticeQuestion.answer) < 0.015;
+            if (isCorrect) {
+                streakCount++;
+            } else {
+                streakCount = 0;
+            }
+            document.getElementById('streakCount').textContent = streakCount;
+
+            renderQuestionToUI(currentPracticeQuestion, inputVal, true);
+        }
+
+        function toggleFormulaHint() {
+            document.getElementById('formulaHintBox').classList.toggle('hidden');
+        }
+
+        // =========================================================================
+        // 5. 右側工具欄：手寫計算草稿紙（含橡皮擦） & 輔助小算盤（含平方鍵）
+        // =========================================================================
+        function switchTool(tool) {
+            const tabS = document.getElementById('tabScratchpad');
+            const tabC = document.getElementById('tabCalculator');
+            const panelS = document.getElementById('panelScratchpad');
+            const panelC = document.getElementById('panelCalculator');
+
+            if (tool === 'scratchpad') {
+                tabS.className = "flex-1 py-2 text-sm font-bold rounded-xl bg-white text-slate-800 shadow-sm transition";
+                tabC.className = "flex-1 py-2 text-sm font-bold rounded-xl text-slate-600 hover:bg-white/50 transition";
+                panelS.classList.remove('hidden');
+                panelC.classList.add('hidden');
+                resizeCanvas();
+            } else {
+                tabC.className = "flex-1 py-2 text-sm font-bold rounded-xl bg-white text-slate-800 shadow-sm transition";
+                tabS.className = "flex-1 py-2 text-sm font-bold rounded-xl text-slate-600 hover:bg-white/50 transition";
+                panelC.classList.remove('hidden');
+                panelS.classList.add('hidden');
+            }
+        }
+
+        // --- Canvas 手寫草稿紙 ---
+        let canvas, ctx;
+        let isDrawing = false;
+        let penColor = '#1e293b';
+        let penWidth = 2.5;
+
+        function initCanvas() {
+            canvas = document.getElementById('scratchpadCanvas');
+            ctx = canvas.getContext('2d');
+            resizeCanvas();
+
+            window.addEventListener('resize', resizeCanvas);
+
+            canvas.addEventListener('mousedown', startDraw);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', endDraw);
+            canvas.addEventListener('mouseout', endDraw);
+
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const rect = canvas.getBoundingClientRect();
+                isDrawing = true;
+                ctx.beginPath();
+                ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+            }, { passive: false });
+
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (!isDrawing) return;
+                const touch = e.touches[0];
+                const rect = canvas.getBoundingClientRect();
+                ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+                ctx.strokeStyle = penColor;
+                ctx.lineWidth = penWidth;
+                ctx.lineCap = 'round';
+                ctx.stroke();
+            }, { passive: false });
+
+            canvas.addEventListener('touchend', endDraw);
+        }
+
+        function resizeCanvas() {
+            if (!canvas) return;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            if (rect.width > 0) {
+                canvas.width = rect.width;
+                canvas.height = 290;
+                drawGrid();
+            }
+        }
+
+        function drawGrid() {
+            if (!ctx) return;
+            ctx.fillStyle = '#fffdf7';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = '#f1f5f9';
+            ctx.lineWidth = 1;
+            const step = 20;
+            for (let x = 0; x < canvas.width; x += step) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            for (let y = 0; y < canvas.height; y += step) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+        }
+
+        function startDraw(e) {
+            isDrawing = true;
+            const rect = canvas.getBoundingClientRect();
+            ctx.beginPath();
+            ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            const rect = canvas.getBoundingClientRect();
+            ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+            ctx.strokeStyle = penColor;
+            ctx.lineWidth = penWidth;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+        }
+
+        function endDraw() {
+            isDrawing = false;
+        }
+
+        function setPenTool(color, width) {
+            penColor = color;
+            penWidth = width;
+        }
+
+        function setEraserTool() {
+            penColor = '#fffdf7';
+            penWidth = 18;
+        }
+
+        function clearCanvas() {
+            drawGrid();
+        }
+
+        // --- 簡易輔助小算盤 ---
+        let calcCurrent = '0';
+        let calcPrev = null;
+        let calcOperator = null;
+        let calcResetNext = false;
+
+        function updateCalcDisplay() {
+            document.getElementById('calcDisplay').textContent = calcCurrent;
+            const opMap = { '+': '＋', '-': '−', '*': '×', '/': '÷' };
+            document.getElementById('calcHistory').textContent = (calcPrev !== null && calcOperator)
+                ? `${calcPrev} ${opMap[calcOperator]}`
+                : '';
+        }
+
+        function calcAppend(char) {
+            if (calcResetNext) {
+                calcCurrent = (char === '.') ? '0.' : char;
+                calcResetNext = false;
+            } else {
+                if (char === '.' && calcCurrent.includes('.')) return;
+                if (calcCurrent === '0' && char !== '.') {
+                    calcCurrent = char;
+                } else {
+                    calcCurrent += char;
+                }
+            }
+            updateCalcDisplay();
+        }
+
+        function calcOp(op) {
+            if (calcOperator && !calcResetNext) {
+                calcEqual();
+            }
+            calcPrev = parseFloat(calcCurrent);
+            calcOperator = op;
+            calcResetNext = true;
+            updateCalcDisplay();
+        }
+
+        function calcSquare() {
+            const val = parseFloat(calcCurrent);
+            if (!isNaN(val)) {
+                calcCurrent = String(roundClean(val * val));
+                calcResetNext = true;
+                updateCalcDisplay();
+            }
+        }
+
+        function calcInsertPi() {
+            const val = parseFloat(calcCurrent);
+            if (!isNaN(val)) {
+                calcCurrent = String(roundClean(val * 3.14));
+                calcResetNext = true;
+                updateCalcDisplay();
+            }
+        }
+
+        function calcEqual() {
+            if (calcOperator === null || calcPrev === null) return;
+            const curr = parseFloat(calcCurrent);
+            let res = 0;
+            if (calcOperator === '+') res = calcPrev + curr;
+            if (calcOperator === '-') res = calcPrev - curr;
+            if (calcOperator === '*') res = calcPrev * curr;
+            if (calcOperator === '/') res = curr === 0 ? 0 : calcPrev / curr;
+
+            calcCurrent = String(roundClean(res));
+            calcPrev = null;
+            calcOperator = null;
+            calcResetNext = true;
+            updateCalcDisplay();
+        }
+
+        function calcClear() {
+            calcCurrent = '0';
+            calcPrev = null;
+            calcOperator = null;
+            calcResetNext = false;
+            updateCalcDisplay();
+        }
+
+        window.onload = function() {
+            initApp();
+        };
+    </script>
+</body>
+</html>
