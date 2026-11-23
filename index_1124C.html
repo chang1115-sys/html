@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>國小六上國語 第九課〈火燒連環船〉線上測驗</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Noto Sans TC -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Noto Sans TC', 'sans-serif'],
+                    },
+                    colors: {
+                        cream: '#fdfbf7',
+                        tealbrand: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            200: '#99f6e4',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #fdfbf7;
+            scroll-behavior: smooth;
+        }
+        /* 自訂選項選取樣式 */
+        .custom-radio:checked + label {
+            border-color: #0d9488;
+            background-color: #f0fdfa;
+            color: #0f766e;
+            font-weight: 700;
+            box-shadow: 0 4px 10px -2px rgba(13, 148, 136, 0.12);
+        }
+        .custom-radio:checked + label .option-badge {
+            background-color: #0d9488;
+            color: #ffffff;
+            border-color: #0d9488;
+        }
+        /* 隱藏導覽列捲動條但保留捲動功能 */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-stone-800">
+
+    <!-- 頂部固定導覽與進度區 -->
+    <header class="bg-white/95 backdrop-blur-md shadow-sm sticky top-0 z-30 border-b border-stone-200/80">
+        <div class="max-w-4xl mx-auto px-4 pt-3.5 pb-3">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-tealbrand-600 text-white flex items-center justify-center font-bold text-lg shadow-sm shrink-0">
+                        <i class="fa-solid fa-book-open-reader"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg sm:text-xl font-black text-stone-800 tracking-tight">國小六上國語 線上測驗</h1>
+                        <p class="text-xs text-tealbrand-700 font-bold">第九課〈火燒連環船〉語詞與成語辨析</p>
+                    </div>
+                </div>
+                
+                <!-- 作答進度條 -->
+                <div id="header-progress" class="w-full sm:w-auto flex items-center gap-3 bg-stone-50 px-3 py-1.5 rounded-xl border border-stone-200/70">
+                    <div class="text-xs font-bold text-stone-600 whitespace-nowrap">
+                        作答進度：<span id="answered-count" class="text-tealbrand-600 text-sm">0</span> / 12
+                    </div>
+                    <div class="w-full sm:w-32 bg-stone-200 h-2.5 rounded-full overflow-hidden">
+                        <div id="progress-bar" class="bg-tealbrand-500 h-full w-0 transition-all duration-300 rounded-full"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 題號快速跳轉導覽列 -->
+            <div id="quick-nav-wrapper" class="mt-3 pt-2.5 border-t border-stone-100 flex items-center gap-2 overflow-x-auto no-scrollbar">
+                <span class="text-xs font-bold text-stone-400 shrink-0 mr-1">題號：</span>
+                <div id="quick-nav" class="flex items-center gap-1.5">
+                    <!-- 題號按鈕由 JS 動態生成 -->
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要測驗內容區 -->
+    <main class="flex-grow max-w-4xl w-full mx-auto px-4 py-6 sm:py-8">
+        
+        <!-- 測驗說明卡片 -->
+        <div id="welcome-card" class="bg-white rounded-2xl shadow-sm p-5 sm:p-6 mb-6 border border-tealbrand-100 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-1.5 h-full bg-tealbrand-500"></div>
+            <div class="flex items-start gap-3.5">
+                <div class="w-9 h-9 rounded-xl bg-tealbrand-50 text-tealbrand-600 flex items-center justify-center shrink-0 mt-0.5">
+                    <i class="fa-solid fa-lightbulb text-lg"></i>
+                </div>
+                <div>
+                    <h2 class="text-base font-bold text-stone-800 mb-1.5">作答小提醒</h2>
+                    <ul class="text-sm text-stone-600 space-y-1">
+                        <li>• 本測驗共 <span class="font-bold text-tealbrand-700">12 題單選題</span>，滿分 100 分，每次測驗題目與選項皆會隨機重新排列。</li>
+                        <li>• 點擊上方「題號」可快速跳轉至該題；完成所有題目後，請點擊頁面底部的「提交試卷」。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 測驗表單 -->
+        <form id="quiz-form" onsubmit="handleQuizSubmit(event)">
+            <div id="questions-container" class="space-y-6">
+                <!-- 題目卡片由 JS 動態生成 -->
+            </div>
+
+            <!-- 交卷區塊 -->
+            <div id="submit-section" class="mt-8 bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-stone-200/80 text-center">
+                <div id="unanswered-warning" class="hidden mb-4 text-amber-700 font-bold text-sm bg-amber-50 border border-amber-200 py-2.5 px-4 rounded-xl inline-flex items-center gap-2">
+                    <i class="fa-solid fa-circle-exclamation text-amber-500"></i>
+                    <span id="warning-text">還有題目尚未作答喔！已為您跳轉至未作答題目。</span>
+                </div>
+                <div>
+                    <button type="submit" class="w-full sm:w-auto px-12 py-4 bg-tealbrand-600 hover:bg-tealbrand-700 active:scale-[0.99] text-white font-bold rounded-2xl shadow-lg shadow-tealbrand-600/20 transition-all duration-200 text-base sm:text-lg flex items-center justify-center gap-2.5 mx-auto cursor-pointer">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        <span>提交試卷看成績</span>
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <!-- 成績單畫面 (僅顯示總分、答對題數與鼓勵評語，無任何詳解與對錯提示) -->
+        <div id="result-page" class="hidden">
+            <div class="bg-white rounded-3xl shadow-xl overflow-hidden text-center border border-stone-100 max-w-2xl mx-auto">
+                <!-- 頂部視覺橫幅 -->
+                <div id="result-header" class="bg-gradient-to-br from-tealbrand-500 to-tealbrand-700 text-white p-8 sm:p-10">
+                    <div id="result-icon-box" class="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-3xl flex items-center justify-center mx-auto mb-4 border border-white/30 text-4xl shadow-inner">
+                        <i class="fa-solid fa-trophy text-amber-300"></i>
+                    </div>
+                    <h2 class="text-2xl sm:text-3xl font-black tracking-wide mb-1">測驗完成！</h2>
+                    <p class="text-tealbrand-100 text-sm font-medium">國小六上國語 第九課〈火燒連環船〉</p>
+                </div>
+
+                <!-- 成績數據區塊 -->
+                <div class="p-6 sm:p-10">
+                    <div class="mb-6">
+                        <span class="text-xs font-bold text-stone-400 tracking-widest uppercase block mb-1">本次測驗總分</span>
+                        <div class="flex items-baseline justify-center gap-1">
+                            <span id="final-score" class="text-6xl sm:text-7xl font-black text-stone-800 tracking-tight">0</span>
+                            <span class="text-xl font-bold text-stone-400">分</span>
+                        </div>
+                    </div>
+
+                    <!-- 答對題數統計 -->
+                    <div class="bg-stone-50 rounded-2xl p-4 sm:p-5 max-w-sm mx-auto mb-6 border border-stone-200/70">
+                        <div class="text-xs font-bold text-stone-500 mb-1">答對題數統計</div>
+                        <div class="text-xl sm:text-2xl font-black text-tealbrand-700">
+                            答對 <span id="correct-count" class="text-2xl sm:text-3xl">0</span> / 12 題
+                        </div>
+                    </div>
+
+                    <!-- 鼓勵評語 -->
+                    <div id="feedback-card" class="p-4 sm:p-5 rounded-2xl text-base font-bold mb-8 max-w-md mx-auto leading-relaxed">
+                        <!-- 評語由 JS 動態填入 -->
+                    </div>
+
+                    <!-- 重新測驗按鈕 -->
+                    <button type="button" onclick="restartQuiz()" class="w-full sm:w-auto px-8 py-3.5 bg-stone-800 hover:bg-stone-900 active:scale-[0.99] text-white font-bold rounded-2xl shadow-md transition-all duration-200 inline-flex items-center justify-center gap-2.5 cursor-pointer">
+                        <i class="fa-solid fa-shuffle"></i>
+                        <span>重新測驗（題目與選項重新洗牌）</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 頁尾 -->
+    <footer class="bg-white border-t border-stone-200/80 py-4 mt-auto">
+        <div class="max-w-4xl mx-auto px-4 text-center text-xs text-stone-400 font-medium">
+            國小六上國語 第九課〈火燒連環船〉互動練習系統
+        </div>
+    </footer>
+
+    <!-- 測驗核心腳本 -->
+    <script>
+        // 原始題庫資料 (每題第一個選項皆為正確答案，載入時會自動打亂選項順序並追蹤正解)
+        const rawQuizData = [
+            {
+                id: 1,
+                question: "下列哪一個語詞的意思是「相差很遠」？",
+                correctText: "懸殊",
+                options: ["懸殊", "鞏固", "顛簸", "倉皇"]
+            },
+            {
+                id: 2,
+                question: "「這支空軍作戰聯隊訓練精良，常＿＿＿＿，逼退敵人。」空格中填入哪一個成語最恰當？",
+                correctText: "以寡擊眾",
+                options: ["以寡擊眾", "寡不敵眾", "三足鼎立", "群策群力"]
+            },
+            {
+                id: 3,
+                question: "下列「」中的語詞，何者用法不正確？",
+                correctText: "這條路崎嶇不平，坐在車上感覺「瀰漫」得很厲害。",
+                options: [
+                    "這條路崎嶇不平，坐在車上感覺「瀰漫」得很厲害。",
+                    "得知兒子的荒唐行徑，老父親「勃然大怒」，嚴加斥責。",
+                    "這次作戰訓練，請帶上足夠的「軍糧」，以備不時之需。",
+                    "雨滴落下，江面泛起了一圈圈大小不一的漣漪。"
+                ]
+            },
+            {
+                id: 4,
+                question: "「古代軍隊中的刑具」指的是下列哪一個語詞？",
+                correctText: "軍棍",
+                options: ["軍棍", "策士", "軍糧", "江面"]
+            },
+            {
+                id: 5,
+                question: "下列哪一個語詞的意思是「提供謀略、計策」？",
+                correctText: "獻計",
+                options: ["獻計", "策士", "否則", "鞏固"]
+            },
+            {
+                id: 6,
+                question: "「旅遊的事前準備都已完成，現在＿＿＿＿，就等接送車輛到來。」空格中應填入下列何者？",
+                correctText: "只欠東風",
+                options: ["只欠東風", "顛沛流離", "借花獻佛", "倉皇逃跑"]
+            },
+            {
+                id: 7,
+                question: "「大考時，不安的情緒＿＿＿＿整個考場，讓考生更焦慮了。」空格中最適合填入哪一個語詞？",
+                correctText: "瀰漫",
+                options: ["瀰漫", "顛簸", "懸殊", "鞏固"]
+            },
+            {
+                id: 8,
+                question: "下列哪一個語詞用來形容「慌張匆忙的樣子」？",
+                correctText: "倉皇",
+                options: ["倉皇", "勃然大怒", "顛沛流離", "野心勃勃"]
+            },
+            {
+                id: 9,
+                question: "「三方的勢力如鼎足般相對而立，不相上下」是下列哪一個成語的解釋？",
+                correctText: "三足鼎立",
+                options: ["三足鼎立", "群策群力", "以寡擊眾", "寡不敵眾"]
+            },
+            {
+                id: 10,
+                question: "下列哪一組成語的關係是「反義詞」？",
+                correctText: "群策群力 ／ 一意孤行",
+                options: [
+                    "群策群力 ／ 一意孤行",
+                    "野心勃勃 ／ 雄心勃勃",
+                    "顛沛流離 ／ 流離失所",
+                    "借花獻佛 ／ 順水人情"
+                ]
+            },
+            {
+                id: 11,
+                question: "「這份資料是老師提供的，我不過是＿＿＿＿，影印給你罷了！」空格中應填入哪一個成語？",
+                correctText: "借花獻佛",
+                options: ["借花獻佛", "群策群力", "野心勃勃", "寡不敵眾"]
+            },
+            {
+                id: 12,
+                question: "關於「顛沛流離」的解釋，下列何者正確？",
+                correctText: "形容生活困迫不安，四處流浪。",
+                options: [
+                    "形容生活困迫不安，四處流浪。",
+                    "形容狂妄非分之心或遠大的企圖。",
+                    "指人少的抵擋不過人多勢眾的。",
+                    "聚合眾人的智慧和能力。"
+                ]
+            }
+        ];
+
+        let activeQuestions = [];
+        let userSelections = {}; // 紀錄每題使用者選擇的文字內容
+
+        // Fisher-Yates 洗牌演算法
+        function shuffleArray(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        // 初始化測驗（打亂題目順序與選項順序）
+        function initQuiz() {
+            userSelections = {};
+            
+            // 1. 打亂題目順序
+            const shuffledQuestions = shuffleArray(rawQuizData);
+            
+            // 2. 打亂每題的選項順序
+            activeQuestions = shuffledQuestions.map((item, idx) => {
+                return {
+                    displayNum: idx + 1,
+                    question: item.question,
+                    correctText: item.correctText,
+                    shuffledOptions: shuffleArray(item.options)
+                };
+            });
+
+            renderQuickNav();
+            renderQuestions();
+            updateProgress();
+
+            // 切換畫面狀態
+            document.getElementById('quiz-form').classList.remove('hidden');
+            document.getElementById('welcome-card').classList.remove('hidden');
+            document.getElementById('header-progress').classList.remove('hidden');
+            document.getElementById('quick-nav-wrapper').classList.remove('hidden');
+            document.getElementById('unanswered-warning').classList.add('hidden');
+            document.getElementById('result-page').classList.add('hidden');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 渲染頂部題號快速跳轉列
+        function renderQuickNav() {
+            const navContainer = document.getElementById('quick-nav');
+            navContainer.innerHTML = '';
+
+            activeQuestions.forEach((q) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.id = `nav-btn-${q.displayNum}`;
+                btn.innerText = q.displayNum;
+                btn.className = "w-7 h-7 rounded-lg text-xs font-bold border border-stone-200 bg-stone-50 text-stone-500 hover:border-tealbrand-500 hover:text-tealbrand-600 transition-colors shrink-0 cursor-pointer";
+                btn.onclick = () => scrollToQuestion(q.displayNum);
+                navContainer.appendChild(btn);
+            });
+        }
+
+        // 點擊題號平滑捲動至對應題目
+        function scrollToQuestion(qNum) {
+            const targetCard = document.getElementById(`q-card-${qNum}`);
+            if (targetCard) {
+                const headerOffset = 135;
+                const elementPosition = targetCard.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: "smooth"
+                });
+            }
+        }
+
+        // 渲染題目卡片
+        function renderQuestions() {
+            const container = document.getElementById('questions-container');
+            container.innerHTML = '';
+            const optionLetters = ['A', 'B', 'C', 'D'];
+
+            activeQuestions.forEach((q) => {
+                const card = document.createElement('div');
+                card.id = `q-card-${q.displayNum}`;
+                card.className = "bg-white rounded-2xl shadow-sm p-5 sm:p-7 border border-stone-200/70 transition-all duration-200";
+
+                let optionsHTML = '';
+                q.shuffledOptions.forEach((optText, optIdx) => {
+                    const inputId = `q${q.displayNum}_opt${optIdx}`;
+                    // 逃脫引號避免 HTML 屬性錯誤
+                    const safeOptAttr = optText.replace(/"/g, '&quot;');
+                    optionsHTML += `
+                        <div class="relative">
+                            <input type="radio"
+                                   id="${inputId}"
+                                   name="question_${q.displayNum}"
+                                   value="${safeOptAttr}"
+                                   class="custom-radio sr-only"
+                                   onchange="handleOptionChange(${q.displayNum}, this.value)">
+                            <label for="${inputId}"
+                                   class="flex items-center gap-3.5 p-3.5 sm:p-4 rounded-xl border border-stone-200 cursor-pointer transition-all duration-150 hover:bg-stone-50/80 hover:border-stone-300 text-sm sm:text-base text-stone-700 select-none">
+                                <span class="option-badge w-7 h-7 sm:w-8 sm:h-8 rounded-lg border border-stone-300 flex items-center justify-center font-bold text-xs sm:text-sm text-stone-500 shrink-0 transition-colors">
+                                    ${optionLetters[optIdx]}
+                                </span>
+                                <span class="leading-relaxed flex-grow">${optText}</span>
+                            </label>
+                        </div>
+                    `;
+                });
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between mb-3.5">
+                        <span class="inline-flex items-center gap-1.5 bg-tealbrand-50 text-tealbrand-700 border border-tealbrand-200/70 font-black text-xs px-3 py-1 rounded-lg">
+                            第 ${q.displayNum} 題
+                        </span>
+                        <span id="status-tag-${q.displayNum}" class="text-xs font-bold text-stone-400">
+                            尚未作答
+                        </span>
+                    </div>
+                    <h3 class="text-base sm:text-lg font-bold text-stone-800 leading-relaxed mb-5">
+                        ${q.question}
+                    </h3>
+                    <div class="grid grid-cols-1 gap-3">
+                        ${optionsHTML}
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        // 處理選項變更
+        function handleOptionChange(qNum, selectedText) {
+            userSelections[qNum] = selectedText;
+
+            // 更新題目卡片右上角狀態
+            const statusTag = document.getElementById(`status-tag-${qNum}`);
+            if (statusTag) {
+                statusTag.innerText = "已作答";
+                statusTag.className = "text-xs font-bold text-tealbrand-600";
+            }
+
+            // 更新頂部題號導覽按鈕外觀
+            const navBtn = document.getElementById(`nav-btn-${qNum}`);
+            if (navBtn) {
+                navBtn.className = "w-7 h-7 rounded-lg text-xs font-bold border border-tealbrand-500 bg-tealbrand-500 text-white shadow-xs transition-colors shrink-0 cursor-pointer";
+            }
+
+            updateProgress();
+
+            // 若全部作答完畢，隱藏警告提示
+            if (Object.keys(userSelections).length === activeQuestions.length) {
+                document.getElementById('unanswered-warning').classList.add('hidden');
+            }
+        }
+
+        // 更新頂部進度條
+        function updateProgress() {
+            const answered = Object.keys(userSelections).length;
+            const total = activeQuestions.length;
+            const percent = (answered / total) * 100;
+
+            document.getElementById('answered-count').innerText = answered;
+            document.getElementById('progress-bar').style.width = `${percent}%`;
+        }
+
+        // 處理提交試卷
+        function handleQuizSubmit(event) {
+            event.preventDefault();
+
+            const total = activeQuestions.length;
+            const answered = Object.keys(userSelections).length;
+
+            // 檢查是否有未作答題目
+            if (answered < total) {
+                const unansweredList = [];
+                for (let i = 1; i <= total; i++) {
+                    if (!userSelections[i]) {
+                        unansweredList.push(i);
+                    }
+                }
+
+                const warningBox = document.getElementById('unanswered-warning');
+                const warningText = document.getElementById('warning-text');
+                warningText.innerText = `還有第 ${unansweredList.join('、')} 題尚未作答，請完成所有題目後再交卷喔！`;
+                warningBox.classList.remove('hidden');
+
+                // 自動跳轉至第一題未作答題目並給予視覺提示
+                const firstUnanswered = unansweredList[0];
+                scrollToQuestion(firstUnanswered);
+                const card = document.getElementById(`q-card-${firstUnanswered}`);
+                if (card) {
+                    card.classList.add('ring-2', 'ring-amber-400');
+                    setTimeout(() => card.classList.remove('ring-2', 'ring-amber-400'), 2200);
+                }
+                return;
+            }
+
+            // 計算總答對題數
+            let correctCount = 0;
+            activeQuestions.forEach((q) => {
+                if (userSelections[q.displayNum] === q.correctText) {
+                    correctCount++;
+                }
+            });
+
+            // 換算 100 分制（四捨五入取整數）
+            const finalScore = Math.round((correctCount / total) * 100);
+
+            displayResultPage(finalScore, correctCount);
+        }
+
+        // 顯示成績頁面（僅顯示總分、答對題數與鼓勵評語，絕不顯示單題對錯與解析）
+        function displayResultPage(score, correctCount) {
+            // 隱藏作答介面與導覽列
+            document.getElementById('quiz-form').classList.add('hidden');
+            document.getElementById('welcome-card').classList.add('hidden');
+            document.getElementById('header-progress').classList.add('hidden');
+            document.getElementById('quick-nav-wrapper').classList.add('hidden');
+
+            // 填入分數與答對題數
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('correct-count').innerText = correctCount;
+
+            const feedbackCard = document.getElementById('feedback-card');
+            const resultHeader = document.getElementById('result-header');
+            const resultIconBox = document.getElementById('result-icon-box');
+
+            // 依據分數區間給予溫暖鼓勵評語
+            if (score === 100) {
+                resultHeader.className = "bg-gradient-to-br from-emerald-500 to-teal-700 text-white p-8 sm:p-10";
+                resultIconBox.innerHTML = '<i class="fa-solid fa-crown text-amber-300"></i>';
+                feedbackCard.className = "p-4 sm:p-5 rounded-2xl text-base font-bold mb-8 max-w-md mx-auto leading-relaxed bg-emerald-50 text-emerald-800 border border-emerald-200";
+                feedbackCard.innerHTML = "太厲害了！滿分 100 分！<br>第九課的語詞與成語你已經完全掌握囉！";
+            } else if (score >= 80) {
+                resultHeader.className = "bg-gradient-to-br from-tealbrand-500 to-tealbrand-700 text-white p-8 sm:p-10";
+                resultIconBox.innerHTML = '<i class="fa-solid fa-trophy text-amber-300"></i>';
+                feedbackCard.className = "p-4 sm:p-5 rounded-2xl text-base font-bold mb-8 max-w-md mx-auto leading-relaxed bg-tealbrand-50 text-tealbrand-800 border border-tealbrand-200";
+                feedbackCard.innerHTML = "表現非常優秀！<br>對課文語詞與成語的理解很紮實，繼續保持！";
+            } else if (score >= 60) {
+                resultHeader.className = "bg-gradient-to-br from-sky-500 to-blue-600 text-white p-8 sm:p-10";
+                resultIconBox.innerHTML = '<i class="fa-solid fa-award text-amber-200"></i>';
+                feedbackCard.className = "p-4 sm:p-5 rounded-2xl text-base font-bold mb-8 max-w-md mx-auto leading-relaxed bg-sky-50 text-sky-800 border border-sky-200";
+                feedbackCard.innerHTML = "順利過關！表現不錯喔！<br>可以再多閱讀幾次課本成語例句，挑戰更高分！";
+            } else {
+                resultHeader.className = "bg-gradient-to-br from-amber-500 to-orange-600 text-white p-8 sm:p-10";
+                resultIconBox.innerHTML = '<i class="fa-solid fa-seedling text-white"></i>';
+                feedbackCard.className = "p-4 sm:p-5 rounded-2xl text-base font-bold mb-8 max-w-md mx-auto leading-relaxed bg-amber-50 text-amber-800 border border-amber-200";
+                feedbackCard.innerHTML = "加油！每一次練習都是進步的開始！<br>先翻開課本複習一下詞語意思，再重新挑戰一次吧！";
+            }
+
+            document.getElementById('result-page').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 重新測驗
+        function restartQuiz() {
+            initQuiz();
+        }
+
+        // 頁面載入完成後啟動測驗
+        window.onload = function() {
+            initQuiz();
+        };
+    </script>
+</body>
+</html>
