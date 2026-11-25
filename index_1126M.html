@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>國小六年級數學：練習6 扇形周長與面積測驗</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #f1f5f9;
+            color: #1e293b;
+        }
+        .fraction {
+            display: inline-flex;
+            flex-direction: column;
+            vertical-align: middle;
+            text-align: center;
+            font-size: 0.9em;
+            line-height: 1.1;
+            margin: 0 3px;
+        }
+        .fraction .num {
+            border-bottom: 1.5px solid currentColor;
+            padding: 0 3px 1px 3px;
+        }
+        .fraction .den {
+            padding: 1px 3px 0 3px;
+        }
+        #scratchpadCanvas {
+            touch-action: none;
+            cursor: crosshair;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- 頂部導覽列 -->
+    <header class="bg-gradient-to-r from-emerald-700 via-teal-700 to-cyan-700 text-white shadow-md sticky top-0 z-30">
+        <div class="max-w-6xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="bg-white/20 p-2 rounded-xl backdrop-blur-sm">
+                    <svg class="w-7 h-7 text-amber-300" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c2.76 0 5.26-1.12 7.07-2.93L12 12V2z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-xl font-bold tracking-wide">國小六年級數學 • 練習 6 線上測驗</h1>
+                    <p class="text-xs text-teal-100">扇形弧長、周長與塗色面積（共 10 題，每題 10 分，圓周率以 3.14 計算）</p>
+                </div>
+            </div>
+
+            <button onclick="restartQuiz()" class="bg-amber-400 hover:bg-amber-500 text-slate-900 font-bold px-4 py-2 rounded-xl text-sm shadow-sm flex items-center gap-1.5 transition active:scale-95">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+                <span>重新測驗（隨機換題）</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- 主要測驗區 -->
+    <main class="flex-grow max-w-6xl w-full mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- 左側題目區 (8 欄) -->
+        <div class="lg:col-span-8 flex flex-col gap-5">
+
+            <!-- 題號導覽與交卷列 -->
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80 flex flex-col gap-3">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-2.5">
+                        <span id="qNumberBadge" class="bg-teal-600 text-white text-sm font-bold px-3.5 py-1 rounded-xl">
+                            第 1 / 10 題
+                        </span>
+                        <span id="qTypeTag" class="text-xs font-bold bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg border border-slate-200">
+                            選擇題
+                        </span>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <span id="answeredProgress" class="text-xs font-bold text-slate-500">已作答：0 / 10 題</span>
+                        <button id="btnSubmitQuiz" onclick="openSubmitConfirm()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-1.5 rounded-xl text-sm shadow transition active:scale-95">
+                            交卷看成績
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 1~10 題快速切換按鈕 -->
+                <div id="questionNavDots" class="grid grid-cols-5 sm:grid-cols-10 gap-1.5 pt-2 border-t border-slate-100">
+                    <!-- 動態生成 -->
+                </div>
+            </div>
+
+            <!-- 交卷確認橫幅 (取代 confirm) -->
+            <div id="submitConfirmBar" class="hidden bg-amber-50 border-2 border-amber-400 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3 shadow-sm">
+                <div class="text-sm font-bold text-amber-900" id="submitConfirmText">
+                    確定要交卷嗎？交卷後將立即計算總分。
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="closeSubmitConfirm()" class="px-3.5 py-1.5 rounded-xl bg-white border border-slate-300 text-slate-700 text-sm font-bold hover:bg-slate-50">
+                        繼續作答
+                    </button>
+                    <button onclick="finalizeQuiz()" class="px-4 py-1.5 rounded-xl bg-emerald-600 text-white text-sm font-bold hover:bg-emerald-700 shadow-sm">
+                        確定交卷
+                    </button>
+                </div>
+            </div>
+
+            <!-- 成績單總覽卡片 (僅交卷後顯示，無任何解析) -->
+            <div id="scoreSummaryCard" class="hidden bg-white rounded-2xl p-6 shadow-md border-2 border-teal-600 flex flex-col gap-5">
+                <div class="bg-gradient-to-r from-teal-600 to-emerald-600 text-white rounded-xl p-5 flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                        <div class="text-xs uppercase tracking-wider text-teal-100 font-bold">測驗成績單</div>
+                        <div class="text-3xl sm:text-4xl font-black mt-1 flex items-baseline gap-2">
+                            總分：<span id="totalScoreText" class="text-5xl text-amber-300">0</span> 分
+                        </div>
+                        <p id="scoreSummarySub" class="text-sm text-teal-50 mt-1">答對 0 題 / 共 10 題</p>
+                    </div>
+                    <button onclick="restartQuiz()" class="bg-white text-teal-800 hover:bg-teal-50 font-bold px-5 py-3 rounded-xl shadow transition">
+                        重新測驗（隨機換題）
+                    </button>
+                </div>
+
+                <!-- 10 題對錯結果列表（僅顯示題號、你的答案、正確答案與對錯） -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 border-b border-slate-200">
+                                <th class="py-2.5 px-3 text-center">題號</th>
+                                <th class="py-2.5 px-3 text-left">題型項目</th>
+                                <th class="py-2.5 px-3 text-center">你的答案</th>
+                                <th class="py-2.5 px-3 text-center">正確答案</th>
+                                <th class="py-2.5 px-3 text-center">結果</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scoreTableBody" class="divide-y divide-slate-100">
+                            <!-- 動態生成 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 題目作答主卡片 -->
+            <div id="questionMainCard" class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80 flex flex-col gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                    <!-- 動態 SVG 幾何圖形 -->
+                    <div class="md:col-span-5 bg-slate-50 border border-slate-200/90 rounded-2xl p-4 flex flex-col items-center justify-center min-h-[240px]">
+                        <div id="svgContainer" class="w-full max-w-[235px] aspect-square flex items-center justify-center">
+                            <!-- 動態插入 SVG -->
+                        </div>
+                    </div>
+
+                    <!-- 題目敘述與作答控制 -->
+                    <div class="md:col-span-7 flex flex-col justify-between gap-5">
+                        <div id="questionPrompt" class="text-lg sm:text-xl font-bold text-slate-800 leading-relaxed">
+                            <!-- 題目文字 -->
+                        </div>
+
+                        <!-- 選擇題選項區 (僅第 1 題使用) -->
+                        <div id="mcqOptionsContainer" class="hidden flex flex-col gap-2.5">
+                            <!-- 動態產生 4 個算式選項 -->
+                        </div>
+
+                        <!-- 數值輸入區 (第 2 ~ 10 題使用) -->
+                        <div id="numericInputContainer" class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                            <label for="numericAnswerInput" class="block text-sm font-bold text-slate-700 mb-2">請輸入答案：</label>
+                            <div class="flex items-center gap-3">
+                                <div class="relative flex-grow max-w-[240px]">
+                                    <input type="number" step="any" id="numericAnswerInput" placeholder="輸入數字"
+                                        oninput="handleNumericInput(this.value)"
+                                        onkeydown="if(event.key==='Enter') goNextQuestion()"
+                                        class="w-full text-lg font-bold text-slate-800 bg-white border-2 border-slate-300 focus:border-teal-600 focus:outline-none rounded-xl px-4 py-2.5 pr-20 transition">
+                                    <span id="unitText" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 font-bold text-sm">公分</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 交卷後的單題對錯標示（純對錯與正確答案，無解析） -->
+                        <div id="postSubmitResultBanner" class="hidden rounded-xl p-3.5 text-sm font-bold border">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 上一題 / 下一題導覽按鈕 -->
+                <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+                    <button id="btnPrev" onclick="goPrevQuestion()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm transition">
+                        ← 上一題
+                    </button>
+                    <span class="text-xs text-slate-400">作答內容自動保存</span>
+                    <button id="btnNext" onclick="goNextQuestion()" class="px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm shadow-sm transition">
+                        下一題 →
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 右側空白計算草稿紙 (4 欄，純空白計算區，無公式或速記表) -->
+        <div class="lg:col-span-4 flex flex-col">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden flex flex-col">
+                <div class="bg-slate-100 px-4 py-3 border-b border-slate-200 flex items-center justify-between">
+                    <span class="text-sm font-bold text-slate-800">✏️ 計算草稿紙</span>
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="setPen('#1e293b', 2.5)" class="w-5 h-5 rounded-full bg-slate-800 border-2 border-white shadow ring-1 ring-slate-300" title="黑筆"></button>
+                        <button onclick="setPen('#0284c7', 2.5)" class="w-5 h-5 rounded-full bg-sky-600 border-2 border-white shadow" title="藍筆"></button>
+                        <button onclick="setPen('#e11d48', 2.5)" class="w-5 h-5 rounded-full bg-rose-600 border-2 border-white shadow" title="紅筆"></button>
+                        <button onclick="setEraser()" class="px-2 py-1 bg-amber-100 hover:bg-amber-200 text-amber-800 text-xs font-bold rounded-lg transition">
+                            橡皮擦
+                        </button>
+                        <button onclick="clearPad()" class="px-2 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold rounded-lg transition">
+                            清除
+                        </button>
+                    </div>
+                </div>
+                <div class="p-3 bg-[#fffdf7]">
+                    <canvas id="scratchpadCanvas" class="w-full h-[380px] rounded-xl border border-slate-200 block"></canvas>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // =========================================================================
+        // 1. 數學輔助工具
+        // =========================================================================
+        function cleanNum(n) {
+            return Math.round(n * 10000) / 10000;
+        }
+
+        function pick(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function shuffle(arr) {
+            const copy = [...arr];
+            for (let i = copy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copy[i], copy[j]] = [copy[j], copy[i]];
+            }
+            return copy;
+        }
+
+        function polar(cx, cy, r, deg) {
+            const rad = (-deg * Math.PI) / 180;
+            return {
+                x: cx + r * Math.cos(rad),
+                y: cy + r * Math.sin(rad)
+            };
+        }
+
+        // =========================================================================
+        // 2. 動態 SVG 圖形繪製（嚴格對應課本練習6 第1~5大題共10小題）
+        // =========================================================================
+
+        // Q1: 長方形左右兩側各挖掉一個半圓 (如課本第1題)
+        function svgQ1(L, W) {
+            const rectW = 136;
+            const rectH = Math.max(68, Math.min(104, Math.round(rectW * (W / L))));
+            const x0 = (220 - rectW) / 2;
+            const y0 = (210 - rectH) / 2 + 6;
+            const x1 = x0 + rectW;
+            const y1 = y0 + rectH;
+            const r = rectH / 2;
+
+            // 塗色區域：長方形扣除左右兩個向內凹的半圓
+            const shadedPath = `
+                M ${x0} ${y0}
+                L ${x1} ${y0}
+                A ${r} ${r} 0 0 0 ${x1} ${y1}
+                L ${x0} ${y1}
+                A ${r} ${r} 0 0 0 ${x0} ${y0}
+                Z
+            `;
+
+            return `
+            <svg viewBox="0 0 220 220" class="w-full h-full">
+                <!-- 虛線標示左右半圓直徑 -->
+                <line x1="${x0}" y1="${y0}" x2="${x0}" y2="${y1}" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="3,2"/>
+                <line x1="${x1}" y1="${y0}" x2="${x1}" y2="${y1}" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="3,2"/>
+                <!-- 塗色圖形 -->
+                <path d="${shadedPath}" fill="#cbd5e1" stroke="#1e293b" stroke-width="1.8" stroke-linejoin="round"/>
+                <!-- 頂部長度標示 -->
+                <text x="110" y="${y0 - 8}" text-anchor="middle" font-size="13" font-weight="bold" fill="#1e293b">${L}</text>
+                <!-- 左側寬度標示 -->
+                <text x="${x0 - 14}" y="${y0 + r + 4}" text-anchor="middle" font-size="13" font-weight="bold" fill="#1e293b">${W}</text>
+                <text x="110" y="208" text-anchor="middle" font-size="11" fill="#64748b">（單位：公分）</text>
+            </svg>`;
+        }
+
+        // Q2: 圓形等分成 N 份，塗色 k 份，標示直徑 D (如課本第2題①)
+        function svgQ2(parts, shadedParts, diameter) {
+            const cx = 110, cy = 104, r = 74;
+            let dividers = '';
+            for (let i = 0; i < parts; i++) {
+                const p = polar(cx, cy, r, (360 / parts) * i);
+                dividers += `<line x1="${cx}" y1="${cy}" x2="${p.x}" y2="${p.y}" stroke="#475569" stroke-width="1.1" stroke-dasharray="3,2"/>`;
+            }
+            const angle = (360 / parts) * shadedParts;
+            const start = polar(cx, cy, r, 0);
+            const end = polar(cx, cy, r, angle);
+            const largeArc = angle > 180 ? 1 : 0;
+            const sectorPath = `M ${cx} ${cy} L ${start.x} ${start.y} A ${r} ${r} 0 ${largeArc} 0 ${end.x} ${end.y} Z`;
+
+            // 直徑標示線
+            const dLeft = polar(cx, cy, r, 180);
+            const dRight = polar(cx, cy, r, 0);
+
+            return `
+            <svg viewBox="0 0 220 220" class="w-full h-full">
+                <circle cx="${cx}" cy="${cy}" r="${r}" fill="#ffffff" stroke="#334155" stroke-width="1.5" stroke-dasharray="3,2"/>
+                <path d="${sectorPath}" fill="#fbcfe8" stroke="#be185d" stroke-width="2" stroke-linejoin="round"/>
+                ${dividers}
+                <line x1="${dLeft.x}" y1="${dLeft.y}" x2="${dRight.x}" y2="${dRight.y}" stroke="#0f172a" stroke-width="1.5"/>
+                <circle cx="${cx}" cy="${cy}" r="3" fill="#0f172a"/>
+                <text x="${cx + r / 2}" y="${cy + 15}" text-anchor="middle" font-size="12" font-weight="bold" fill="#0f172a">${diameter}</text>
+                <text x="110" y="208" text-anchor="middle" font-size="11" fill="#64748b">（單位：公分）</text>
+            </svg>`;
+        }
+
+        // Q3: 圓心角 deg 度的扇形，標示半徑 r (如課本第2題②)
+        function svgQ3(deg, r) {
+            const cx = 110, cy = 148, radius = 78;
+            const start = polar(cx, cy, radius, 0);
+            const end = polar(cx, cy, radius, deg);
+            const largeArc = deg > 180 ? 1 : 0;
+            const sectorPath = `M ${cx} ${cy} L ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArc} 0 ${end.x} ${end.y} Z`;
+
+            const ar = 18;
+            const aStart = polar(cx, cy, ar, 0);
+            const aEnd = polar(cx, cy, ar, deg);
+            const arcMark = `M ${aStart.x} ${aStart.y} A ${ar} ${ar} 0 ${largeArc} 0 ${aEnd.x} ${aEnd.y}`;
+            const labelPos = polar(cx, cy, 32, deg / 2);
+            const rLabelPos = polar(cx, cy, radius * 0.55, deg);
+
+            return `
+            <svg viewBox="0 0 220 220" class="w-full h-full">
+                <path d="${sectorPath}" fill="#fed7aa" stroke="#9a3412" stroke-width="2" stroke-linejoin="round"/>
+                <path d="${arcMark}" fill="none" stroke="#1e293b" stroke-width="1.4"/>
+                <circle cx="${cx}" cy="${cy}" r="2.8" fill="#0f172a"/>
+                <text x="${labelPos.x}" y="${labelPos.y}" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="bold" fill="#0f172a">${deg}°</text>
+                <text x="${rLabelPos.x - 12}" y="${rLabelPos.y + 14}" text-anchor="middle" font-size="12" font-weight="bold" fill="#0f172a">${r}</text>
+                <text x="110" y="206" text-anchor="middle" font-size="11" fill="#64748b">（單位：公尺）</text>
+            </svg>`;
+        }
+
+        // Q4: 3/4圓塗色扇形，標示直徑 D (如課本第3題①)
+        function svgQ4(diameter) {
+            const cx = 110, cy = 104, r = 74;
+            const pTop = polar(cx, cy, r, 90);
+            const pRight = polar(cx, cy, r, 0);
+            const sectorPath = `M ${cx} ${cy} L ${pTop.x} ${pTop.y} A ${r} ${r} 0 1 0 ${pRight.x} ${pRight.y} Z`;
+
+            return `
+            <svg viewBox="0 0 220 220" class="w-full h-full">
+                <circle cx="${cx}" cy="${cy}" r="${r}" fill="#ffffff" stroke="#334155" stroke-width="1.4" stroke-dasharray="3,2"/>
+                <path d="${sectorPath}" fill="#bae6fd" stroke="#0369a1" stroke-width="2" stroke-linejoin="round"/>
+                <!-- 直角記號 -->
+                <polyline points="${cx},${cy - 13} ${cx + 13},${cy - 13} ${cx + 13},${cy}" fill="none" stroke="#0f172a" stroke-width="1.4"/>
+                <!-- 水平直徑標示線 -->
+                <line x1="${cx - r}" y1="${cy}" x2="${cx + r}" y2="${cy}" stroke="#0f172a" stroke-width="1.5"/>
+                <circle cx="${cx}" cy="${cy}" r="2.8" fill="#0f172a"/>
+                <text x="${cx}" y="${cy + 16}" text-anchor="middle" font-size="12" font-weight="bold" fill="#0f172a">${diameter}</text>
+                <text x="110" y="208" text-anchor="middle" font-size="11" fill="#64748b">（單位：公分）</text>
+            </svg>`;
+        }
+
+        // Q5: 正方形內對角兩個1/4圓塗色扇形 (如課本第3題②)
+        function svgQ5(side) {
+            const x0 = 52, y0 = 36, s = 116;
+            const r = s / 2;
+            const xm = x0 + r, ym = y0 + r;
+            const x1 = x0 + s, y1 = y0 + s;
+
+            // 左上 1/4 圓 (圓心在左上角 x0, y0)
+            const topLeftSector = `M ${x0} ${y0} L ${xm} ${y0} A ${r} ${r} 0 0 1 ${x0} ${ym} Z`;
+            // 右下 1/4 圓 (圓心在右下角 x1, y1)
+            const bottomRightSector = `M ${x1} ${y1} L ${xm} ${y1} A ${r} ${r} 0 0 1 ${x1} ${ym} Z`;
+
+            return `
+            <svg viewBox="0 0 220 220" class="w-full h-full">
+                <rect x="${x0}" y="${y0}" width="${s}" height="${s}" fill="#ffffff" stroke="#475569" stroke-width="1.4" stroke-dasharray="3,2"/>
+                <line x1="${xm}" y1="${y0}" x2="${xm}" y2="${y1}" stroke="#64748b" stroke-width="1.2" stroke-dasharray="3,2"/>
+                <line x1="${x0}" y1="${ym}" x2="${x1}" y2="${ym}" stroke="#64748b" stroke-width="1.2" stroke-dasharray="3,2"/>
+                <path d="${topLeftSector}" fill="#fbcfe8" stroke="#9d174d" stroke-width="1.8" stroke-linejoin="round"/>
+                <path d="${bottomRightSector}" fill="#fbcfe8" stroke="#9d174d" stroke-width="1.8" stroke-linejoin="round"/>
+                <!-- 直角記號 -->
+                <polyline points="${x0 + 10},${y0} ${x0 + 10},${y0 + 10} ${x0},${y0 + 10}" fill="none" stroke="#0f172a" stroke-width="1.2"/>
+                <polyline points="${x1 - 10},${y1} ${x1 - 10},${y1 - 10} ${x1},${y1 - 10}" fill="none" stroke="#0f172a" stroke-width="1.2"/>
+                <text x="${x1 + 14}" y="${ym + 4}" text-anchor="middle" font-size="12" font-weight="bold" fill="#0f172a">${side}</text>
+                <text x="${xm}" y="${y1 + 16}" text-anchor="middle" font-size="12" font-weight="bold" fill="#0f172a">${side}</text>
+                <text x="110" y="210" text-anchor="middle" font-size="11" fill="#64748b">（單位：公尺）</text>
+            </svg>`;
+        }
+
+        // Q6: 簡化為標準「扇形環（甜甜圈扇形）」
+        function svgQ6(deg, outerR, innerR) {
+            const cx = 64, cy = 152;
+            const R = 104;
+            const r = Math.max(42, Math.round(R * (innerR / outerR)));
+            const largeArc = deg > 180 ? 1 : 0;
+
+            const pOuter0 = polar(cx, cy, R, 0);
+            const pOuterD = polar(cx, cy, R, deg);
+            const pInner0 = polar(cx, cy, r, 0);
+            const pInnerD = polar(cx, cy, r, deg);
+
+            const ringPath = `
+                M ${pInner0.x} ${pInner0.y}
+                L ${pOuter0.x} ${pOuter0.y}
+                A ${R} ${R} 0 ${largeArc} 0 ${pOuterD.x} ${pOuterD.y}
+                L ${pInnerD.x} ${pInnerD.y}
+                A ${r} ${r} 0 ${largeArc} 1 ${pInner0.x} ${pInner0.y}
+                Z
+            `;
+
+            const angleMarker = deg === 90
+                ? `<polyline points="${cx + 14},${cy} ${cx + 14},${cy - 14} ${cx},${cy - 14}" fill="none" stroke="#0f172a" stroke-width="1.4"/>`
+                : `<text x="${cx + 22}" y="${cy - 14}" text-anchor="middle" font-size="11" font-weight="bold" fill="#0f172a">${deg}°</text>`;
+
+            return `
+            <svg viewBox="0 0 220 220" class="w-full h-full">
+                <!-- 虛線輔助半徑至圓心 -->
+                <line x1="${cx}" y1="${cy}" x2="${pInner0.x}" y2="${pInner0.y}" stroke="#64748b" stroke-width="1.3" stroke-dasharray="3,2"/>
+                <line x1="${cx}" y1="${cy}" x2="${pInnerD.x}" y2="${pInnerD.y}" stroke="#64748b" stroke-width="1.3" stroke-dasharray="3,2"/>
+                <!-- 扇形環塗色區塊 -->
+                <path d="${ringPath}" fill="#fed7aa" stroke="#9a3412" stroke-width="1.8" stroke-linejoin="round"/>
+                ${angleMarker}
+                <circle cx="${cx}" cy="${cy}" r="3" fill="#0f172a"/>
+                <!-- 清楚標示內半徑與外半徑 -->
+                <text x="${cx + r / 2}" y="${cy + 16}" text-anchor="middle" font-size="11" font-weight="bold" fill="#0f172a">${innerR}</text>
+                <text x="${cx + R / 2}" y="${cy + 30}" text-anchor="middle" font-size="11" font-weight="bold" fill="#9a3412">外半徑 ${outerR}</text>
+                <text x="110" y="208" text-anchor="middle" font-size="11" fill="#64748b">（單位：公尺）</text>
+            </svg>`;
+        }
+
+        // Q7: 太極圖形 (大圓直徑 D，內部一小黑圓一小白圓直徑 d，如課本第4題②)
+        function svgQ7(bigD, smallD) {
+            const cx = 110, cy = 104, R = 74;
+            const r = R / 2;
+            const dotR = 11;
+
+            // 右半邊塗色陰陽魚
+            const yinYangRight = `
+                M ${cx} ${cy - R}
+                A ${R} ${R} 0 0 1 ${cx} ${cy + R}
+                A ${r} ${r} 0 0 1 ${cx} ${cy}
+                A ${r} ${r} 0 0 0 ${cx} ${cy - R}
+                Z
+            `;
+
+            return `
+            <svg viewBox="0 0 220 220" class="w-full h-full">
+                <circle cx="${cx}" cy="${cy}" r="${R}" fill="#ffffff" stroke="#334155" stroke-width="1.8"/>
+                <path d="${yinYangRight}" fill="#fed7aa" stroke="#334155" stroke-width="1.6"/>
+                <!-- 垂直直徑虛線 -->
+                <line x1="${cx}" y1="${cy - R}" x2="${cx}" y2="${cy + R}" stroke="#475569" stroke-width="1.2" stroke-dasharray="3,2"/>
+                <!-- 上方白色區域內的塗色小圓 -->
+                <circle cx="${cx}" cy="${cy - r}" r="${dotR}" fill="#fed7aa" stroke="#334155" stroke-width="1.4"/>
+                <!-- 下方塗色區域內的白色小圓 -->
+                <circle cx="${cx}" cy="${cy + r}" r="${dotR}" fill="#ffffff" stroke="#334155" stroke-width="1.4"/>
+                <!-- 標註大圓半徑/直徑與小圓直徑 -->
+                <text x="${cx - 16}" y="${cy - r + 4}" text-anchor="end" font-size="11" font-weight="bold" fill="#0f172a">直徑${bigD}</text>
+                <text x="${cx + 16}" y="${cy + r + 4}" text-anchor="start" font-size="11" font-weight="bold" fill="#0f172a">${smallD}</text>
+                <text x="110" y="208" text-anchor="middle" font-size="11" fill="#64748b">（單位：公分）</text>
+            </svg>`;
+        }
+
+        // Q8: 正方形內扣除中間葉子形，左上與右下兩角落塗色 (如課本第4題③)
+        function svgQ8(side) {
+            const x0 = 52, y0 = 34, s = 116;
+            const x1 = x0 + s, y1 = y0 + s;
+
+            // 左上角塗色區塊：沿左上頂點、上邊到右上頂點，再沿以右下角(x1, y1)為圓心的1/4圓弧回到左上頂點(x0, y0)
+            const topLeftCorner = `
+                M ${x0} ${y0}
+                L ${x1} ${y0}
+                A ${s} ${s} 0 0 0 ${x0} ${y1}
+                Z
+            `;
+            // 右下角塗色區塊：沿右下頂點、右邊到右上頂點，再沿以左上角(x0, y0)為圓心的1/4圓弧到左下頂點(x0, y1)
+            const bottomRightCorner = `
+                M ${x1} ${y1}
+                L ${x1} ${y0}
+                A ${s} ${s} 0 0 1 ${x0} ${y1}
+                Z
+            `;
+
+            return `
+            <svg viewBox="0 0 220 220" class="w-full h-full">
+                <rect x="${x0}" y="${y0}" width="${s}" height="${s}" fill="#ffffff" stroke="#334155" stroke-width="1.6"/>
+                <path d="${topLeftCorner}" fill="#fbcfe8" stroke="#9d174d" stroke-width="1.6" stroke-linejoin="round"/>
+                <path d="${bottomRightCorner}" fill="#fbcfe8" stroke="#9d174d" stroke-width="1.6" stroke-linejoin="round"/>
+                <!-- 四角直角記號 -->
+                <polyline points="${x0 + 10},${y0} ${x0 + 10},${y0 + 10} ${x0},${y0 + 10}" fill="none" stroke="#334155" stroke-width="1.2"/>
+                <polyline points="${x1 - 10},${y0} ${x1 - 10},${y0 + 10} ${x1},${y0 + 10}" fill="none" stroke="#334155" stroke-width="1.2"/>
+                <polyline points="${x0 + 10},${y1} ${x0 + 10},${y1 - 10} ${x0},${y1 - 10}" fill="none" stroke="#334155" stroke-width="1.2"/>
+                <polyline points="${x1 - 10},${y1} ${x1 - 10},${y1 - 10} ${x1},${y1 - 10}" fill="none" stroke="#334155" stroke-width="1.2"/>
+                <text x="${x1 + 14}" y="${y0 + s / 2 + 4}" text-anchor="middle" font-size="12" font-weight="bold" fill="#0f172a">${side}</text>
+                <text x="${x0 + s / 2}" y="${y1 + 16}" text-anchor="middle" font-size="12" font-weight="bold" fill="#0f172a">${side}</text>
+                <text x="110" y="210" text-anchor="middle" font-size="11" fill="#64748b">（單位：公分）</text>
+            </svg>`;
+        }
+
+        // Q9: 正方形內對角線(左下至右上)與以左下角為圓心的1/4圓弧交錯割補圖形 (如課本第4題④)
+        function svgQ9(side) {
+            const x0 = 52, y0 = 34, s = 116;
+            const x1 = x0 + s, y1 = y0 + s;
+
+            // 以左下角 (x0, y1) 為圓心、半徑 s 的 1/4 圓弧，與左下至右上 45° 對角線的精確交點
+            const ix = x0 + s * Math.SQRT1_2;
+            const iy = y1 - s * Math.SQRT1_2;
+
+            // 左側綠色扇形區塊 (45°扇形)：左下角(x0, y1) -> 左上角(x0, y0) -> 圓弧至交點(ix, iy) -> 沿對角線回(x0, y1)
+            const leftGreenSector = `
+                M ${x0} ${y1}
+                L ${x0} ${y0}
+                A ${s} ${s} 0 0 1 ${ix} ${iy}
+                Z
+            `;
+
+            // 右側綠色彎角區塊：交點(ix, iy) -> 沿對角線至右上角(x1, y0) -> 沿右邊至右下角(x1, y1) -> 沿圓弧回交點(ix, iy)
+            const rightGreenRegion = `
+                M ${ix} ${iy}
+                L ${x1} ${y0}
+                L ${x1} ${y1}
+                A ${s} ${s} 0 0 0 ${ix} ${iy}
+                Z
+            `;
+
+            return `
+            <svg viewBox="0 0 220 220" class="w-full h-full">
+                <rect x="${x0}" y="${y0}" width="${s}" height="${s}" fill="#ffffff" stroke="#334155" stroke-width="1.6"/>
+                <path d="${leftGreenSector}" fill="#bbf7d0" stroke="#15803d" stroke-width="1.6" stroke-linejoin="round"/>
+                <path d="${rightGreenRegion}" fill="#bbf7d0" stroke="#15803d" stroke-width="1.6" stroke-linejoin="round"/>
+                <line x1="${x0}" y1="${y1}" x2="${x1}" y2="${y0}" stroke="#334155" stroke-width="1.5"/>
+                <!-- 四角直角記號 -->
+                <polyline points="${x0 + 10},${y0} ${x0 + 10},${y0 + 10} ${x0},${y0 + 10}" fill="none" stroke="#334155" stroke-width="1.2"/>
+                <polyline points="${x1 - 10},${y0} ${x1 - 10},${y0 + 10} ${x1},${y0 + 10}" fill="none" stroke="#334155" stroke-width="1.2"/>
+                <polyline points="${x0 + 10},${y1} ${x0 + 10},${y1 - 10} ${x0},${y1 - 10}" fill="none" stroke="#334155" stroke-width="1.2"/>
+                <polyline points="${x1 - 10},${y1} ${x1 - 10},${y1 - 10} ${x1},${y1 - 10}" fill="none" stroke="#334155" stroke-width="1.2"/>
+                <text x="${x1 + 14}" y="${y0 + s / 2 + 4}" text-anchor="middle" font-size="12" font-weight="bold" fill="#0f172a">${side}</text>
+                <text x="${x0 + s / 2}" y="${y1 + 16}" text-anchor="middle" font-size="12" font-weight="bold" fill="#0f172a">${side}</text>
+                <text x="110" y="210" text-anchor="middle" font-size="11" fill="#64748b">（單位：公尺）</text>
+            </svg>`;
+        }
+
+        // Q10: 圓形花園等分出幾分之幾圓的扇形草地 (如課本第5題)
+        function svgQ10(den, num) {
+            const cx = 110, cy = 106, r = 74;
+            let lines = '';
+            for (let i = 0; i < den; i++) {
+                const p = polar(cx, cy, r, (360 / den) * i);
+                lines += `<line x1="${cx}" y1="${cy}" x2="${p.x}" y2="${p.y}" stroke="#475569" stroke-width="1.2" stroke-dasharray="3,2"/>`;
+            }
+            const angle = (360 / den) * num;
+            const pStart = polar(cx, cy, r, 0);
+            const pEnd = polar(cx, cy, r, angle);
+            const largeArc = angle > 180 ? 1 : 0;
+            const sector = `M ${cx} ${cy} L ${pStart.x} ${pStart.y} A ${r} ${r} 0 ${largeArc} 0 ${pEnd.x} ${pEnd.y} Z`;
+
+            return `
+            <svg viewBox="0 0 220 220" class="w-full h-full">
+                <circle cx="${cx}" cy="${cy}" r="${r}" fill="#ffffff" stroke="#334155" stroke-width="1.6"/>
+                <path d="${sector}" fill="#bbf7d0" stroke="#15803d" stroke-width="1.8" stroke-linejoin="round"/>
+                ${lines}
+                <circle cx="${cx}" cy="${cy}" r="2.8" fill="#0f172a"/>
+            </svg>`;
+        }
+
+        // =========================================================================
+        // 3. 10 題隨機出題引擎（確保每題數字乾淨、可整除或有限小數）
+        // =========================================================================
+        function build10Questions() {
+            const questions = [];
+
+            // --- 第 1 題：【選擇題】長方形左右各挖掉一個半圓 (如課本第1題) ---
+            {
+                const pairs = [
+                    { L: 30, W: 20 },
+                    { L: 24, W: 14 },
+                    { L: 28, W: 16 },
+                    { L: 36, W: 22 },
+                    { L: 25, W: 18 }
+                ];
+                const { L, W } = pick(pairs);
+                const correctExpr = `${L} × ${W} − (${W} ÷ 2) × (${W} ÷ 2) × 3.14`;
+                const distractors = [
+                    `${L} × ${W} − ${W} × 2 × 3.14`,
+                    `${L} × ${W} − ${W} × ${W} × 3.14 ÷ 2`,
+                    `${L} × ${W} − (${W} ÷ 2) × (${W} ÷ 2) × 3.14 ÷ 2`
+                ];
+                const options = shuffle([correctExpr, ...distractors]);
+                const correctIndex = options.indexOf(correctExpr);
+
+                questions.push({
+                    id: 1,
+                    type: 'mcq',
+                    tag: '選擇題 • 複合圖形面積列式',
+                    prompt: `如圖，塗色圖形的面積是多少平方公分？下面哪個算式能算出正確答案？`,
+                    svg: svgQ1(L, W),
+                    options: options,
+                    correctIndex: correctIndex,
+                    correctDisplay: `(${correctIndex + 1}) ${correctExpr}`
+                });
+            }
+
+            // --- 第 2 題：【求弧長 1】等分圓塗色扇形弧長 (如課本第2題①) ---
+            {
+                const configs = [
+                    { parts: 10, shaded: 1, d: 36 },
+                    { parts: 12, shaded: 1, d: 30 },
+                    { parts: 8, shaded: 1, d: 24 },
+                    { parts: 9, shaded: 1, d: 36 },
+                    { parts: 10, shaded: 3, d: 40 },
+                    { parts: 12, shaded: 5, d: 24 },
+                    { parts: 8, shaded: 3, d: 32 }
+                ];
+                const cfg = pick(configs);
+                // 弧長 = d * 3.14 * shaded / parts
+                const ans = cleanNum((cfg.d * cfg.shaded / cfg.parts) * 3.14);
+
+                questions.push({
+                    id: 2,
+                    type: 'num',
+                    tag: '計算題 • 扇形弧長',
+                    prompt: `如圖，圓形被平分成 ${cfg.parts} 等份，塗色部分占 ${cfg.shaded} 份，直徑為 ${cfg.d} 公分，塗色扇形的<strong>弧長</strong>大約是多少公分？`,
+                    svg: svgQ2(cfg.parts, cfg.shaded, cfg.d),
+                    answer: ans,
+                    unit: '公分',
+                    correctDisplay: `${ans} 公分`
+                });
+            }
+
+            // --- 第 3 題：【求弧長 2】給圓心角與半徑，求弧長 (如課本第2題②) ---
+            {
+                const configs = [
+                    { deg: 150, r: 24 },
+                    { deg: 120, r: 18 },
+                    { deg: 135, r: 16 },
+                    { deg: 240, r: 15 },
+                    { deg: 72, r: 25 },
+                    { deg: 144, r: 15 },
+                    { deg: 210, r: 12 }
+                ];
+                const cfg = pick(configs);
+                // 弧長 = 2 * r * 3.14 * deg / 360
+                const ans = cleanNum((2 * cfg.r * cfg.deg / 360) * 3.14);
+
+                questions.push({
+                    id: 3,
+                    type: 'num',
+                    tag: '計算題 • 扇形弧長',
+                    prompt: `如圖，半徑為 ${cfg.r} 公尺、圓心角為 ${cfg.deg}° 的塗色扇形，它的<strong>弧長</strong>大約是多少公尺？`,
+                    svg: svgQ3(cfg.deg, cfg.r),
+                    answer: ans,
+                    unit: '公尺',
+                    correctDisplay: `${ans} 公尺`
+                });
+            }
+
+            // --- 第 4 題：【求周長 1】4分之3圓塗色部分周長 (如課本第3題①) ---
+            {
+                const d = pick([12, 16, 20, 24, 28, 32]);
+                // 周長 = d * 3.14 * 3/4 + d
+                const ans = cleanNum(d * 3.14 * 0.75 + d);
+
+                questions.push({
+                    id: 4,
+                    type: 'num',
+                    tag: '計算題 • 扇形周長',
+                    prompt: `如圖，直徑為 ${d} 公分的圓中，塗色部分是 <span class="fraction"><span class="num">3</span><span class="den">4</span></span> 圓扇形，塗色部分的<strong>周長</strong>大約共是多少公分？`,
+                    svg: svgQ4(d),
+                    answer: ans,
+                    unit: '公分',
+                    correctDisplay: `${ans} 公分`
+                });
+            }
+
+            // --- 第 5 題：【求周長 2】正方形內對角兩個1/4圓塗色周長 (如課本第3題②) ---
+            {
+                const side = pick([10, 12, 16, 20, 24, 28]);
+                // 兩個半徑為 side/2 的 1/4 圓弧(合起來是直徑為 side 的半圓弧) + 4 條半徑(合起來是 2 * side)
+                const ans = cleanNum(side * 3.14 * 0.5 + side * 2);
+
+                questions.push({
+                    id: 5,
+                    type: 'num',
+                    tag: '計算題 • 複合圖形周長',
+                    prompt: `如圖，邊長為 ${side} 公尺的正方形內有兩個對角的 <span class="fraction"><span class="num">1</span><span class="den">4</span></span> 圓塗色扇形，塗色部分的<strong>周長</strong>大約共是多少公尺？`,
+                    svg: svgQ5(side),
+                    answer: ans,
+                    unit: '公尺',
+                    correctDisplay: `${ans} 公尺`
+                });
+            }
+
+            // --- 第 6 題：【求塗色面積 1】簡化為標準扇形環（外扇形 − 內扇形） ---
+            {
+                const configs = [
+                    { deg: 90, num: 1, den: 4, outerR: 12, innerR: 6 },
+                    { deg: 90, num: 1, den: 4, outerR: 10, innerR: 6 },
+                    { deg: 90, num: 1, den: 4, outerR: 16, innerR: 8 },
+                    { deg: 120, num: 1, den: 3, outerR: 12, innerR: 6 },
+                    { deg: 120, num: 1, den: 3, outerR: 15, innerR: 9 },
+                    { deg: 60, num: 1, den: 6, outerR: 12, innerR: 6 }
+                ];
+                const cfg = pick(configs);
+                const diffSq = cfg.outerR * cfg.outerR - cfg.innerR * cfg.innerR;
+                const ans = cleanNum((diffSq * cfg.num / cfg.den) * 3.14);
+
+                questions.push({
+                    id: 6,
+                    type: 'num',
+                    tag: '計算題 • 複合塗色面積',
+                    prompt: `如圖，圓心角為 ${cfg.deg}° 的扇形環，外半徑為 ${cfg.outerR} 公尺，內半徑為 ${cfg.innerR} 公尺，橘色塗色部分的<strong>面積</strong>大約共是多少平方公尺？`,
+                    svg: svgQ6(cfg.deg, cfg.outerR, cfg.innerR),
+                    answer: ans,
+                    unit: '平方公尺',
+                    correctDisplay: `${ans} 平方公尺`
+                });
+            }
+
+            // --- 第 7 題：【求塗色面積 2】太極圖形塗色面積 (如課本第4題②) ---
+            {
+                const configs = [
+                    { bigD: 12, smallD: 4 },
+                    { bigD: 16, smallD: 4 },
+                    { bigD: 20, smallD: 6 },
+                    { bigD: 24, smallD: 8 },
+                    { bigD: 28, smallD: 10 }
+                ];
+                const cfg = pick(configs);
+                const bigR = cfg.bigD / 2;
+                // 塗色面積剛好等於大圓的一半
+                const ans = cleanNum(bigR * bigR * 3.14 * 0.5);
+
+                questions.push({
+                    id: 7,
+                    type: 'num',
+                    tag: '計算題 • 複合塗色面積',
+                    prompt: `如圖，大圓的直徑是 ${cfg.bigD} 公分，內部兩個對稱小圓的直徑都是 ${cfg.smallD} 公分，橘色塗色部分的<strong>面積</strong>大約共是多少平方公分？`,
+                    svg: svgQ7(cfg.bigD, cfg.smallD),
+                    answer: ans,
+                    unit: '平方公分',
+                    correctDisplay: `${ans} 平方公分`
+                });
+            }
+
+            // --- 第 8 題：【求塗色面積 3】正方形內扣除中間葉子形，上下兩角塗色 (如課本第4題③) ---
+            {
+                const side = pick([10, 20, 30, 40]);
+                // 塗色面積 = 2 * (正方形 - 1/4圓) = side^2 * (2 - 3.14/2) = side^2 * 0.43
+                const ans = cleanNum(side * side * 0.43);
+
+                questions.push({
+                    id: 8,
+                    type: 'num',
+                    tag: '計算題 • 複合塗色面積',
+                    prompt: `如圖，邊長為 ${side} 公分的正方形內，由兩個 <span class="fraction"><span class="num">1</span><span class="den">4</span></span> 圓交疊出中間空白葉子形，粉色塗色部分的<strong>面積</strong>大約共是多少平方公分？`,
+                    svg: svgQ8(side),
+                    answer: ans,
+                    unit: '平方公分',
+                    correctDisplay: `${ans} 平方公分`
+                });
+            }
+
+            // --- 第 9 題：【求塗色面積 4】正方形內對角線與雙半葉割補圖形 (如課本第4題④) ---
+            {
+                const side = pick([10, 12, 14, 16, 18, 20]);
+                // 割補後剛好等於正方形面積的一半
+                const ans = cleanNum((side * side) / 2);
+
+                questions.push({
+                    id: 9,
+                    type: 'num',
+                    tag: '計算題 • 複合塗色面積',
+                    prompt: `如圖，邊長為 ${side} 公尺的正方形內畫有對角線與對稱圓弧，綠色塗色部分的<strong>面積</strong>大約共是多少平方公尺？`,
+                    svg: svgQ9(side),
+                    answer: ans,
+                    unit: '平方公尺',
+                    correctDisplay: `${ans} 平方公尺`
+                });
+            }
+
+            // --- 第 10 題：【應用計算】圓周長反推半徑再算幾分之幾圓草地面積 (如課本第5題) ---
+            {
+                const configs = [
+                    { r: 20, den: 8, num: 3 }, // C = 125.6
+                    { r: 10, den: 8, num: 3 }, // C = 62.8
+                    { r: 20, den: 8, num: 5 }, // C = 125.6
+                    { r: 30, den: 6, num: 1 }, // C = 188.4
+                    { r: 16, den: 8, num: 3 }, // C = 100.48
+                    { r: 20, den: 4, num: 3 }  // C = 125.6
+                ];
+                const cfg = pick(configs);
+                const circumference = cleanNum(cfg.r * 2 * 3.14);
+                const ans = cleanNum((cfg.r * cfg.r * cfg.num / cfg.den) * 3.14);
+
+                questions.push({
+                    id: 10,
+                    type: 'num',
+                    tag: '應用題 • 扇形面積計算',
+                    prompt: `如下圖，在圓周長 ${circumference} 公尺的圓形花圃中，圍出一塊 <span class="fraction"><span class="num">${cfg.num}</span><span class="den">${cfg.den}</span></span> 圓的扇形草地，草地面積大約是幾平方公尺？`,
+                    svg: svgQ10(cfg.den, cfg.num),
+                    answer: ans,
+                    unit: '平方公尺',
+                    correctDisplay: `${ans} 平方公尺`
+                });
+            }
+
+            return questions;
+        }
+
+        // =========================================================================
+        // 4. 測驗狀態與介面控制（純測驗模式、無練習、無解析）
+        // =========================================================================
+        let quizQuestions = [];
+        let userAnswers = Array(10).fill(null); // 第1題存選項索引(0~3)，第2~10題存字串數字
+        let currentIdx = 0;
+        let isSubmitted = false;
+
+        function startQuiz() {
+            quizQuestions = build10Questions();
+            userAnswers = Array(10).fill(null);
+            currentIdx = 0;
+            isSubmitted = false;
+
+            document.getElementById('scoreSummaryCard').classList.add('hidden');
+            document.getElementById('submitConfirmBar').classList.add('hidden');
+            document.getElementById('btnSubmitQuiz').classList.remove('hidden');
+
+            renderNavDots();
+            updateAnsweredCount();
+            renderCurrentQuestion();
+        }
+
+        function restartQuiz() {
+            clearPad();
+            startQuiz();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function isQuestionAnswered(idx) {
+            const val = userAnswers[idx];
+            if (quizQuestions[idx].type === 'mcq') {
+                return val !== null && val !== undefined;
+            }
+            return val !== null && String(val).trim() !== '';
+        }
+
+        function isQuestionCorrect(idx) {
+            const q = quizQuestions[idx];
+            const val = userAnswers[idx];
+            if (q.type === 'mcq') {
+                return val === q.correctIndex;
+            }
+            const parsed = parseFloat(val);
+            return !isNaN(parsed) && Math.abs(parsed - q.answer) < 0.015;
+        }
+
+        function updateAnsweredCount() {
+            let count = 0;
+            for (let i = 0; i < 10; i++) {
+                if (isQuestionAnswered(i)) count++;
+            }
+            document.getElementById('answeredProgress').textContent = `已作答：${count} / 10 題`;
+        }
+
+        function renderNavDots() {
+            const container = document.getElementById('questionNavDots');
+            container.innerHTML = '';
+
+            for (let i = 0; i < 10; i++) {
+                const btn = document.createElement('button');
+                btn.textContent = `第${i + 1}題`;
+                let cls = "py-1.5 rounded-lg text-xs font-bold border transition ";
+
+                if (isSubmitted) {
+                    const correct = isQuestionCorrect(i);
+                    if (correct) {
+                        cls += (i === currentIdx)
+                            ? "bg-emerald-600 text-white border-emerald-700 ring-2 ring-emerald-300"
+                            : "bg-emerald-100 text-emerald-800 border-emerald-300";
+                    } else {
+                        cls += (i === currentIdx)
+                            ? "bg-rose-600 text-white border-rose-700 ring-2 ring-rose-300"
+                            : "bg-rose-100 text-rose-800 border-rose-300";
+                    }
+                } else {
+                    if (i === currentIdx) {
+                        cls += "bg-teal-600 text-white border-teal-700 shadow-sm";
+                    } else if (isQuestionAnswered(i)) {
+                        cls += "bg-teal-50 text-teal-800 border-teal-300";
+                    } else {
+                        cls += "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100";
+                    }
+                }
+
+                btn.className = cls;
+                btn.onclick = () => {
+                    currentIdx = i;
+                    renderCurrentQuestion();
+                    renderNavDots();
+                };
+                container.appendChild(btn);
+            }
+        }
+
+        function renderCurrentQuestion() {
+            const q = quizQuestions[currentIdx];
+            document.getElementById('qNumberBadge').textContent = `第 ${currentIdx + 1} / 10 題`;
+            document.getElementById('qTypeTag').textContent = q.tag;
+            document.getElementById('questionPrompt').innerHTML = q.prompt;
+            document.getElementById('svgContainer').innerHTML = q.svg;
+
+            const mcqBox = document.getElementById('mcqOptionsContainer');
+            const numBox = document.getElementById('numericInputContainer');
+            const postBanner = document.getElementById('postSubmitResultBanner');
+
+            if (q.type === 'mcq') {
+                mcqBox.classList.remove('hidden');
+                numBox.classList.add('hidden');
+                mcqBox.innerHTML = '';
+
+                const labels = ['①', '②', '③', '④'];
+                q.options.forEach((optText, optIdx) => {
+                    const btn = document.createElement('button');
+                    const selected = userAnswers[currentIdx] === optIdx;
+
+                    let btnCls = "w-full text-left px-4 py-3 rounded-xl border-2 font-bold text-sm sm:text-base transition flex items-center gap-3 ";
+                    if (isSubmitted) {
+                        if (optIdx === q.correctIndex) {
+                            btnCls += "bg-emerald-50 border-emerald-500 text-emerald-900";
+                        } else if (selected && optIdx !== q.correctIndex) {
+                            btnCls += "bg-rose-50 border-rose-500 text-rose-900";
+                        } else {
+                            btnCls += "bg-slate-50 border-slate-200 text-slate-500";
+                        }
+                        btn.disabled = true;
+                    } else {
+                        if (selected) {
+                            btnCls += "bg-teal-50 border-teal-600 text-teal-900 shadow-sm";
+                        } else {
+                            btnCls += "bg-white border-slate-200 hover:border-teal-400 text-slate-700";
+                        }
+                        btn.onclick = () => {
+                            userAnswers[currentIdx] = optIdx;
+                            updateAnsweredCount();
+                            renderCurrentQuestion();
+                            renderNavDots();
+                        };
+                    }
+
+                    btn.className = btnCls;
+                    btn.innerHTML = `<span class="text-lg text-teal-700 shrink-0">${labels[optIdx]}</span><span>${optText}</span>`;
+                    mcqBox.appendChild(btn);
+                });
+            } else {
+                mcqBox.classList.add('hidden');
+                numBox.classList.remove('hidden');
+                document.getElementById('unitText').textContent = q.unit;
+
+                const inputEl = document.getElementById('numericAnswerInput');
+                inputEl.value = userAnswers[currentIdx] !== null ? userAnswers[currentIdx] : '';
+                inputEl.disabled = isSubmitted;
+            }
+
+            // 交卷後顯示純對錯結果（不含任何解析）
+            if (isSubmitted) {
+                postBanner.classList.remove('hidden');
+                const correct = isQuestionCorrect(currentIdx);
+                let userDisp = '未作答';
+                if (q.type === 'mcq' && userAnswers[currentIdx] !== null) {
+                    const labels = ['(1)', '(2)', '(3)', '(4)'];
+                    userDisp = `${labels[userAnswers[currentIdx]]} ${q.options[userAnswers[currentIdx]]}`;
+                } else if (q.type === 'num' && isQuestionAnswered(currentIdx)) {
+                    userDisp = `${userAnswers[currentIdx]} ${q.unit}`;
+                }
+
+                if (correct) {
+                    postBanner.className = "rounded-xl p-3.5 text-sm font-bold border bg-emerald-50 border-emerald-300 text-emerald-800";
+                    postBanner.innerHTML = `⭕ 答對（+10 分）｜正確答案：${q.correctDisplay}`;
+                } else {
+                    postBanner.className = "rounded-xl p-3.5 text-sm font-bold border bg-rose-50 border-rose-300 text-rose-800";
+                    postBanner.innerHTML = `❌ 答錯（0 分）｜你的答案：${userDisp} ｜ 正確答案：${q.correctDisplay}`;
+                }
+            } else {
+                postBanner.classList.add('hidden');
+            }
+
+            // 上下一題按鈕狀態
+            const btnPrev = document.getElementById('btnPrev');
+            const btnNext = document.getElementById('btnNext');
+            btnPrev.disabled = currentIdx === 0;
+            btnPrev.classList.toggle('opacity-40', currentIdx === 0);
+
+            if (currentIdx === 9) {
+                btnNext.textContent = isSubmitted ? '已到最後一題' : '完成（準備交卷）';
+                btnNext.disabled = isSubmitted;
+                btnNext.classList.toggle('opacity-40', isSubmitted);
+            } else {
+                btnNext.textContent = '下一題 →';
+                btnNext.disabled = false;
+                btnNext.classList.remove('opacity-40');
+            }
+        }
+
+        function handleNumericInput(val) {
+            if (isSubmitted) return;
+            userAnswers[currentIdx] = val.trim();
+            updateAnsweredCount();
+            renderNavDots();
+        }
+
+        function goPrevQuestion() {
+            if (currentIdx > 0) {
+                currentIdx--;
+                renderCurrentQuestion();
+                renderNavDots();
+            }
+        }
+
+        function goNextQuestion() {
+            if (currentIdx < 9) {
+                currentIdx++;
+                renderCurrentQuestion();
+                renderNavDots();
+            } else if (!isSubmitted) {
+                openSubmitConfirm();
+            }
+        }
+
+        function openSubmitConfirm() {
+            let unanswered = 0;
+            for (let i = 0; i < 10; i++) {
+                if (!isQuestionAnswered(i)) unanswered++;
+            }
+            const confirmText = unanswered > 0
+                ? `你還有 ${unanswered} 題尚未作答，確定要現在交卷嗎？`
+                : `10 題都已經作答完成，確定要交卷看成績嗎？`;
+            document.getElementById('submitConfirmText').textContent = confirmText;
+            document.getElementById('submitConfirmBar').classList.remove('hidden');
+        }
+
+        function closeSubmitConfirm() {
+            document.getElementById('submitConfirmBar').classList.add('hidden');
+        }
+
+        function finalizeQuiz() {
+            isSubmitted = true;
+            document.getElementById('submitConfirmBar').classList.add('hidden');
+            document.getElementById('btnSubmitQuiz').classList.add('hidden');
+
+            let correctCount = 0;
+            const tbody = document.getElementById('scoreTableBody');
+            tbody.innerHTML = '';
+
+            for (let i = 0; i < 10; i++) {
+                const q = quizQuestions[i];
+                const correct = isQuestionCorrect(i);
+                if (correct) correctCount++;
+
+                let userDisp = '未作答';
+                if (q.type === 'mcq' && userAnswers[i] !== null) {
+                    userDisp = `(${userAnswers[i] + 1})`;
+                } else if (q.type === 'num' && isQuestionAnswered(i)) {
+                    userDisp = `${userAnswers[i]} ${q.unit}`;
+                }
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 cursor-pointer";
+                tr.onclick = () => {
+                    currentIdx = i;
+                    renderCurrentQuestion();
+                    renderNavDots();
+                    document.getElementById('questionMainCard').scrollIntoView({ behavior: 'smooth' });
+                };
+
+                tr.innerHTML = `
+                    <td class="py-2.5 px-3 text-center font-bold text-slate-700">第 ${i + 1} 題</td>
+                    <td class="py-2.5 px-3 text-left text-slate-600">${q.tag}</td>
+                    <td class="py-2.5 px-3 text-center font-bold ${correct ? 'text-emerald-700' : 'text-rose-600'}">${userDisp}</td>
+                    <td class="py-2.5 px-3 text-center font-bold text-slate-800">${q.type === 'mcq' ? `(${q.correctIndex + 1})` : q.correctDisplay}</td>
+                    <td class="py-2.5 px-3 text-center font-bold">${correct ? '<span class="text-emerald-600">⭕ 對</span>' : '<span class="text-rose-600">❌ 錯</span>'}</td>
+                `;
+                tbody.appendChild(tr);
+            }
+
+            const totalScore = correctCount * 10;
+            document.getElementById('totalScoreText').textContent = totalScore;
+            document.getElementById('scoreSummarySub').textContent = `答對 ${correctCount} 題 / 共 10 題（點擊下方列表可切換檢視各題作答結果）`;
+            document.getElementById('scoreSummaryCard').classList.remove('hidden');
+
+            renderNavDots();
+            renderCurrentQuestion();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // =========================================================================
+        // 5. 手寫空白計算草稿紙
+        // =========================================================================
+        let canvas, ctx;
+        let drawing = false;
+        let strokeColor = '#1e293b';
+        let strokeWidth = 2.5;
+
+        function initPad() {
+            canvas = document.getElementById('scratchpadCanvas');
+            ctx = canvas.getContext('2d');
+            resizePad();
+            window.addEventListener('resize', resizePad);
+
+            canvas.addEventListener('mousedown', (e) => {
+                drawing = true;
+                const r = canvas.getBoundingClientRect();
+                ctx.beginPath();
+                ctx.moveTo(e.clientX - r.left, e.clientY - r.top);
+            });
+            canvas.addEventListener('mousemove', (e) => {
+                if (!drawing) return;
+                const r = canvas.getBoundingClientRect();
+                ctx.lineTo(e.clientX - r.left, e.clientY - r.top);
+                ctx.strokeStyle = strokeColor;
+                ctx.lineWidth = strokeWidth;
+                ctx.lineCap = 'round';
+                ctx.stroke();
+            });
+            canvas.addEventListener('mouseup', () => drawing = false);
+            canvas.addEventListener('mouseout', () => drawing = false);
+
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                drawing = true;
+                const t = e.touches[0];
+                const r = canvas.getBoundingClientRect();
+                ctx.beginPath();
+                ctx.moveTo(t.clientX - r.left, t.clientY - r.top);
+            }, { passive: false });
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (!drawing) return;
+                const t = e.touches[0];
+                const r = canvas.getBoundingClientRect();
+                ctx.lineTo(t.clientX - r.left, t.clientY - r.top);
+                ctx.strokeStyle = strokeColor;
+                ctx.lineWidth = strokeWidth;
+                ctx.lineCap = 'round';
+                ctx.stroke();
+            }, { passive: false });
+            canvas.addEventListener('touchend', () => drawing = false);
+        }
+
+        function resizePad() {
+            if (!canvas) return;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            if (rect.width > 0) {
+                canvas.width = rect.width - 24;
+                canvas.height = 380;
+                clearPad();
+            }
+        }
+
+        function setPen(color, width) {
+            strokeColor = color;
+            strokeWidth = width;
+        }
+
+        function setEraser() {
+            strokeColor = '#fffdf7';
+            strokeWidth = 20;
+        }
+
+        function clearPad() {
+            if (!ctx) return;
+            ctx.fillStyle = '#fffdf7';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        window.onload = function () {
+            initPad();
+            startQuiz();
+        };
+    </script>
+</body>
+</html>
