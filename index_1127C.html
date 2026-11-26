@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>國小六上國語｜第十課〈戲術〉語詞與成語線上測驗</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Noto Sans TC -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Noto Sans TC', 'sans-serif'],
+                    },
+                    colors: {
+                        paper: '#FAF8F5',
+                        ink: '#1E293B',
+                        tealbrand: {
+                            50: '#F0FDFA',
+                            100: '#CCFBF1',
+                            200: '#99F6E4',
+                            500: '#14B8A6',
+                            600: '#0D9488',
+                            700: '#0F766E',
+                            800: '#115E59',
+                        },
+                        amberbrand: {
+                            50: '#FFFBEB',
+                            100: '#FEF3C7',
+                            500: '#F59E0B',
+                            600: '#D97706',
+                            700: '#B45309',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* 全域防複製與禁止文字選取保護 */
+        * {
+            user-select: none !important;
+            -webkit-user-select: none !important;
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
+            -webkit-touch-callout: none !important;
+        }
+
+        /* 防列印保護：防止透過列印功能將試題輸出 */
+        @media print {
+            body {
+                display: none !important;
+            }
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #FAF8F5;
+            color: #1E293B;
+            scroll-behavior: smooth;
+        }
+
+        /* 選項選中狀態樣式 */
+        .custom-radio:checked + label {
+            border-color: #0F766E;
+            background-color: #F0FDFA;
+            color: #115E59;
+            font-weight: 700;
+            box-shadow: 0 4px 14px -3px rgba(15, 118, 110, 0.16);
+        }
+        .custom-radio:checked + label .option-badge {
+            background-color: #0F766E;
+            color: #FFFFFF;
+            border-color: #0F766E;
+        }
+
+        /* Toast 浮動氣泡動畫 */
+        @keyframes toastSlideUp {
+            0% { opacity: 0; transform: translate(-50%, 16px); }
+            100% { opacity: 1; transform: translate(-50%, 0); }
+        }
+        .toast-active {
+            animation: toastSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-ink" oncontextmenu="return false;" onselectstart="return false;" ondragstart="return false;">
+
+    <!-- 防複製浮動提示氣泡 (Toast) -->
+    <div id="protection-toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden pointer-events-none w-max max-w-[92vw]">
+        <div class="bg-slate-900/95 text-amber-300 border border-amber-400/40 px-4 py-2.5 rounded-2xl shadow-xl flex items-center gap-2.5 text-xs sm:text-sm font-bold backdrop-blur-md">
+            <i class="fa-solid fa-shield-halved text-amber-400 text-base"></i>
+            <span>測驗進行中，已啟用防複製保護機制</span>
+        </div>
+    </div>
+
+    <!-- 頂部固定導覽與狀態列 -->
+    <header class="bg-white/95 backdrop-blur-md shadow-xs sticky top-0 z-30 border-b border-slate-200/80">
+        <div class="max-w-4xl mx-auto px-4 py-3">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5">
+                <!-- 測驗標題 -->
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-tealbrand-700 to-tealbrand-500 text-white flex items-center justify-center font-bold text-lg shadow-xs shrink-0">
+                        <i class="fa-solid fa-book-open"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h1 class="text-base sm:text-lg font-black text-ink tracking-tight">國小六上國語｜第十課〈戲術〉線上測驗</h1>
+                            <span class="inline-flex items-center gap-1 bg-amberbrand-50 text-amberbrand-700 border border-amberbrand-500/30 text-[11px] font-bold px-2 py-0.5 rounded-md">
+                                <i class="fa-solid fa-lock text-[10px]"></i> 防複製保護中
+                            </span>
+                        </div>
+                        <p class="text-xs text-tealbrand-700 font-bold">新詞教學・生字延伸成語・共 16 題（滿分 100 分）</p>
+                    </div>
+                </div>
+
+                <!-- 作答中即時狀態列 -->
+                <div id="header-controls" class="hidden w-full sm:w-auto flex items-center justify-between sm:justify-end gap-2.5 bg-paper px-3 py-1.5 rounded-xl border border-slate-200/90">
+                    <!-- 計時器 -->
+                    <div class="flex items-center gap-1.5 text-xs font-bold text-slate-600">
+                        <i class="fa-regular fa-clock text-amberbrand-600"></i>
+                        <span id="timer-display" class="font-mono text-sm text-ink">00:00</span>
+                    </div>
+                    <div class="h-4 w-px bg-slate-200"></div>
+                    <!-- 作答進度 -->
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold text-slate-600 whitespace-nowrap">
+                            已作答 <span id="answered-count" class="text-tealbrand-700 text-sm font-black">0</span> / 16
+                        </span>
+                        <div class="w-16 sm:w-20 bg-slate-200 h-2 rounded-full overflow-hidden">
+                            <div id="progress-bar" class="bg-tealbrand-600 h-full w-0 transition-all duration-300 rounded-full"></div>
+                        </div>
+                    </div>
+                    <div class="h-4 w-px bg-slate-200"></div>
+                    <!-- 模式切換鈕 -->
+                    <button type="button" id="toggle-mode-btn" onclick="toggleViewMode()" class="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:border-tealbrand-600 text-xs font-bold text-slate-700 hover:text-tealbrand-700 flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer whitespace-nowrap">
+                        <i id="mode-icon" class="fa-solid fa-expand text-tealbrand-600"></i>
+                        <span id="mode-label">逐題專注</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 題號快速導覽列 (1～16 題) -->
+            <div id="quick-nav-wrapper" class="hidden mt-3 pt-2.5 border-t border-slate-100">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div id="quick-nav-grid" class="grid grid-cols-8 sm:grid-cols-16 gap-1.5 w-full sm:w-auto flex-grow">
+                        <!-- 1~16 題號按鈕由 JS 動態生成 -->
+                    </div>
+                    <div class="hidden md:flex items-center gap-3 text-[11px] font-bold text-slate-500 pl-2 shrink-0">
+                        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-xs bg-white border border-slate-300 inline-block"></span> 未作答</span>
+                        <span class="flex items-center gap-1 text-tealbrand-700"><span class="w-2.5 h-2.5 rounded-xs bg-tealbrand-600 inline-block"></span> 已作答</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要內容區 -->
+    <main class="flex-grow max-w-4xl w-full mx-auto px-4 py-6 sm:py-8">
+
+        <!-- 1. 開始畫面 -->
+        <section id="start-screen" class="max-w-2xl mx-auto">
+            <div class="bg-white rounded-3xl shadow-md border border-slate-200/80 overflow-hidden">
+                <!-- 橫幅 -->
+                <div class="bg-gradient-to-br from-tealbrand-700 via-tealbrand-600 to-tealbrand-800 text-white p-7 sm:p-10 text-center">
+                    <div class="w-16 h-16 bg-white/15 backdrop-blur-xs rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/25 text-3xl shadow-inner">
+                        <i class="fa-solid fa-feather-pointed text-amber-300"></i>
+                    </div>
+                    <span class="inline-block bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full mb-2 tracking-wider">
+                        國小六年級上學期・國語科
+                    </span>
+                    <h2 class="text-2xl sm:text-3xl font-black tracking-tight mb-2">第十課〈戲術〉語詞與成語線上測驗</h2>
+                    <p class="text-tealbrand-100 text-sm font-medium">新詞教學・生字延伸成語・共 16 題（滿分 100 分）</p>
+                </div>
+
+                <!-- 測驗規格與須知 -->
+                <div class="p-6 sm:p-8">
+                    <div class="grid grid-cols-3 gap-3 mb-6">
+                        <div class="bg-paper rounded-2xl p-3.5 text-center border border-slate-200/80">
+                            <div class="text-xs font-bold text-slate-400 mb-1">測驗題數</div>
+                            <div class="text-xl sm:text-2xl font-black text-ink">16 <span class="text-xs font-bold text-slate-500">題</span></div>
+                        </div>
+                        <div class="bg-paper rounded-2xl p-3.5 text-center border border-slate-200/80">
+                            <div class="text-xs font-bold text-slate-400 mb-1">測驗滿分</div>
+                            <div class="text-xl sm:text-2xl font-black text-tealbrand-700">100 <span class="text-xs font-bold text-slate-500">分</span></div>
+                        </div>
+                        <div class="bg-paper rounded-2xl p-3.5 text-center border border-slate-200/80">
+                            <div class="text-xs font-bold text-slate-400 mb-1">題型模式</div>
+                            <div class="text-base sm:text-lg font-black text-amberbrand-600 mt-0.5">四選一</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-tealbrand-50/70 rounded-2xl p-5 border border-tealbrand-100 mb-7 space-y-2.5">
+                        <h3 class="text-sm font-black text-tealbrand-800 flex items-center gap-2">
+                            <i class="fa-solid fa-circle-info text-tealbrand-600"></i>
+                            <span>測驗規則與注意事項</span>
+                        </h3>
+                        <ul class="text-sm text-slate-700 space-y-2 leading-relaxed">
+                            <li class="flex items-start gap-2.5">
+                                <i class="fa-solid fa-shuffle text-tealbrand-600 mt-1 shrink-0 text-xs"></i>
+                                <span><strong>隨機出題機制：</strong>每次測驗開始或重新練習時，題目順序與每題四個選項順序都會重新隨機打亂。</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <i class="fa-solid fa-shield-halved text-amberbrand-600 mt-1 shrink-0 text-xs"></i>
+                                <span><strong>防複製保護：</strong>測驗期間全面禁止反白選取文字、右鍵選單、複製貼上、列印及開發者快速鍵。</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <i class="fa-solid fa-award text-tealbrand-700 mt-1 shrink-0 text-xs"></i>
+                                <span><strong>成績結算說明：</strong>交卷後僅顯示最終得分、答對題數、作答總耗時與鼓勵評語，<strong>不顯示單題對錯與文字解析</strong>。</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <button type="button" onclick="startQuiz()" class="w-full py-4 bg-tealbrand-700 hover:bg-tealbrand-800 active:scale-[0.99] text-white font-black rounded-2xl shadow-lg shadow-tealbrand-700/20 transition-all duration-200 text-lg flex items-center justify-center gap-2.5 cursor-pointer">
+                        <i class="fa-solid fa-play"></i>
+                        <span>開始測驗</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. 測驗進行畫面 -->
+        <section id="quiz-screen" class="hidden">
+            <form id="quiz-form" onsubmit="handleSubmitClick(event)">
+                <div id="questions-container" class="space-y-6">
+                    <!-- 題目卡片由 JS 動態渲染 -->
+                </div>
+
+                <!-- 逐題專注模式下的上下題導覽按鈕 -->
+                <div id="single-mode-nav" class="hidden mt-6 flex items-center justify-between gap-3">
+                    <button type="button" id="prev-btn" onclick="stepSingleQuestion(-1)" class="px-5 py-3 bg-white border border-slate-300 hover:bg-slate-50 disabled:opacity-40 disabled:pointer-events-none text-slate-700 font-bold rounded-xl text-sm flex items-center gap-2 shadow-2xs transition-all cursor-pointer">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span>上一題</span>
+                    </button>
+                    <span id="single-counter" class="text-sm font-black text-slate-600">第 1 / 16 題</span>
+                    <button type="button" id="next-btn" onclick="stepSingleQuestion(1)" class="px-5 py-3 bg-white border border-slate-300 hover:bg-slate-50 disabled:opacity-40 disabled:pointer-events-none text-slate-700 font-bold rounded-xl text-sm flex items-center gap-2 shadow-2xs transition-all cursor-pointer">
+                        <span>下一題</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <!-- 提交試卷區塊 -->
+                <div class="mt-8 bg-white p-6 sm:p-8 rounded-2xl shadow-xs border border-slate-200/80 text-center">
+                    <p class="text-xs sm:text-sm text-slate-500 font-medium mb-4">
+                        確認所有題目皆已作答完成後，請點擊下方按鈕送出試卷。
+                    </p>
+                    <button type="submit" class="w-full sm:w-auto px-12 py-4 bg-tealbrand-700 hover:bg-tealbrand-800 active:scale-[0.99] text-white font-black rounded-2xl shadow-lg shadow-tealbrand-700/20 transition-all duration-200 text-base sm:text-lg inline-flex items-center justify-center gap-2.5 cursor-pointer">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        <span>提交試卷</span>
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- 3. 成績結算畫面 (嚴格不顯示單題對錯、正確答案或任何文字解析) -->
+        <section id="result-screen" class="hidden">
+            <div class="bg-white rounded-3xl shadow-lg overflow-hidden text-center border border-slate-200/80 max-w-2xl mx-auto">
+                <div id="result-banner" class="bg-gradient-to-br from-tealbrand-600 to-tealbrand-800 text-white p-8 sm:p-10">
+                    <div id="result-icon-wrapper" class="w-20 h-20 bg-white/20 backdrop-blur-xs rounded-3xl flex items-center justify-center mx-auto mb-4 border border-white/30 text-4xl shadow-inner">
+                        <i class="fa-solid fa-trophy text-amber-300"></i>
+                    </div>
+                    <h2 class="text-2xl sm:text-3xl font-black tracking-wide mb-1">測驗成績單</h2>
+                    <p class="text-tealbrand-100 text-sm font-medium">國小六上國語｜第十課〈戲術〉語詞與成語測驗</p>
+                </div>
+
+                <div class="p-6 sm:p-10">
+                    <!-- 最終得分大字顯示 -->
+                    <div class="mb-6">
+                        <span class="text-xs font-bold text-slate-400 tracking-widest uppercase block mb-1">最終測驗得分</span>
+                        <div class="flex items-baseline justify-center gap-1.5">
+                            <span id="final-score" class="text-6xl sm:text-7xl font-black text-ink tracking-tight">0</span>
+                            <span class="text-xl sm:text-2xl font-bold text-slate-400">/ 100 分</span>
+                        </div>
+                    </div>
+
+                    <!-- 答對題數與作答總耗時 -->
+                    <div class="grid grid-cols-2 gap-3.5 max-w-md mx-auto mb-6">
+                        <div class="bg-paper rounded-2xl p-4 border border-slate-200/80">
+                            <div class="text-xs font-bold text-slate-500 mb-1">答對題數</div>
+                            <div class="text-xl sm:text-2xl font-black text-tealbrand-700">
+                                <span id="correct-count">0</span> <span class="text-sm font-bold text-slate-500">/ 16 題</span>
+                            </div>
+                        </div>
+                        <div class="bg-paper rounded-2xl p-4 border border-slate-200/80">
+                            <div class="text-xs font-bold text-slate-500 mb-1">作答總耗時</div>
+                            <div id="total-time" class="text-xl sm:text-2xl font-black text-amberbrand-600 font-mono">
+                                00:00
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 鼓勵評語卡片 -->
+                    <div id="encouragement-box" class="p-4 sm:p-5 rounded-2xl text-base font-bold mb-8 max-w-md mx-auto leading-relaxed">
+                        <!-- 評語由 JS 動態填入 -->
+                    </div>
+
+                    <!-- 重新測驗按鈕 -->
+                    <button type="button" onclick="startQuiz()" class="w-full sm:w-auto px-8 py-4 bg-ink hover:bg-slate-800 active:scale-[0.99] text-white font-bold rounded-2xl shadow-md transition-all duration-200 inline-flex items-center justify-center gap-2.5 cursor-pointer">
+                        <i class="fa-solid fa-rotate-right"></i>
+                        <span>重新測驗（題目與選項將重新洗牌）</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 未作答確認彈窗 (Modal) -->
+    <div id="confirm-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-xs px-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-slate-200 text-center">
+            <div class="w-14 h-14 rounded-2xl bg-amberbrand-50 text-amberbrand-600 border border-amberbrand-500/30 flex items-center justify-center mx-auto mb-4 text-2xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="text-lg sm:text-xl font-black text-ink mb-2">尚有題目未作答！</h3>
+            <p id="modal-unanswered-msg" class="text-sm text-slate-600 leading-relaxed mb-6">
+                您還有題目尚未作答，確定要直接交卷嗎？
+            </p>
+            <div class="grid grid-cols-2 gap-3">
+                <button type="button" onclick="closeConfirmModal(true)" class="py-3 px-4 rounded-xl bg-tealbrand-700 hover:bg-tealbrand-800 text-white font-bold text-sm transition-colors cursor-pointer">
+                    繼續作答
+                </button>
+                <button type="button" onclick="confirmForceSubmit()" class="py-3 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm transition-colors cursor-pointer">
+                    確認交卷
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 頁尾 -->
+    <footer class="bg-white border-t border-slate-200/80 py-4 mt-auto">
+        <div class="max-w-4xl mx-auto px-4 text-center text-xs text-slate-400 font-medium">
+            國小六上國語｜第十課〈戲術〉語詞與成語線上測驗 ・ 已啟用防複製保護機制
+        </div>
+    </footer>
+
+    <!-- 核心程式邏輯 -->
+    <script>
+        /* =========================================================
+           二、完整 16 題第十課〈戲術〉語詞與成語題庫
+           ========================================================= */
+        const quizBank = [
+            {
+                id: 1,
+                category: "新詞教學",
+                question: "「全部倒出來。」是下列哪一個語詞的解釋？",
+                correctAnswer: "傾注",
+                options: [
+                    "傾注",
+                    "頃刻",
+                    "開鑼",
+                    "陳述"
+                ]
+            },
+            {
+                id: 2,
+                category: "新詞教學",
+                question: "「＿＿＿＿之間，光芒萬丈的太陽從山的那頭升起，眩目不已。」空格中最適合填入哪一個語詞？",
+                correctAnswer: "頃刻",
+                options: [
+                    "頃刻",
+                    "篇幅",
+                    "墊子",
+                    "傾注"
+                ]
+            },
+            {
+                id: 3,
+                category: "新詞教學",
+                question: "下列哪一個語詞的意思是「一無所有的樣子」？",
+                correctAnswer: "空蕩蕩",
+                options: [
+                    "空蕩蕩",
+                    "重覆",
+                    "勾起",
+                    "俐落"
+                ]
+            },
+            {
+                id: 4,
+                category: "新詞教學",
+                question: "「這本寫滿兒時趣事的日記，＿＿＿＿了媽媽小時候住在眷村的溫暖回憶。」空格中應填入下列何者？",
+                correctAnswer: "勾起",
+                options: [
+                    "勾起",
+                    "陳述",
+                    "開鑼",
+                    "傾注"
+                ]
+            },
+            {
+                id: 5,
+                category: "新詞教學",
+                question: "關於「篇幅」的解釋，下列何者正確？",
+                correctAnswer: "指文章的長短，或排版時所占版面的位置大小",
+                options: [
+                    "指文章的長短，或排版時所占版面的位置大小",
+                    "戲劇開演前敲打鑼鼓，表示即將開演",
+                    "重要或不重要的都不會遺漏",
+                    "變化多端，不可預測"
+                ]
+            },
+            {
+                id: 6,
+                category: "新詞教學",
+                question: "「搶案目擊者向警方＿＿＿＿的描述案發經過，提供有力的破案線索。」空格中最適合填入哪一個語詞？",
+                correctAnswer: "鉅細靡遺",
+                options: [
+                    "鉅細靡遺",
+                    "嘖嘖稱奇",
+                    "亦步亦趨",
+                    "變幻莫測"
+                ]
+            },
+            {
+                id: 7,
+                category: "新詞教學",
+                question: "「嘖嘖稱奇」的意思是什麼？",
+                correctAnswer: "咂嘴作聲，表示驚奇、讚嘆",
+                options: [
+                    "咂嘴作聲，表示驚奇、讚嘆",
+                    "敘述、說明",
+                    "驚奇、訝異",
+                    "使人意志頹廢的音樂"
+                ]
+            },
+            {
+                id: 8,
+                category: "新詞教學",
+                question: "「經過一晚的沉澱與休息之後，阿福用顫抖的聲音＿＿＿＿了整起事件的經過。」空格中最適合填入哪一個語詞？",
+                correctAnswer: "陳述",
+                options: [
+                    "陳述",
+                    "開鑼",
+                    "勾起",
+                    "頃刻"
+                ]
+            },
+            {
+                id: 9,
+                category: "新詞教學",
+                question: "下列哪一個語詞是指「戲劇開演前敲打鑼鼓，表示即將開演，以吸引觀眾前往欣賞」？",
+                correctAnswer: "開鑼",
+                options: [
+                    "開鑼",
+                    "傾注",
+                    "重覆",
+                    "篇幅"
+                ]
+            },
+            {
+                id: 10,
+                category: "生字延伸成語",
+                question: "「奈奈自小練習跆拳道，面對惡徒的攻擊，她用＿＿＿＿的身手保護了自己。」空格中最適合填入哪一個語詞？",
+                correctAnswer: "俐落",
+                options: [
+                    "俐落",
+                    "詫異",
+                    "放蕩不羈",
+                    "空蕩蕩"
+                ]
+            },
+            {
+                id: 11,
+                category: "生字延伸成語",
+                question: "下列哪一個語詞與「詫異」的意思最接近？",
+                correctAnswer: "驚奇、訝異",
+                options: [
+                    "驚奇、訝異",
+                    "簡潔明快",
+                    "變化多端",
+                    "事事追隨仿效"
+                ]
+            },
+            {
+                id: 12,
+                category: "生字延伸成語",
+                question: "「小星的脾氣猶如＿＿＿＿的天氣，時而笑容滿面，時而愁眉苦臉。」空格中最適合填入哪一個成語？",
+                correctAnswer: "變幻莫測",
+                options: [
+                    "變幻莫測",
+                    "過猶不及",
+                    "亦步亦趨",
+                    "愛莫能助"
+                ]
+            },
+            {
+                id: 13,
+                category: "生字延伸成語",
+                question: "「除了學習他人的長處，也要發掘自己的優勢，不要只是＿＿＿＿跟在別人後頭。」空格中最適合填入哪一個成語？",
+                correctAnswer: "亦步亦趨",
+                options: [
+                    "亦步亦趨",
+                    "標新立異",
+                    "放蕩不羈",
+                    "恰如其分"
+                ]
+            },
+            {
+                id: 14,
+                category: "生字延伸成語",
+                question: "「過猶不及」這個成語在提醒我們什麼道理？",
+                correctAnswer: "做事過分就好比做得不夠一樣，皆不妥當，指事情要做得恰到好處",
+                options: [
+                    "做事過分就好比做得不夠一樣，皆不妥當，指事情要做得恰到好處",
+                    "豪放而不受拘束，行為放縱隨便",
+                    "內心雖然同情，想要幫助卻無能為力",
+                    "形容事事追隨或仿效別人"
+                ]
+            },
+            {
+                id: 15,
+                category: "生字延伸成語",
+                question: "下列哪一組成語的關係是「反義詞」？",
+                correctAnswer: "放蕩不羈 ／ 循規蹈矩",
+                options: [
+                    "放蕩不羈 ／ 循規蹈矩",
+                    "愛莫能助 ／ 心餘力絀",
+                    "靡靡之音 ／ 亡國之音",
+                    "過猶不及 ／ 恰如其分"
+                ]
+            },
+            {
+                id: 16,
+                category: "生字延伸成語",
+                question: "成語「愛莫能助」的典故出自《詩經》，原本是在讚美春秋時期哪一位賢德大臣的品德與才能？",
+                correctAnswer: "仲山甫",
+                options: [
+                    "仲山甫",
+                    "周宣王",
+                    "尹吉甫",
+                    "李白"
+                ]
+            }
+        ];
+
+        /* =========================================================
+           三、測驗狀態管理與互動邏輯
+           ========================================================= */
+        let currentQuestions = [];
+        let answersMap = {}; // { displayNum: selectedOptionText }
+        let isSingleMode = false;
+        let currentFocusNum = 1; // 1 ~ 16
+        let timerId = null;
+        let secondsElapsed = 0;
+        let firstUnansweredNum = null;
+
+        // Fisher-Yates 洗牌演算法
+        function shuffle(arr) {
+            const copy = [...arr];
+            for (let i = copy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copy[i], copy[j]] = [copy[j], copy[i]];
+            }
+            return copy;
+        }
+
+        // 格式化時間為 MM:SS
+        function formatDuration(sec) {
+            const m = Math.floor(sec / 60).toString().padStart(2, '0');
+            const s = (sec % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        function startTimer() {
+            stopTimer();
+            secondsElapsed = 0;
+            document.getElementById('timer-display').innerText = "00:00";
+            timerId = setInterval(() => {
+                secondsElapsed++;
+                document.getElementById('timer-display').innerText = formatDuration(secondsElapsed);
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (timerId) {
+                clearInterval(timerId);
+                timerId = null;
+            }
+        }
+
+        // 開始 / 重新測驗
+        function startQuiz() {
+            answersMap = {};
+            isSingleMode = false;
+            currentFocusNum = 1;
+
+            // 洗牌題目與每題選項
+            const shuffledBank = shuffle(quizBank);
+            currentQuestions = shuffledBank.map((item, idx) => ({
+                displayNum: idx + 1,
+                category: item.category,
+                question: item.question,
+                correctAnswer: item.correctAnswer,
+                shuffledOptions: shuffle(item.options)
+            }));
+
+            renderQuickNav();
+            renderQuestions();
+            updateProgressUI();
+            applyViewModeUI();
+
+            // 切換畫面顯示
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+            document.getElementById('header-controls').classList.remove('hidden');
+            document.getElementById('quick-nav-wrapper').classList.remove('hidden');
+
+            startTimer();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 渲染 1~12 題號快速導覽方塊
+        function renderQuickNav() {
+            const grid = document.getElementById('quick-nav-grid');
+            grid.innerHTML = '';
+
+            currentQuestions.forEach(q => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.id = `nav-pill-${q.displayNum}`;
+                btn.innerText = q.displayNum;
+                btn.onclick = () => jumpToQuestion(q.displayNum);
+                grid.appendChild(btn);
+            });
+            refreshQuickNavStyles();
+        }
+
+        // 更新所有題號方塊狀態（已作答青綠色、當前題目外框強調）
+        function refreshQuickNavStyles() {
+            currentQuestions.forEach(q => {
+                const btn = document.getElementById(`nav-pill-${q.displayNum}`);
+                if (!btn) return;
+
+                const isAnswered = Boolean(answersMap[q.displayNum]);
+                const isFocused = (q.displayNum === currentFocusNum);
+
+                let baseClasses = "h-8 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center justify-center ";
+                if (isAnswered) {
+                    baseClasses += "bg-tealbrand-600 text-white border border-tealbrand-600 shadow-2xs ";
+                } else {
+                    baseClasses += "bg-white text-slate-600 border border-slate-300 hover:border-tealbrand-500 ";
+                }
+
+                if (isFocused) {
+                    baseClasses += "ring-2 ring-amberbrand-500 ring-offset-1 ";
+                }
+
+                btn.className = baseClasses;
+            });
+        }
+
+        // 點擊題號快速跳題
+        function jumpToQuestion(qNum) {
+            currentFocusNum = qNum;
+            refreshQuickNavStyles();
+
+            if (isSingleMode) {
+                applyViewModeUI();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                const card = document.getElementById(`question-card-${qNum}`);
+                if (card) {
+                    const offset = 135;
+                    const topPos = card.getBoundingClientRect().top + window.pageYOffset - offset;
+                    window.scrollTo({ top: topPos, behavior: 'smooth' });
+                }
+            }
+        }
+
+        // 切換「全部展開 / 逐題專注」模式
+        function toggleViewMode() {
+            isSingleMode = !isSingleMode;
+            applyViewModeUI();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function applyViewModeUI() {
+            const modeLabel = document.getElementById('mode-label');
+            const modeIcon = document.getElementById('mode-icon');
+            const singleNav = document.getElementById('single-mode-nav');
+
+            if (isSingleMode) {
+                modeLabel.innerText = "全部展開";
+                modeIcon.className = "fa-solid fa-list text-tealbrand-600";
+                singleNav.classList.remove('hidden');
+
+                currentQuestions.forEach(q => {
+                    const card = document.getElementById(`question-card-${q.displayNum}`);
+                    if (card) {
+                        if (q.displayNum === currentFocusNum) {
+                            card.classList.remove('hidden');
+                        } else {
+                            card.classList.add('hidden');
+                        }
+                    }
+                });
+
+                document.getElementById('single-counter').innerText = `第 ${currentFocusNum} / ${currentQuestions.length} 題`;
+                document.getElementById('prev-btn').disabled = (currentFocusNum === 1);
+                document.getElementById('next-btn').disabled = (currentFocusNum === currentQuestions.length);
+            } else {
+                modeLabel.innerText = "逐題專注";
+                modeIcon.className = "fa-solid fa-expand text-tealbrand-600";
+                singleNav.classList.add('hidden');
+
+                currentQuestions.forEach(q => {
+                    const card = document.getElementById(`question-card-${q.displayNum}`);
+                    if (card) card.classList.remove('hidden');
+                });
+            }
+            refreshQuickNavStyles();
+        }
+
+        // 逐題模式下切換上一題/下一題
+        function stepSingleQuestion(delta) {
+            const nextNum = currentFocusNum + delta;
+            if (nextNum >= 1 && nextNum <= currentQuestions.length) {
+                currentFocusNum = nextNum;
+                applyViewModeUI();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        // 渲染題目卡片
+        function renderQuestions() {
+            const container = document.getElementById('questions-container');
+            container.innerHTML = '';
+            const optionBadges = ['①', '②', '③', '④'];
+
+            currentQuestions.forEach(q => {
+                const card = document.createElement('div');
+                card.id = `question-card-${q.displayNum}`;
+                card.className = "bg-white rounded-2xl shadow-xs p-5 sm:p-7 border border-slate-200/80 transition-all duration-200";
+                card.onclick = () => {
+                    if (currentFocusNum !== q.displayNum) {
+                        currentFocusNum = q.displayNum;
+                        refreshQuickNavStyles();
+                    }
+                };
+
+                const isNewWordCategory = q.category === "新詞教學";
+                const categoryBadgeClass = isNewWordCategory
+                    ? "bg-tealbrand-50 text-tealbrand-700 border-tealbrand-200"
+                    : "bg-amberbrand-50 text-amberbrand-700 border-amberbrand-500/30";
+                const categoryIcon = isNewWordCategory ? "fa-spell-check" : "fa-book-bookmark";
+
+                let optionsHtml = '';
+                q.shuffledOptions.forEach((optText, idx) => {
+                    const inputId = `q_${q.displayNum}_opt_${idx}`;
+                    const escapedVal = optText.replace(/"/g, '&quot;');
+                    optionsHtml += `
+                        <div class="relative">
+                            <input type="radio"
+                                   id="${inputId}"
+                                   name="question_${q.displayNum}"
+                                   value="${escapedVal}"
+                                   class="custom-radio sr-only"
+                                   onchange="onSelectOption(${q.displayNum}, this.value)">
+                            <label for="${inputId}"
+                                   class="flex items-center gap-3.5 p-3.5 sm:p-4 rounded-xl border border-slate-200 cursor-pointer transition-all duration-150 hover:bg-paper hover:border-slate-300 text-sm sm:text-base text-slate-700">
+                                <span class="option-badge w-7 h-7 sm:w-8 sm:h-8 rounded-lg border border-slate-300 flex items-center justify-center font-bold text-sm text-slate-500 shrink-0 transition-colors">
+                                    ${optionBadges[idx]}
+                                </span>
+                                <span class="leading-relaxed flex-grow">${optText}</span>
+                            </label>
+                        </div>
+                    `;
+                });
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between gap-2 mb-3.5">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="inline-flex items-center bg-ink text-white font-black text-xs px-3 py-1 rounded-lg">
+                                第 ${q.displayNum} 題
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 border font-bold text-xs px-2.5 py-1 rounded-lg ${categoryBadgeClass}">
+                                <i class="fa-solid ${categoryIcon} text-[11px]"></i>
+                                ${q.category}
+                            </span>
+                        </div>
+                        <span id="q-status-${q.displayNum}" class="text-xs font-bold text-slate-400 shrink-0">
+                            尚未作答
+                        </span>
+                    </div>
+                    <h3 class="text-base sm:text-lg font-bold text-ink leading-relaxed mb-5">
+                        ${q.question}
+                    </h3>
+                    <div class="grid grid-cols-1 gap-3">
+                        ${optionsHtml}
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        // 選擇答案事件
+        function onSelectOption(qNum, selectedValue) {
+            answersMap[qNum] = selectedValue;
+            currentFocusNum = qNum;
+
+            const statusEl = document.getElementById(`q-status-${qNum}`);
+            if (statusEl) {
+                statusEl.innerText = "已作答";
+                statusEl.className = "text-xs font-bold text-tealbrand-700 shrink-0";
+            }
+
+            updateProgressUI();
+            refreshQuickNavStyles();
+        }
+
+        // 更新頂部進度條
+        function updateProgressUI() {
+            const count = Object.keys(answersMap).length;
+            const total = currentQuestions.length;
+            const percent = (count / total) * 100;
+            document.getElementById('answered-count').innerText = count;
+            document.getElementById('progress-bar').style.width = `${percent}%`;
+        }
+
+        // 點擊提交試卷
+        function handleSubmitClick(e) {
+            e.preventDefault();
+
+            const unanswered = [];
+            for (let i = 1; i <= currentQuestions.length; i++) {
+                if (!answersMap[i]) {
+                    unanswered.push(i);
+                }
+            }
+
+            if (unanswered.length > 0) {
+                firstUnansweredNum = unanswered[0];
+                document.getElementById('modal-unanswered-msg').innerHTML =
+                    `您還有 <strong class="text-amberbrand-600">${unanswered.length} 題</strong>（第 ${unanswered.join('、')} 題）尚未作答，確定要直接交卷嗎？`;
+                const modal = document.getElementById('confirm-modal');
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                return;
+            }
+
+            finalizeAndShowResult();
+        }
+
+        // 關閉未作答提示視窗
+        function closeConfirmModal(jumpToFirst) {
+            const modal = document.getElementById('confirm-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+
+            if (jumpToFirst && firstUnansweredNum) {
+                jumpToQuestion(firstUnansweredNum);
+            }
+        }
+
+        // 確認強制交卷
+        function confirmForceSubmit() {
+            closeConfirmModal(false);
+            finalizeAndShowResult();
+        }
+
+        // 結算分數並切換至純成績畫面
+        function finalizeAndShowResult() {
+            stopTimer();
+
+            let correctCount = 0;
+            currentQuestions.forEach(q => {
+                if (answersMap[q.displayNum] === q.correctAnswer) {
+                    correctCount++;
+                }
+            });
+
+            // 總分 100 分計算公式 (16 題)
+            const finalScore = Math.round((correctCount / currentQuestions.length) * 100);
+
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('header-controls').classList.add('hidden');
+            document.getElementById('quick-nav-wrapper').classList.add('hidden');
+
+            document.getElementById('final-score').innerText = finalScore;
+            document.getElementById('correct-count').innerText = correctCount;
+            document.getElementById('total-time').innerText = formatDuration(secondsElapsed);
+
+            const banner = document.getElementById('result-banner');
+            const iconBox = document.getElementById('result-icon-wrapper');
+            const feedbackBox = document.getElementById('encouragement-box');
+
+            if (finalScore >= 90) {
+                banner.className = "bg-gradient-to-br from-emerald-600 to-tealbrand-800 text-white p-8 sm:p-10";
+                iconBox.innerHTML = '<i class="fa-solid fa-crown text-amber-300"></i>';
+                feedbackBox.className = "p-4 sm:p-5 rounded-2xl text-base font-bold mb-8 max-w-md mx-auto leading-relaxed bg-emerald-50 text-emerald-800 border border-emerald-200";
+                feedbackBox.innerText = "太厲害了！閱讀理解滿分級表現！";
+            } else if (finalScore >= 75) {
+                banner.className = "bg-gradient-to-br from-tealbrand-600 to-tealbrand-800 text-white p-8 sm:p-10";
+                iconBox.innerHTML = '<i class="fa-solid fa-trophy text-amber-300"></i>';
+                feedbackBox.className = "p-4 sm:p-5 rounded-2xl text-base font-bold mb-8 max-w-md mx-auto leading-relaxed bg-tealbrand-50 text-tealbrand-800 border border-tealbrand-200";
+                feedbackBox.innerText = "表現很棒！再細心一點就更完美囉！";
+            } else if (finalScore >= 60) {
+                banner.className = "bg-gradient-to-br from-sky-600 to-tealbrand-700 text-white p-8 sm:p-10";
+                iconBox.innerHTML = '<i class="fa-solid fa-award text-amber-200"></i>';
+                feedbackBox.className = "p-4 sm:p-5 rounded-2xl text-base font-bold mb-8 max-w-md mx-auto leading-relaxed bg-sky-50 text-sky-800 border border-sky-200";
+                feedbackBox.innerText = "及格通過！可以再多熟讀課文重點！";
+            } else {
+                banner.className = "bg-gradient-to-br from-amberbrand-600 to-orange-700 text-white p-8 sm:p-10";
+                iconBox.innerHTML = '<i class="fa-solid fa-book-open-reader text-white"></i>';
+                feedbackBox.className = "p-4 sm:p-5 rounded-2xl text-base font-bold mb-8 max-w-md mx-auto leading-relaxed bg-amberbrand-50 text-amberbrand-800 border border-amberbrand-500/30";
+                feedbackBox.innerText = "別氣餒，重新翻翻課本再挑戰一次吧！";
+            }
+
+            document.getElementById('result-screen').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
